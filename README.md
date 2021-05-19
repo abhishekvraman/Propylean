@@ -1,4 +1,4 @@
-# production_plant_modle
+# production_plant_model
 
 ## Objective
 The objective of the project is to create a python library which will help engineers simulate production plants focusing on chemical and related process industries. 
