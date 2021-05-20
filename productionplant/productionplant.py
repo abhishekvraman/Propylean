@@ -7,7 +7,7 @@ class equipment:
         self.operating_pressure = operating_pressure
         self.operating_temperature = operating_temperature
 
-class pump:
+class pump(equipment):
     def __init__(self, suction_pressure=None,
                  name=None, 
                  operating_pressure=None,
