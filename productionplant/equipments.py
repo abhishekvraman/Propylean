@@ -17,10 +17,11 @@ class _equipment_one_inlet_outlet:
         self.design_temperature = None if 'design_temperature' not in inputs else inputs['design_temperature']
 
         #Flow properties
-        self.inlet_flowrate = None if 'inlet_flowrate' not in inputs else inputs['inlet_flowrate']
-        self.outlet_flowrate = None if 'outlet_flowrate' not in inputs else inputs['outlet_flowrate']
+        self._inlet_flowrate = None if 'inlet_flowrate' not in inputs else inputs['inlet_flowrate']
+        self._outlet_flowrate = None if 'outlet_flowrate' not in inputs else inputs['outlet_flowrate']
         self.design_flowrate = None if 'design_flowrate' not in inputs else inputs['design_flowrate']
-        
+    
+ 
     @property
     def pressure_drop(self):
         if (self.inlet_pressure == None or
@@ -35,19 +36,41 @@ class _equipment_one_inlet_outlet:
             self.inlet_pressure = self.outlet_pressure + value
         else:
             raise Exception("Error! Assign inlet value or outlet outlet before assigning differential")
-
+    @property
+    def inlet_flowrate(self):
+        return self._inlet_flowrate
+    @inlet_flowrate.setter
+    def inlet_flowrate(self,value):
+        self._inlet_flowrate = value
+        if not self.dynamic_state:
+            self._outlet_flowrate = self._inlet_flowrate
+        elif self._outlet_flowrate != None:
+            self._outlet_flowrate = self._inlet_flowrate + self.inventory_change_rate
+    @property
+    def outlet_flowrate(self):
+        return self._outlet_flowrate
+    @outlet_flowrate.setter
+    def outlet_flowrate(self,value):
+        self._outlet_flowrate = value
+        if not self.dynamic_state:
+            self._inlet_flowrate = self._outlet_flowrate
+        elif self._inlet_flowrate !=None:
+            self._inlet_flowrate = self._outlet_flowrate - self.inventory_change_rate   
+    
     @property
     def inventory_change_rate(self):
-        if (self.inlet_flowrate == None or
-            self.outlet_flowrate == None):
+        if not self.dynamic_state:
+            return 0
+        if (self._inlet_flowrate == None or
+            self._outlet_flowrate == None):
             return None            
-        return self.inlet_flowrate - self.outlet_flowrate
+        return self._inlet_flowrate - self._outlet_flowrate
     @inventory_change_rate.setter
     def inventory_change_rate(self,value):
-        if self.inlet_flowrate != None:
-            self.outlet_flowrate = self.inlet_flowrate - value
-        elif self.outlet_flowrate != None:
-            self.inlet_flowrate = self.outlet_flowrate + value
+        if self._inlet_flowrate != None:
+            self._outlet_flowrate = self._inlet_flowrate - value
+        elif self._outlet_flowrate != None:
+            self._inlet_flowrate = self._outlet_flowrate + value
         else:
             raise Exception("Error! Assign inlet value or outlet outlet before assigning differential")
 
@@ -55,7 +78,8 @@ class _equipment_one_inlet_outlet:
 class _equipment_multiple_inlet_outlet:
     def __init__(self):
         self.inlet_pressure = list()
-#Defining generic class for all types of pressure enhancers like Pumps and Compressors
+
+#Defining generic class for all types of pressure changers like Pumps, Compressors and Expanders
 class _pressure_changers(_equipment_one_inlet_outlet):
     def __init__(self,**inputs):
         super().__init__(**inputs)
@@ -65,7 +89,9 @@ class _pressure_changers(_equipment_one_inlet_outlet):
             self.outlet_pressure = inputs['discharge_pressure']
         if 'differential_pressure' in inputs:
             self.pressure_drop = -1 * inputs['differential_pressure']
-
+        
+        self._efficiency = None if 'efficiency' not in inputs else inputs['efficiency']
+    
     @property
     def suction_pressure(self):
         return self.inlet_pressure
@@ -83,9 +109,21 @@ class _pressure_changers(_equipment_one_inlet_outlet):
     @property
     def differential_pressure(self):
         return -1*self.pressure_drop
-    @discharge_pressure.setter
-    def discharge_pressure(self, value):
+    @differential_pressure.setter
+    def differential_pressure(self, value):
         self.pressure_drop = -1*value
+
+    @property
+    def efficiency(self):
+        return self._efficiency
+    @efficiency.setter
+    def efficiency(self, value):
+        if value < 0:
+            raise Exception("Please enter a positive value for efficiency")
+        elif value <= 1:
+            self._efficiency = value
+        else:
+            self._efficiency = value/100
 
 #Defining generic class for all types of vessels.  NEEDS SUPER CLASS WITH MULTI INPUT AND OUTPUT 
 class _vessel():
@@ -122,9 +160,18 @@ class _exchanger():
 class centrifugal_pump(_pressure_changers):
     def __init__(self, **inputs):
         super().__init__( **inputs)
-        self.min_flow = None if "min_flow" not in inputs else inputs['min_flow']
+        self.min_flow = None if 'min_flow' not in inputs else inputs['min_flow']
         self.NPSHr = None if 'NPSHr' not in inputs else inputs['NPSHr']
         self.NPSHa = None if 'NPSHa' not in inputs else inputs['NPSHa']
+
+    @property
+    def head(self):
+        fluid_density = 1000 # THIS NEEDS TO BE UPDATED WITH STREAM PROPERTY
+        return self.differential_pressure / (9.8 * fluid_density)
+    @property
+    def hydraulic_power(self):
+        fluid_density = 1000 # THIS NEEDS TO BE UPDATED WITH STREAM PROPERTY
+        return self.inlet_flowrate * fluid_density * 9.81 * self.head / (3.6e6 *self.efficiency)
 
 class positive_displacement_pump(_pressure_changers):
     def __init__(self, **inputs):
@@ -135,6 +182,7 @@ class positive_displacement_pump(_pressure_changers):
 class centrifugal_compressors(_pressure_changers):
     def __init__(self, **inputs):
         super().__init__(**inputs)
+
 class expander(_pressure_changers):
     def __init__(self, **inputs):
         super().__init__(**inputs)
@@ -176,7 +224,6 @@ class flow_meter(_equipment_one_inlet_outlet):
         super().__init__(**inputs)
 
 # End of final classes of Piping and instruments
-
 
 # Start of final classes of vessels
 class vertical_separator(_vessel):
