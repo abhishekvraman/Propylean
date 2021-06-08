@@ -1,4 +1,4 @@
-# production_plant_model
+# Propylean
 
 ## Objective
 The objective of the project is to create a Python library which will help engineers simulate production plants focusing on chemical and related process industries. 
