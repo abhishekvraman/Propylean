@@ -81,10 +81,26 @@ class _pressure_changers(_equipment_one_inlet_outlet):
         super().__init__(**inputs)
         if 'suction_pressure' in inputs:
             self.inlet_pressure = inputs['suction_pressure']
+            if ('differential_pressure' in inputs and 'performance_curve' in inputs or
+                'differential_pressure' in inputs and 'discharge_pressure' in inputs or
+                'performance_curve' in inputs and 'discharge_pressure' in inputs):
+                raise Exception('Please input only one of output_pressure, differential_pressure or performance_curve \
+                                 with suction pressure')
         if 'discharge_pressure' in inputs:
+            if (self.suction_pressure != None and 
+                'differential_pressure' in inputs):
+                raise Exception("Please enter ethier one of discharge_pressure or differential_pressure")
             self.outlet_pressure = inputs['discharge_pressure']
+            
         if 'differential_pressure' in inputs:
+            if ((self.suction_pressure != None or self.discharge_pressure != None) and
+                 'performance_curve' in inputs):
+                 raise Exception('Please input only one of differenti')
             self.pressure_drop = -1 * inputs['differential_pressure']
+        
+        self._performance_curve = pd.DataFrame()
+        if 'performance_curve' in inputs:
+            self.performace_curve = inputs['performance_curve']
         
         self._efficiency = None if 'efficiency' not in inputs else inputs['efficiency']
     
@@ -108,7 +124,17 @@ class _pressure_changers(_equipment_one_inlet_outlet):
     @differential_pressure.setter
     def differential_pressure(self, value):
         self.pressure_drop = -1*value
-
+    
+    @property
+    def performance_curve(self):
+        return self._perfomace_curve
+    @performance_curve.setter
+    def pump_curve(self,value):
+        if isinstance(value,pd.DataFrame) and value.shape[1] == 2:
+                self._performance_curve = value
+        else:
+            raise Exception("Please enter performance_curve as pandas dataframe of 2 columns")
+    
     @property
     def efficiency(self):
         return self._efficiency
@@ -159,11 +185,7 @@ class centrifugal_pump(_pressure_changers):
         self.min_flow = None if 'min_flow' not in inputs else inputs['min_flow']
         self.NPSHr = None if 'NPSHr' not in inputs else inputs['NPSHr']
         self.NPSHa = None if 'NPSHa' not in inputs else inputs['NPSHa']
-        self._pump_curve = pd.DataFrame()
-        if 'pump_curve' in inputs:
-            self.pump_curve = inputs['pump_curve']
-            
-    
+                
     @property
     def head(self):
         fluid_density = 1000 # THIS NEEDS TO BE UPDATED WITH STREAM PROPERTY
@@ -175,16 +197,7 @@ class centrifugal_pump(_pressure_changers):
     @property
     def brake_horse_power(self):
         return self.hydraulic_power / self.efficiency
-    @property
-    def pump_curve(self):
-        return self._pump_curve
-    @pump_curve.setter
-    def pump_curve(self,value):
-        if isinstance(value,pd.DataFrame) and value.shape[1] == 2:
-                self._pump_curve = value
-        else:
-            raise Exception("Please enter pump curve as pandas dataframe of 2 columns")
-
+   
 class positive_displacement_pump(_pressure_changers):
     def __init__(self, **inputs):
         super().__init__(**inputs)
