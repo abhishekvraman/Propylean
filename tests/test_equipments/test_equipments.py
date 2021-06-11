@@ -33,8 +33,26 @@ def test_centrifugal_pump_instantiation():
     
     cp.pump_curve = pd.DataFrame([{'flow':[2,10,30,67], 'head':[45,20,10,2]}])
     with pytest.raises(Exception):
-        cp.pump_curve = pd.DataFrame([{'flow':[2,10,30,67], 'head':[45,20,10,2],'some':[2,3,4]}])
+        cp.pump_curve = pd.DataFrame([{'flow':[2,10,30,67], 'head':[45,20,10,2],'something':[2,3,4]}])
         cp.pump_curve = [[2,10,30,67],[45,20,10,2]]
+
+def test_centrifugal_pump_wrong_instantiation():
+    with pytest.raises(Exception):
+        cp = equipments.centrifugal_pump(suction_pressure = 30,
+                                         discharge_pressure = 40,
+                                         differential_pressure = 10)
+    with pytest.raises(Exception):
+        cp = equipments.centrifugal_pump(suction_pressure = 30,
+                                         discharge_pressure = 40,
+                                         performance_curve = pd.DataFrame([{'flow':[2,10,30,67], 'head':[45,20,10,2]}]))
+    with pytest.raises(Exception):
+        cp = equipments.centrifugal_pump(suction_pressure = 30,
+                                         differential_pressure = 10,
+                                         performance_curve = pd.DataFrame([{'flow':[2,10,30,67], 'head':[45,20,10,2]}]))
+    with pytest.raises(Exception):
+        cp = equipments.centrifugal_pump(discharge_pressure = 40,
+                                         differential_pressure = 10,
+                                         performance_curve = pd.DataFrame([{'flow':[2,10,30,67], 'head':[45,20,10,2]}]))
 
 p = equipments.pipe(thickness=2, OD=15)
 def test_pipe():
