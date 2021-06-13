@@ -3,8 +3,11 @@ import pandas as pd
 
 from propylean import equipments
 
-cp = equipments.centrifugal_pump(inlet_pressure=50, design_pressure = 50, pressure_drop=-60)
+
 def test_centrifugal_pump_instantiation():
+    cp = equipments.centrifugal_pump(inlet_pressure=50, 
+                                     design_pressure = 50,
+                                     pressure_drop=-60)
     assert cp.suction_pressure == 50
     assert cp.outlet_pressure == 110
     assert cp.discharge_pressure == 110
@@ -54,7 +57,26 @@ def test_centrifugal_pump_wrong_instantiation():
                                          differential_pressure = 10,
                                          performance_curve = pd.DataFrame([{'flow':[2,10,30,67], 'head':[45,20,10,2]}]))
 
-p = equipments.pipe(thickness=2, OD=15)
-def test_pipe():
+def test_pipe_segment_instantiation():
+    p = equipments.pipe_segment(thickness=2, OD=15, length = 10)
     assert p.ID == 13
+    
+    #Raise exception if ID is not calculatable or explicitly defined
+    with pytest.raises(Exception):
+            p = equipments.pipe_segment(thickness=2, length = 10)
+    
+    #Raise exception if length is not defined in case of straight segement as it is a default type
+    with pytest.raises(Exception):
+        p = equipments.pipe_segment(thickness=2, ID=15)
+    
+    #Raise exception if segment is not in range of the list or material is not in range of the list
+    with pytest.raises(Exception):
+        p = equipments.pipe_segment(thickness=2, ID=15, segment_type = 30, material = 22)
+    
+    # Do not raise exception if length is not defined but segement is not straight pipe
+    try:
+        p = equipments.pipe_segment(ID=15, segment_type = 6)
+    except Exception as exc:
+        assert False, f"'Ball valve instantiation' raised an exception {exc}"
 
+# def test_pipe_segment_pressure_drop():
