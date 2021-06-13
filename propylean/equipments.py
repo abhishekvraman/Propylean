@@ -1,4 +1,5 @@
 import pandas as pd
+import math
 
 #Defining generic base class for all equipments with one inlet and outlet
 class _equipment_one_inlet_outlet:
@@ -84,7 +85,7 @@ class _pressure_changers(_equipment_one_inlet_outlet):
             if ('differential_pressure' in inputs and 'performance_curve' in inputs or
                 'differential_pressure' in inputs and 'discharge_pressure' in inputs or
                 'performance_curve' in inputs and 'discharge_pressure' in inputs):
-                raise Exception('Please input only one of output_pressure, differential_pressure or performance_curve \
+                raise Exception('Please input only one of discharge_pressure, differential_pressure or performance_curve \
                                  with suction pressure')
         if 'discharge_pressure' in inputs:
             if (self.suction_pressure != None and 
@@ -95,7 +96,7 @@ class _pressure_changers(_equipment_one_inlet_outlet):
         if 'differential_pressure' in inputs:
             if ((self.suction_pressure != None or self.discharge_pressure != None) and
                  'performance_curve' in inputs):
-                 raise Exception('Please input only one of differenti')
+                 raise Exception('Please input only one of differential pressure or performance_curve')
             self.pressure_drop = -1 * inputs['differential_pressure']
         
         self._performance_curve = pd.DataFrame()
@@ -214,14 +215,66 @@ class expander(_pressure_changers):
 # End of final classes of compressors
 
 # Start of final classes of Piping and Instruments
-class pipe(_equipment_one_inlet_outlet):
+class pipe_segment(_equipment_one_inlet_outlet):
     def __init__(self, **inputs):
         super().__init__(**inputs)
-        self.ID = None if 'ID' not in inputs else inputs['ID']
-        self.OD = None if 'OD' not in inputs else inputs['OD']
-        if 'thickness' in inputs:
-            self.thickness = inputs['thickness']
+        self.segment_type = 1 if 'segment_type' not in inputs else inputs['segment_type']
+        segments = '''\nSegments can be of following types and in range of numbers below:
+                    1. Straight Tube
+                    2. Elbow
+                    3. Tee
+                    4. Angle valve
+                    5. Butterfly valve
+                    6. Ball valve
+                    7. Gate valve
+                    8. Globe valve
+                    9. Swing check valve
+                    10. Ball check valve
+                    11. Lift check valve
+                    12. Reducer
+                    13. Expander'''
+        if self.segment_type == 1:
+            if 'length' in inputs:
+                self.length = inputs['length']                
+            else:
+                raise Exception('Straight Tube segment requires length value')
+        elif self.segment_type not in range(1,14):
+            raise Exception(segments)
 
+        materials = '''\nSegment material can be of following types and in range of numbers below:
+                    1. Raw Steel
+                    2. Carbon Steel
+                    3. Cast Iron
+                    4. Stainless Steel
+                    5. PVC'''   
+        self.material = 1 
+        if 'material' in inputs:
+            if inputs['material'] in range(1,6):
+                self.material = inputs['material']
+            else:
+                raise Exception(materials)
+        
+        self.OD = None
+        if ('ID' in inputs):
+            self.ID = inputs['ID']
+        elif ('OD' in inputs and 'thickness' in inputs):
+            self.OD = inputs['OD']
+            self.ID = self.OD - inputs['thickness']
+        else:
+            raise Exception('Define atleast ID or OD with thickness to define a pipe segment object') 
+        
+    @property
+    def pressure_drop(self):
+        return super().pressure_drop
+    @pressure_drop.setter
+    def pressure_drop(self):
+        #Pressure drop calculation using equation
+        friction_coefficient = 0.004 # UPDATE THIS AS PER MATERIAL!!!!
+        density = 1000 # UPDATE THIS AS PER FLUID!!!!!!!
+        velocity = 4 * self.inlet_flowrate / math.pi * self.ID * self.ID 
+        drop = friction_coefficient * self.length * density * velocity * velocity /(2 * self.ID)
+        super().pressure_drop = drop
+    
     @property
     def thickness(self):
         if self.ID == None or self.OD == None:
