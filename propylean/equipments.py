@@ -1,5 +1,6 @@
 import pandas as pd
-import math
+from math import pi 
+from pipe_pressure_loss_calculator import PressureLoss as PL 
 
 #Defining generic base class for all equipments with one inlet and outlet
 class _equipment_one_inlet_outlet:
@@ -8,8 +9,8 @@ class _equipment_one_inlet_outlet:
         self.dynamic_state = False if 'dynamic_state' not in inputs else inputs['dynamic_state']
 
         #Pressure properties
-        self.inlet_pressure = None if 'inlet_pressure' not in inputs else inputs['inlet_pressure']
-        self.outlet_pressure = None if 'outlet_pressure' not in inputs else inputs['outlet_pressure']
+        self._inlet_pressure = None if 'inlet_pressure' not in inputs else inputs['inlet_pressure']
+        self._outlet_pressure = None if 'outlet_pressure' not in inputs else inputs['outlet_pressure']
         if 'pressure_drop' in inputs:
             self.pressure_drop = inputs['pressure_drop']
         self.design_pressure = None if 'design_pressure' not in inputs else inputs['design_pressure']
@@ -20,16 +21,30 @@ class _equipment_one_inlet_outlet:
         self.design_temperature = None if 'design_temperature' not in inputs else inputs['design_temperature']
 
         #Flow properties
-        self._inlet_flowrate = None if 'inlet_flowrate' not in inputs else inputs['inlet_flowrate']
-        self._outlet_flowrate = None if 'outlet_flowrate' not in inputs else inputs['outlet_flowrate']
-        self.design_flowrate = None if 'design_flowrate' not in inputs else inputs['design_flowrate']
+        self._inlet_flowrate = 0 if 'inlet_flowrate' not in inputs else inputs['inlet_flowrate']
+        self._outlet_flowrate = 0 if 'outlet_flowrate' not in inputs else inputs['outlet_flowrate']
+        self.design_flowrate = 0 if 'design_flowrate' not in inputs else inputs['design_flowrate']
     
- 
+    @property
+    def inlet_pressure(self):
+        return self._inlet_pressure
+    @inlet_pressure.setter
+    def inlet_pressure(self,value):
+        self._inlet_pressure = value
+        self._outlet_pressure = self._inlet_pressure - self.pressure_drop
+    @property
+    def outlet_pressure(self):
+        return self._outlet_pressure
+    @outlet_pressure.setter
+    def outlet_pressure(self,value):
+        self._outlet_pressure = value
+        self._inlet_pressure = self._outlet_pressure + self.pressure_drop
     @property
     def pressure_drop(self):
         if (self.inlet_pressure == None or
-            self.outlet_pressure == None):
-            return None            
+            self.outlet_pressure == None or
+            self.inlet_flowrate == 0):
+            return 0            
         return self.inlet_pressure - self.outlet_pressure
     @pressure_drop.setter
     def pressure_drop(self,value):
@@ -216,6 +231,7 @@ class expander(_pressure_changers):
 
 # Start of final classes of Piping and Instruments
 class pipe_segment(_equipment_one_inlet_outlet):
+    
     def __init__(self, **inputs):
         super().__init__(**inputs)
         self.segment_type = 1 if 'segment_type' not in inputs else inputs['segment_type']
@@ -247,7 +263,8 @@ class pipe_segment(_equipment_one_inlet_outlet):
                     3. Cast Iron
                     4. Stainless Steel
                     5. PVC'''   
-        self.material = 1 
+        self.material = 1
+        
         if 'material' in inputs:
             if inputs['material'] in range(1,6):
                 self.material = inputs['material']
@@ -265,16 +282,18 @@ class pipe_segment(_equipment_one_inlet_outlet):
         
     @property
     def pressure_drop(self):
-        return super().pressure_drop
-    @pressure_drop.setter
-    def pressure_drop(self):
+        if (self.inlet_pressure == None or
+            self.outlet_pressure == None or
+            self.inlet_flowrate == 0):
+            return 0
+        roughness = (4.57e-5, 4.5e-5, 0.000259, 1.5e-5, 1.5e-6) #in meters
         #Pressure drop calculation using equation
-        friction_coefficient = 0.004 # UPDATE THIS AS PER MATERIAL!!!!
-        density = 1000 # UPDATE THIS AS PER FLUID!!!!!!!
-        velocity = 4 * self.inlet_flowrate / math.pi * self.ID * self.ID 
-        drop = friction_coefficient * self.length * density * velocity * velocity /(2 * self.ID)
-        super().pressure_drop = drop
-    
+        # density = 1000 # UPDATE THIS AS PER FLUID!!!!!!!
+        # velocity = 4 * self.inlet_flowrate / (pi * self.ID * self.ID) if self.inlet_flowrate !=None else 0
+        # drop = roughness[self.material-1] * self.length * density * velocity * velocity /(2 * self.ID)
+        drop = PL.PressureLoss_DW(self.length,self.ID,self.inlet_flowrate,self.inlet_temperature,roughness[self.material-1])
+        return drop
+        
     @property
     def thickness(self):
         if self.ID == None or self.OD == None:
