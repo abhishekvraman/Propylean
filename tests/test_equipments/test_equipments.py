@@ -79,4 +79,12 @@ def test_pipe_segment_instantiation():
     except Exception as exc:
         assert False, f"'Ball valve instantiation' raised an exception {exc}"
 
-# def test_pipe_segment_pressure_drop():
+def test_pipe_segment_pressure_drop():
+    p = equipments.pipe_segment(ID=18, OD=20, length = 10) #ID in mm, OD in mm and length in meters 
+    p.inlet_pressure = 1.053713e7  #Pascal
+    p.inlet_temperature = 25 #degree Celsius
+    p.inlet_flowrate = 0.0149675   #m3/s
+    assert p.inlet_flowrate != None
+    assert p.ID != None
+    assert p.outlet_pressure != None
+    assert p.pressure_drop == 2.86805e+06 #Pascal
