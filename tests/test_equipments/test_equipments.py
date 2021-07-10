@@ -13,11 +13,12 @@ def test_centrifugal_pump_instantiation():
     assert cp.discharge_pressure == 110
     cp.discharge_pressure = 90
     assert cp.outlet_pressure == 90
-    assert cp.pressure_drop == -40
-    assert cp.differential_pressure == 40
+    cp.inlet_mass_flowrate = 10
+    assert cp.pressure_drop == -60
+    assert cp.differential_pressure == 60
+    assert cp.inlet_pressure == 30
     cp.differential_pressure = 50
-    assert cp.suction_pressure == 50
-    assert cp.discharge_pressure == 100
+    assert cp.discharge_pressure == 80
     
     with pytest.raises(Exception):
         cp.efficiency = -1
@@ -25,13 +26,13 @@ def test_centrifugal_pump_instantiation():
     assert cp.efficiency == 0.6
     cp.efficiency = 80
     assert cp.efficiency == 0.8
-    cp.inlet_flowrate = 20
-    assert cp.inlet_flowrate == 20
+    cp.inlet_mass_flowrate = 20
+    assert cp.inlet_mass_flowrate == 20
     if not cp.dynamic_state:
-        assert cp.outlet_flowrate == 20
-    cp.outlet_flowrate = 30
+        assert cp.outlet_mass_flowrate == 20
+    cp.outlet_mass_flowrate = 30
     if not cp.dynamic_state:
-        assert cp.inlet_flowrate == 30
+        assert cp.inlet_mass_flowrate == 30
     assert cp.head ==  cp.differential_pressure/(9.8*1000) #unpdate based on liquid density from stream
     
     cp.pump_curve = pd.DataFrame([{'flow':[2,10,30,67], 'head':[45,20,10,2]}])
@@ -83,8 +84,8 @@ def test_pipe_segment_pressure_drop():
     p = equipments.pipe_segment(ID=18, OD=20, length = 10) #ID in mm, OD in mm and length in meters 
     p.inlet_pressure = 1.053713e7  #Pascal
     p.inlet_temperature = 25 #degree Celsius
-    p.inlet_flowrate = 0.0149675   #m3/s
-    assert p.inlet_flowrate != None
+    p.inlet_mass_flowrate = 1   #kg/s
+    assert p.inlet_mass_flowrate != None
     assert p.ID != None
     assert p.outlet_pressure != None
-    assert p.pressure_drop == 2.86805e+06 #Pascal
+    assert abs(p.pressure_drop - 1.154)<0.01 #Bar
