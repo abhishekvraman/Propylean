@@ -8,6 +8,11 @@ class _equipment_one_inlet_outlet:
         self.tag = None if 'tag' not in inputs else inputs['tag']
         self.dynamic_state = False if 'dynamic_state' not in inputs else inputs['dynamic_state']
 
+        #Flow properties
+        self._inlet_mass_flowrate = 0 if 'inlet_mass_flowrate' not in inputs else inputs['inlet_mass_flowrate']
+        self._outlet_mass_flowrate = 0 if 'outlet_mass_flowrate' not in inputs else inputs['outlet_mass_flowrate']
+        self.design_flowrate = 0 if 'design_flowrate' not in inputs else inputs['design_flowrate']
+
         #Pressure properties
         self._inlet_pressure = None if 'inlet_pressure' not in inputs else inputs['inlet_pressure']
         self._outlet_pressure = None if 'outlet_pressure' not in inputs else inputs['outlet_pressure']
@@ -20,11 +25,6 @@ class _equipment_one_inlet_outlet:
         self.outlet_temperature = None if 'outlet_temperature' not in inputs else inputs['outlet_temperature']
         self.design_temperature = None if 'design_temperature' not in inputs else inputs['design_temperature']
 
-        #Flow properties
-        self._inlet_flowrate = 0 if 'inlet_flowrate' not in inputs else inputs['inlet_flowrate']
-        self._outlet_flowrate = 0 if 'outlet_flowrate' not in inputs else inputs['outlet_flowrate']
-        self.design_flowrate = 0 if 'design_flowrate' not in inputs else inputs['design_flowrate']
-    
     @property
     def inlet_pressure(self):
         return self._inlet_pressure
@@ -41,48 +41,49 @@ class _equipment_one_inlet_outlet:
         self._inlet_pressure = self._outlet_pressure + self.pressure_drop
     @property
     def pressure_drop(self):
+        print('Parent getter')
         if (self.inlet_pressure == None or
             self.outlet_pressure == None or
-            self.inlet_flowrate == 0):
+            self.inlet_mass_flowrate == 0):
             return 0            
         return self.inlet_pressure - self.outlet_pressure
     @pressure_drop.setter
     def pressure_drop(self,value):
         if self.inlet_pressure != None:
-            self.outlet_pressure = self.inlet_pressure - value
+            self._outlet_pressure = self.inlet_pressure - value
         elif self.outlet_pressure != None:
-            self.inlet_pressure = self.outlet_pressure + value
+            self._inlet_pressure = self.outlet_pressure + value
         else:
             raise Exception("Error! Assign inlet value or outlet outlet before assigning differential")
     
     @property
-    def inlet_flowrate(self):
-        return self._inlet_flowrate
-    @inlet_flowrate.setter
-    def inlet_flowrate(self,value):
-        self._inlet_flowrate = value
-        self._outlet_flowrate = self._inlet_flowrate + self.inventory_change_rate
+    def inlet_mass_flowrate(self):
+        return self._inlet_mass_flowrate
+    @inlet_mass_flowrate.setter
+    def inlet_mass_flowrate(self,value):
+        self._inlet_mass_flowrate = value
+        self._outlet_mass_flowrate = self._inlet_mass_flowrate + self.inventory_change_rate
     @property
-    def outlet_flowrate(self):
-        return self._outlet_flowrate
-    @outlet_flowrate.setter
-    def outlet_flowrate(self,value):
-        self._outlet_flowrate = value
-        self._inlet_flowrate = self._outlet_flowrate - self.inventory_change_rate   
+    def outlet_mass_flowrate(self):
+        return self._outlet_mass_flowrate
+    @outlet_mass_flowrate.setter
+    def outlet_mass_flowrate(self,value):
+        self._outlet_mass_flowrate = value
+        self._inlet_mass_flowrate = self._outlet_mass_flowrate - self.inventory_change_rate   
     @property
     def inventory_change_rate(self):
         if not self.dynamic_state:
             return 0
-        if (self._inlet_flowrate == None or
-            self._outlet_flowrate == None):
+        if (self._inlet_mass_flowrate == None or
+            self._outlet_mass_flowrate == None):
             return None            
-        return self._inlet_flowrate - self._outlet_flowrate
+        return self._inlet_mass_flowrate - self._outlet_mass_flowrate
     @inventory_change_rate.setter
     def inventory_change_rate(self,value):
-        if self._inlet_flowrate != None:
-            self._outlet_flowrate = self._inlet_flowrate - value
-        elif self._outlet_flowrate != None:
-            self._inlet_flowrate = self._outlet_flowrate + value
+        if self._inlet_mass_flowrate != None:
+            self._outlet_mass_flowrate = self._inlet_mass_flowrate - value
+        elif self._outlet_mass_flowrate != None:
+            self._inlet_mass_flowrate = self._outlet_mass_flowrate + value
         else:
             raise Exception("Error! Assign inlet value or outlet outlet before assigning differential")
 
@@ -94,6 +95,17 @@ class _equipment_multiple_inlet_outlet:
 #Defining generic class for all types of pressure changers like Pumps, Compressors and Expanders
 class _pressure_changers(_equipment_one_inlet_outlet):
     def __init__(self,**inputs):
+        self._differential_pressure = None
+        if 'pressure_drop' in inputs:
+            inputs['differential_pressure'] = -1 * inputs['pressure_drop']
+            del inputs['pressure_drop']
+        if 'inlet_pressure' in inputs:
+            inputs['suction_pressure'] = inputs['inlet_pressure']
+            del inputs['inlet_pressure']
+        if 'outlet_pressure' in inputs:
+            inputs['discharge_pressure'] = inputs['outlet_pressure']
+            del inputs['outlet_pressure']
+        
         super().__init__(**inputs)
         if 'suction_pressure' in inputs:
             self.inlet_pressure = inputs['suction_pressure']
@@ -107,19 +119,28 @@ class _pressure_changers(_equipment_one_inlet_outlet):
                 'differential_pressure' in inputs):
                 raise Exception("Please enter ethier one of discharge_pressure or differential_pressure")
             self.outlet_pressure = inputs['discharge_pressure']
-            
+        
         if 'differential_pressure' in inputs:
             if ((self.suction_pressure != None or self.discharge_pressure != None) and
                  'performance_curve' in inputs):
                  raise Exception('Please input only one of differential pressure or performance_curve')
-            self.pressure_drop = -1 * inputs['differential_pressure']
-        
+            self.differential_pressure = inputs['differential_pressure'] 
+                 
         self._performance_curve = pd.DataFrame()
         if 'performance_curve' in inputs:
             self.performace_curve = inputs['performance_curve']
         
         self._efficiency = None if 'efficiency' not in inputs else inputs['efficiency']
-    
+        
+    @_equipment_one_inlet_outlet.inlet_pressure.getter
+    def inlet_pressure(self):
+        print('child getter')
+        return self._inlet_pressure
+    @_equipment_one_inlet_outlet.inlet_pressure.setter
+    def inlet_pressure(self,value):
+        self._inlet_pressure = value
+        if self._differential_pressure!=None:
+            self._outlet_pressure = self._inlet_pressure + self._differential_pressure
     @property
     def suction_pressure(self):
         return self.inlet_pressure
@@ -127,6 +148,15 @@ class _pressure_changers(_equipment_one_inlet_outlet):
     def suction_pressure(self, value):
         self.inlet_pressure = value
 
+    @_equipment_one_inlet_outlet.outlet_pressure.getter
+    def outlet_pressure(self):
+        print('child getter')
+        return self._outlet_pressure
+    @_equipment_one_inlet_outlet.outlet_pressure.setter
+    def outlet_pressure(self,value):
+        self._outlet_pressure = value
+        if self._differential_pressure!=None:
+            self._inlet_pressure = self._outlet_pressure - self._differential_pressure
     @property
     def discharge_pressure(self):
         return self.outlet_pressure
@@ -134,13 +164,24 @@ class _pressure_changers(_equipment_one_inlet_outlet):
     def discharge_pressure(self, value):
         self.outlet_pressure = value
     
+    @_equipment_one_inlet_outlet.pressure_drop.getter
+    def pressure_drop(self):
+        print('child getter')
+        return -1 * self.differential_pressure
+    @_equipment_one_inlet_outlet.pressure_drop.setter
+    def pressure_drop(self,value):
+        self.differential_pressure = -1 * value      
     @property
     def differential_pressure(self):
-        return -1*self.pressure_drop
+        return self._differential_pressure
     @differential_pressure.setter
     def differential_pressure(self, value):
-        self.pressure_drop = -1*value
-    
+        self._differential_pressure = value
+        if self.inlet_pressure != None:
+            self._outlet_pressure = self._inlet_pressure + value
+        elif self.outlet_pressure != None:
+            self._inlet_pressure = self._outlet_pressure - value
+
     @property
     def performance_curve(self):
         return self._perfomace_curve
@@ -209,7 +250,7 @@ class centrifugal_pump(_pressure_changers):
     @property
     def hydraulic_power(self):
         fluid_density = 1000 # THIS NEEDS TO BE UPDATED WITH STREAM PROPERTY
-        return self.inlet_flowrate * fluid_density * 9.81 * self.head / (3.6e6 )
+        return self.inlet_mass_flowrate * fluid_density * 9.81 * self.head / (3.6e6 )
     @property
     def brake_horse_power(self):
         return self.hydraulic_power / self.efficiency
@@ -284,14 +325,15 @@ class pipe_segment(_equipment_one_inlet_outlet):
     def pressure_drop(self):
         if (self.inlet_pressure == None or
             self.outlet_pressure == None or
-            self.inlet_flowrate == 0):
+            self.inlet_mass_flowrate == 0):
             return 0
         roughness = (4.57e-5, 4.5e-5, 0.000259, 1.5e-5, 1.5e-6) #in meters
         #Pressure drop calculation using equation
         # density = 1000 # UPDATE THIS AS PER FLUID!!!!!!!
-        # velocity = 4 * self.inlet_flowrate / (pi * self.ID * self.ID) if self.inlet_flowrate !=None else 0
+        # velocity = 4 * self.inlet_mass_flowrate / (pi * self.ID * self.ID) if self.inlet_mass_flowrate !=None else 0
         # drop = roughness[self.material-1] * self.length * density * velocity * velocity /(2 * self.ID)
-        drop = PL.PressureLoss_DW(self.length,self.ID,self.inlet_flowrate,self.inlet_temperature,roughness[self.material-1])
+        drop = round(PL.PressureLoss_DW(self.length, self.ID, self.inlet_mass_flowrate,
+                                  self.inlet_temperature, 1000*roughness[self.material-1]),3)
         return drop
         
     @property
