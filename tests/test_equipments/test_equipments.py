@@ -89,3 +89,15 @@ def test_pipe_segment_pressure_drop():
     assert p.ID != None
     assert p.outlet_pressure != None
     assert abs(p.pressure_drop - 1.154)<0.01 #Bar
+
+def test_control_valve_instantiation():
+    #All units in SI
+    valve = equipments.control_valve(inlet_pressure=1.04217e7, outlet_pressure=9.92167e6, inlet_temperature=299.18)
+    valve.inlet_mass_flowrate = 1 #kg/s
+    assert abs(valve.pressure_drop - (1.04217e7-9.92167e6)) < 0.001
+    assert abs(valve.Kv - 1.61259) < 0.001
+
+    # Gas phase calculation
+    valve = equipments.control_valve(inlet_pressure=202650, outlet_pressure=197650, inlet_temperature=423.15)
+    valve.inlet_mass_flowrate = 1 #kg/s
+    assert abs(valve.Kv - 502.88) < 50 #NEEDS UPDATE 
