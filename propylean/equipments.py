@@ -1,4 +1,6 @@
 import pandas as pd
+from thermo.chemical import Chemical
+from fluids import control_valve as cv_calculations
 from math import pi 
 from pipe_pressure_loss_calculator import PressureLoss as PL 
 
@@ -41,7 +43,6 @@ class _equipment_one_inlet_outlet:
         self._inlet_pressure = self._outlet_pressure + self.pressure_drop
     @property
     def pressure_drop(self):
-        print('Parent getter')
         if (self.inlet_pressure == None or
             self.outlet_pressure == None or
             self.inlet_mass_flowrate == 0):
@@ -328,10 +329,7 @@ class pipe_segment(_equipment_one_inlet_outlet):
             self.inlet_mass_flowrate == 0):
             return 0
         roughness = (4.57e-5, 4.5e-5, 0.000259, 1.5e-5, 1.5e-6) #in meters
-        #Pressure drop calculation using equation
-        # density = 1000 # UPDATE THIS AS PER FLUID!!!!!!!
-        # velocity = 4 * self.inlet_mass_flowrate / (pi * self.ID * self.ID) if self.inlet_mass_flowrate !=None else 0
-        # drop = roughness[self.material-1] * self.length * density * velocity * velocity /(2 * self.ID)
+        
         drop = round(PL.PressureLoss_DW(self.length, self.ID, self.inlet_mass_flowrate,
                                   self.inlet_temperature, 1000*roughness[self.material-1]),3)
         return drop
@@ -353,7 +351,27 @@ class pipe_segment(_equipment_one_inlet_outlet):
 class control_valve(_equipment_one_inlet_outlet):
     def __init__(self, **inputs):
         super().__init__(**inputs)
-
+    @property
+    def Kv(self):
+        # UPDATE BELOW BASED ON STREAMS
+        water = Chemical('water',
+                         T = self.inlet_temperature,
+                         P = self.inlet_pressure)
+        if water.phase == 'l':
+            return cv_calculations.size_control_valve_l(water.rhol, water.Psat,water.Pc, water.mul,
+                                                        self.inlet_pressure, self.outlet_pressure, 
+                                                        self.inlet_mass_flowrate/water.rhol)
+        elif water.phase == 'g':
+            return cv_calculations.size_control_valve_g(T = self.inlet_temperature, 
+                                                        MW = water.MW,
+                                                        mu= 1.48712E-05,#water.mug,
+                                                        gamma = water.isentropic_exponent, 
+                                                        Z = water.Zg,
+                                                        P1 = self.inlet_pressure, 
+                                                        P2 = self.outlet_pressure, 
+                                                        Q = self.inlet_mass_flowrate/Chemical('water',T=273.15,P=101325).rhog)
+        else:
+            raise Exception('Possibility of fluid solification at control valve')
 class pressure_safety_valve(_equipment_one_inlet_outlet):
     def __init__(self, **inputs):
         super().__init__(**inputs)
