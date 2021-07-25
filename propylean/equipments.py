@@ -1,7 +1,7 @@
 import pandas as pd
 from thermo.chemical import Chemical
 from fluids import control_valve as cv_calculations
-from math import pi 
+import fluids.compressible as compressible_fluid 
 from pipe_pressure_loss_calculator import PressureLoss as PL 
 
 #Defining generic base class for all equipments with one inlet and outlet
@@ -265,7 +265,45 @@ class positive_displacement_pump(_pressure_changers):
 class centrifugal_compressors(_pressure_changers):
     def __init__(self, **inputs):
         super().__init__(**inputs)
+        self.methane = Chemical('methane',
+                         T = self.inlet_temperature,
+                         P = self.inlet_pressure)
+        if 'adiabatic_efficiency' not in inputs and 'polytropic_efficiency' in inputs:
+            self.polytropic_efficiency = inputs['polytropic_efficiency']
+        else:
+            self.adiabatic_efficiency = 0.7 if 'adiabatic_efficiency' not in inputs else inputs['adiabatic_efficiency']
 
+    
+    @property
+    def adiabatic_efficiency(self):
+        return self._adiabatic_efficiency
+    @adiabatic_efficiency.setter
+    def adiabatic_efficiency(self, value):
+        if value ==  None:
+            value = 0.7
+        self._adiabatic_efficiency = value
+    
+    @property
+    def polytropic_efficiency(self):
+        return compressible_fluid.isentropic_efficiency(P1 = self.inlet_pressure,
+                                                        P2 = self.outlet_pressure,
+                                                        k = self.methane.isentropic_exponent,
+                                                        eta_s = self.adiabatic_efficiency)
+    @polytropic_efficiency.setter
+    def polytropic_efficiency(self, value):
+        self.adiabatic_efficiency = compressible_fluid.isentropic_efficiency(P1 = self.inlet_pressure,
+                                                                                 P2 = self.outlet_pressure,
+                                                                                 k = self.methane.isentropic_exponent,
+                                                                                 eta_p = value)
+    @property
+    def power(self):
+        work = compressible_fluid.isentropic_work_compression(T1 = self.inlet_temperature,
+                                                              k = self.methane.isentropic_exponent,
+                                                              Z = self.methane.Z,
+                                                              P1 = self.suction_pressure,
+                                                              P2 = self.discharge_pressure,
+                                                              eta = self.adiabatic_efficiency)
+        return work * self.inlet_mass_flowrate / self.methane.MW
 class expander(_pressure_changers):
     def __init__(self, **inputs):
         super().__init__(**inputs)
@@ -372,6 +410,7 @@ class control_valve(_equipment_one_inlet_outlet):
                                                         Q = self.inlet_mass_flowrate/Chemical('water',T=273.15,P=101325).rhog)
         else:
             raise Exception('Possibility of fluid solification at control valve')
+
 class pressure_safety_valve(_equipment_one_inlet_outlet):
     def __init__(self, **inputs):
         super().__init__(**inputs)
