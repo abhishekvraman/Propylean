@@ -101,3 +101,21 @@ def test_control_valve_instantiation():
     valve = equipments.control_valve(inlet_pressure=202650, outlet_pressure=197650, inlet_temperature=423.15)
     valve.inlet_mass_flowrate = 1 #kg/s
     assert abs(valve.Kv - 502.88) < 50 #NEEDS UPDATE 
+
+def test_centrifugal_compressor_instantiation():
+    
+    compressor = equipments.centrifugal_compressors(suction_pressure = 1013250.0, #Pa
+                                                    differential_pressure = 5000000.0, #Pa
+                                                    inlet_temperature = 248.15, #K
+                                                    inlet_mass_flowrate = 0.02778) #kg/s
+    
+    assert compressor.discharge_pressure == 1013250.0 + 5000000.0
+    
+    assert abs(compressor.power - 10.58) < 0.5 # kW
+
+    compressor.polytropic_efficiency = 0.80
+    assert abs(compressor.adiabatic_efficiency - 0.766) < 0.1
+    assert abs(compressor.power - 9.6698) < 0.5 # kW 
+
+
+
