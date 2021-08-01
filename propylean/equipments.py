@@ -1,4 +1,5 @@
 import pandas as pd
+import propylean.streams as strm
 from thermo.chemical import Chemical
 from fluids import control_valve as cv_calculations
 import fluids.compressible as compressible_fluid 
@@ -6,6 +7,7 @@ from pipe_pressure_loss_calculator import PressureLoss as PL
 
 #Defining generic base class for all equipments with one inlet and outlet
 class _equipment_one_inlet_outlet:
+    
     def __init__(self, **inputs):
         self.tag = None if 'tag' not in inputs else inputs['tag']
         self.dynamic_state = False if 'dynamic_state' not in inputs else inputs['dynamic_state']
@@ -27,6 +29,7 @@ class _equipment_one_inlet_outlet:
         self.outlet_temperature = None if 'outlet_temperature' not in inputs else inputs['outlet_temperature']
         self.design_temperature = None if 'design_temperature' not in inputs else inputs['design_temperature']
 
+        
     @property
     def inlet_pressure(self):
         return self._inlet_pressure
@@ -238,11 +241,14 @@ class _exchanger():
 
 # Start of final classes pumps
 class centrifugal_pump(_pressure_changers):
+    items = []    
     def __init__(self, **inputs):
         super().__init__( **inputs)
         self.min_flow = None if 'min_flow' not in inputs else inputs['min_flow']
         self.NPSHr = None if 'NPSHr' not in inputs else inputs['NPSHr']
         self.NPSHa = None if 'NPSHa' not in inputs else inputs['NPSHa']
+        self.inlet_energy_tag = None if 'inlet_energy_tag' not in inputs else inputs['inlet_energy_tag']
+        centrifugal_pump.items.append(self)
                 
     @property
     def head(self):
@@ -251,18 +257,27 @@ class centrifugal_pump(_pressure_changers):
     @property
     def hydraulic_power(self):
         fluid_density = 1000 # THIS NEEDS TO BE UPDATED WITH STREAM PROPERTY
-        return self.inlet_mass_flowrate * fluid_density * 9.81 * self.head / (3.6e6 )
+        return self.inlet_mass_flowrate * fluid_density * 9.81 * self.head / (3.6e6)
     @property
     def brake_horse_power(self):
         return self.hydraulic_power / self.efficiency
-   
+    @classmethod
+    def list_objects(cls):
+        return cls.items
+    
 class positive_displacement_pump(_pressure_changers):
+    items = []
     def __init__(self, **inputs):
         super().__init__(**inputs)
+        positive_displacement_pump.items.append(self)
+    @classmethod
+    def list_objects(cls):
+        return cls.items
 # End of final classes of pumps
 
 # Start of final classes of Compressors and Expanders
 class centrifugal_compressors(_pressure_changers):
+    items = []
     def __init__(self, **inputs):
         super().__init__(**inputs)
         self.methane = Chemical('methane',
@@ -272,8 +287,8 @@ class centrifugal_compressors(_pressure_changers):
             self.polytropic_efficiency = inputs['polytropic_efficiency']
         else:
             self.adiabatic_efficiency = 0.7 if 'adiabatic_efficiency' not in inputs else inputs['adiabatic_efficiency']
-
-    
+        self.inlet_energy_tag = None if 'inlet_energy_tag' not in inputs else inputs['inlet_energy_tag']
+        centrifugal_compressors.items.append(self)
     @property
     def adiabatic_efficiency(self):
         return self._adiabatic_efficiency
@@ -304,15 +319,27 @@ class centrifugal_compressors(_pressure_changers):
                                                               P2 = self.discharge_pressure,
                                                               eta = self.adiabatic_efficiency)
         return work * self.inlet_mass_flowrate / self.methane.MW
+    @classmethod
+    def list_objects(cls):
+        return cls.items
+
 class expander(_pressure_changers):
+    items = []
     def __init__(self, **inputs):
+        self.outlet_energy_tag = None if 'outlet_energy_tag' not in inputs else inputs['outlet_energy_tag']
         super().__init__(**inputs)
+        expander.items.append(self)
+    @classmethod
+    def list_objects(cls):
+        return cls.items
+
 # End of final classes of compressors
 
 # Start of final classes of Piping and Instruments
 class pipe_segment(_equipment_one_inlet_outlet):
-    
+    items = []
     def __init__(self, **inputs):
+        self.outlet_energy_tag = None if 'outlet_energy_tag' not in inputs else inputs['outlet_energy_tag']
         super().__init__(**inputs)
         self.segment_type = 1 if 'segment_type' not in inputs else inputs['segment_type']
         segments = '''\nSegments can be of following types and in range of numbers below:
@@ -359,7 +386,7 @@ class pipe_segment(_equipment_one_inlet_outlet):
             self.ID = self.OD - inputs['thickness']
         else:
             raise Exception('Define atleast ID or OD with thickness to define a pipe segment object') 
-        
+        pipe_segment.items.append(self)
     @property
     def pressure_drop(self):
         if (self.inlet_pressure == None or
@@ -386,9 +413,15 @@ class pipe_segment(_equipment_one_inlet_outlet):
         else:
             raise Exception("Atleast define ID or OD of pipe before defining thickness")
     
+    @classmethod
+    def list_objects(cls):
+        return cls.items
+
 class control_valve(_equipment_one_inlet_outlet):
+    items = []
     def __init__(self, **inputs):
         super().__init__(**inputs)
+        control_valve.items.append(self)
     @property
     def Kv(self):
         # UPDATE BELOW BASED ON STREAMS
@@ -411,14 +444,27 @@ class control_valve(_equipment_one_inlet_outlet):
         else:
             raise Exception('Possibility of fluid solification at control valve')
 
+    @classmethod
+    def list_objects(cls):
+        return cls.items
 class pressure_safety_valve(_equipment_one_inlet_outlet):
+    items = []
     def __init__(self, **inputs):
+        
+        pressure_safety_valve.items.append(self)
         super().__init__(**inputs)
+    @classmethod
+    def list_objects(cls):
+        return cls.items
 
 class flow_meter(_equipment_one_inlet_outlet):
+    items = []
     def __init__(self, **inputs):
         super().__init__(**inputs)
-
+        flow_meter.items.append(self)
+    @classmethod
+    def list_objects(cls):
+        return cls.items
 # End of final classes of Piping and instruments
 
 # Start of final classes of vessels
