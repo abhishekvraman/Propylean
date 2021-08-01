@@ -40,6 +40,8 @@ def test_centrifugal_pump_instantiation():
         cp.pump_curve = pd.DataFrame([{'flow':[2,10,30,67], 'head':[45,20,10,2],'something':[2,3,4]}])
         cp.pump_curve = [[2,10,30,67],[45,20,10,2]]
 
+    del cp
+
 def test_centrifugal_pump_wrong_instantiation():
     with pytest.raises(Exception):
         cp = equipments.centrifugal_pump(suction_pressure = 30,
@@ -102,6 +104,7 @@ def test_control_valve_instantiation():
     valve.inlet_mass_flowrate = 1 #kg/s
     assert abs(valve.Kv - 502.88) < 50 #NEEDS UPDATE 
 
+    del valve
 def test_centrifugal_compressor_instantiation():
     
     compressor = equipments.centrifugal_compressors(suction_pressure = 1013250.0, #Pa
@@ -117,5 +120,27 @@ def test_centrifugal_compressor_instantiation():
     assert abs(compressor.adiabatic_efficiency - 0.766) < 0.1
     assert abs(compressor.power - 9.6698) < 0.5 # kW 
 
+def test_listing_of_equipments():
+    first_pump = equipments.centrifugal_pump(tag='1', inlet_pressure=50, 
+                                     design_pressure = 50,
+                                     pressure_drop=-60)
+    second_pump = equipments.centrifugal_pump(tag='2', inlet_pressure=50, 
+                                     design_pressure = 50,
+                                     pressure_drop=-60)
+    third_pump = equipments.centrifugal_pump(tag='3', inlet_pressure=50, 
+                                     design_pressure = 50,
+                                     pressure_drop=-60)
+    first_valve = equipments.control_valve(tag='1', inlet_pressure=1.04217e7, outlet_pressure=9.92167e6, inlet_temperature=299.18)
+    second_valve = equipments.control_valve(tag='2', inlet_pressure=1.04217e7, outlet_pressure=9.92167e6, inlet_temperature=299.18)
+    third_valve = equipments.control_valve(tag='3', inlet_pressure=1.04217e7, outlet_pressure=9.92167e6, inlet_temperature=299.18)
+    forth_valve = equipments.control_valve(tag='4', inlet_pressure=1.04217e7, outlet_pressure=9.92167e6, inlet_temperature=299.18)
+    fifth_valve = equipments.control_valve(tag='5', inlet_pressure=1.04217e7, outlet_pressure=9.92167e6, inlet_temperature=299.18)
+    
+    assert first_pump.tag == '1'
+    for pump in equipments.centrifugal_pump.list_objects():
+        print(pump.tag)
+        assert pump.tag in [None, '1', '2', '3']
 
-
+        
+    for valve in equipments.control_valve.list_objects():
+        assert valve.tag in [None, '1', '2','3', '4', '5']
