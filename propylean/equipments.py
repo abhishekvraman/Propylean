@@ -6,9 +6,8 @@ import fluids.compressible as compressible_fluid
 from pipe_pressure_loss_calculator import PressureLoss as PL 
 
 #Defining generic base class for all equipments with one inlet and outlet
-class _equipment_one_inlet_outlet:
-    
-    def __init__(self, **inputs):
+class _EquipmentOneInletOutlet:
+    def __init__(self, **inputs) -> None:
         self.tag = None if 'tag' not in inputs else inputs['tag']
         self.dynamic_state = False if 'dynamic_state' not in inputs else inputs['dynamic_state']
 
@@ -92,13 +91,13 @@ class _equipment_one_inlet_outlet:
             raise Exception("Error! Assign inlet value or outlet outlet before assigning differential")
 
 #Defining generic base class for all equipments with multiple inlet and outlet. TO BE UPDATED!!!!!!       
-class _equipment_multiple_inlet_outlet:
-    def __init__(self):
+class _EquipmentMultipleInletOutlet:
+    def __init__(self) -> None:
         self.inlet_pressure = list()
 
 #Defining generic class for all types of pressure changers like Pumps, Compressors and Expanders
-class _pressure_changers(_equipment_one_inlet_outlet):
-    def __init__(self,**inputs):
+class _PressureChangers(_EquipmentOneInletOutlet):
+    def __init__(self,**inputs) -> None:
         self._differential_pressure = None
         if 'pressure_drop' in inputs:
             inputs['differential_pressure'] = -1 * inputs['pressure_drop']
@@ -136,11 +135,11 @@ class _pressure_changers(_equipment_one_inlet_outlet):
         
         self._efficiency = None if 'efficiency' not in inputs else inputs['efficiency']
         
-    @_equipment_one_inlet_outlet.inlet_pressure.getter
+    @_EquipmentOneInletOutlet.inlet_pressure.getter
     def inlet_pressure(self):
         print('child getter')
         return self._inlet_pressure
-    @_equipment_one_inlet_outlet.inlet_pressure.setter
+    @_EquipmentOneInletOutlet.inlet_pressure.setter
     def inlet_pressure(self,value):
         self._inlet_pressure = value
         if self._differential_pressure!=None:
@@ -152,11 +151,11 @@ class _pressure_changers(_equipment_one_inlet_outlet):
     def suction_pressure(self, value):
         self.inlet_pressure = value
 
-    @_equipment_one_inlet_outlet.outlet_pressure.getter
+    @_EquipmentOneInletOutlet.outlet_pressure.getter
     def outlet_pressure(self):
         print('child getter')
         return self._outlet_pressure
-    @_equipment_one_inlet_outlet.outlet_pressure.setter
+    @_EquipmentOneInletOutlet.outlet_pressure.setter
     def outlet_pressure(self,value):
         self._outlet_pressure = value
         if self._differential_pressure!=None:
@@ -168,11 +167,11 @@ class _pressure_changers(_equipment_one_inlet_outlet):
     def discharge_pressure(self, value):
         self.outlet_pressure = value
     
-    @_equipment_one_inlet_outlet.pressure_drop.getter
+    @_EquipmentOneInletOutlet.pressure_drop.getter
     def pressure_drop(self):
         print('child getter')
         return -1 * self.differential_pressure
-    @_equipment_one_inlet_outlet.pressure_drop.setter
+    @_EquipmentOneInletOutlet.pressure_drop.setter
     def pressure_drop(self,value):
         self.differential_pressure = -1 * value      
     @property
@@ -209,8 +208,8 @@ class _pressure_changers(_equipment_one_inlet_outlet):
             self._efficiency = value/100
 
 #Defining generic class for all types of vessels.  NEEDS SUPER CLASS WITH MULTI INPUT AND OUTPUT 
-class _vessel():
-    def __init__(self, **inputs):
+class _Vessels(_EquipmentMultipleInletOutlet):
+    def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
         self.ID = None if 'ID' not in inputs else inputs['ID']
         self.length = None if 'length' not in inputs else inputs['length']
@@ -222,8 +221,8 @@ class _vessel():
         self.HHLL = None if 'HHLL' not in inputs else inputs['HHLL']
 
 #Defining generic class for all types of heat exchangers NEEDS SUPER CLASS WITH MULTI INPUT AND OUTPUT
-class _exchanger():
-    def __init__(self, **inputs):
+class _Exchanger(_EquipmentMultipleInletOutlet):
+    def __init__(self, **inputs) -> None:
         #Hot side
         self.hot_side_operating_pressure = None if 'hot_side_operating_pressure' not in inputs else inputs['hot_side_operating_pressure']
         self.hot_side_flowrate = None if 'hot_side_flowrate' not in inputs else inputs['hot_side_flowrate']
@@ -240,15 +239,15 @@ class _exchanger():
 #----------------------Generic Classes End here. Final classes below---------------------------------------------------------
 
 # Start of final classes pumps
-class centrifugal_pump(_pressure_changers):
+class CentrifugalPump(_PressureChangers):
     items = []    
-    def __init__(self, **inputs):
+    def __init__(self, **inputs) -> None:
         super().__init__( **inputs)
         self.min_flow = None if 'min_flow' not in inputs else inputs['min_flow']
         self.NPSHr = None if 'NPSHr' not in inputs else inputs['NPSHr']
         self.NPSHa = None if 'NPSHa' not in inputs else inputs['NPSHa']
         self.inlet_energy_tag = None if 'inlet_energy_tag' not in inputs else inputs['inlet_energy_tag']
-        centrifugal_pump.items.append(self)
+        CentrifugalPump.items.append(self)
                 
     @property
     def head(self):
@@ -265,20 +264,20 @@ class centrifugal_pump(_pressure_changers):
     def list_objects(cls):
         return cls.items
     
-class positive_displacement_pump(_pressure_changers):
+class PositiveDisplacementPump(_PressureChangers):
     items = []
-    def __init__(self, **inputs):
+    def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
-        positive_displacement_pump.items.append(self)
+        PositiveDisplacementPump.items.append(self)
     @classmethod
     def list_objects(cls):
         return cls.items
 # End of final classes of pumps
 
 # Start of final classes of Compressors and Expanders
-class centrifugal_compressors(_pressure_changers):
+class CentrifugalCompressor(_PressureChangers):
     items = []
-    def __init__(self, **inputs):
+    def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
         self.methane = Chemical('methane',
                          T = self.inlet_temperature,
@@ -288,7 +287,7 @@ class centrifugal_compressors(_pressure_changers):
         else:
             self.adiabatic_efficiency = 0.7 if 'adiabatic_efficiency' not in inputs else inputs['adiabatic_efficiency']
         self.inlet_energy_tag = None if 'inlet_energy_tag' not in inputs else inputs['inlet_energy_tag']
-        centrifugal_compressors.items.append(self)
+        CentrifugalCompressor.items.append(self)
     @property
     def adiabatic_efficiency(self):
         return self._adiabatic_efficiency
@@ -323,12 +322,12 @@ class centrifugal_compressors(_pressure_changers):
     def list_objects(cls):
         return cls.items
 
-class expander(_pressure_changers):
+class Expander(_PressureChangers):
     items = []
-    def __init__(self, **inputs):
+    def __init__(self, **inputs) -> None:
         self.outlet_energy_tag = None if 'outlet_energy_tag' not in inputs else inputs['outlet_energy_tag']
         super().__init__(**inputs)
-        expander.items.append(self)
+        Expander.items.append(self)
     @classmethod
     def list_objects(cls):
         return cls.items
@@ -336,9 +335,9 @@ class expander(_pressure_changers):
 # End of final classes of compressors
 
 # Start of final classes of Piping and Instruments
-class pipe_segment(_equipment_one_inlet_outlet):
+class PipeSegment(_EquipmentOneInletOutlet):
     items = []
-    def __init__(self, **inputs):
+    def __init__(self, **inputs) -> None:
         self.outlet_energy_tag = None if 'outlet_energy_tag' not in inputs else inputs['outlet_energy_tag']
         super().__init__(**inputs)
         self.segment_type = 1 if 'segment_type' not in inputs else inputs['segment_type']
@@ -386,7 +385,7 @@ class pipe_segment(_equipment_one_inlet_outlet):
             self.ID = self.OD - inputs['thickness']
         else:
             raise Exception('Define atleast ID or OD with thickness to define a pipe segment object') 
-        pipe_segment.items.append(self)
+        PipeSegment.items.append(self)
     @property
     def pressure_drop(self):
         if (self.inlet_pressure == None or
@@ -417,11 +416,11 @@ class pipe_segment(_equipment_one_inlet_outlet):
     def list_objects(cls):
         return cls.items
 
-class control_valve(_equipment_one_inlet_outlet):
+class ControlValve(_EquipmentOneInletOutlet):
     items = []
-    def __init__(self, **inputs):
+    def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
-        control_valve.items.append(self)
+        ControlValve.items.append(self)
     @property
     def Kv(self):
         # UPDATE BELOW BASED ON STREAMS
@@ -429,7 +428,7 @@ class control_valve(_equipment_one_inlet_outlet):
                          T = self.inlet_temperature,
                          P = self.inlet_pressure)
         if water.phase == 'l':
-            return cv_calculations.size_control_valve_l(water.rhol, water.Psat,water.Pc, water.mul,
+            return cv_calculations.size_control_valve_l(water.rhol, water.Psat, water.Pc, water.mul,
                                                         self.inlet_pressure, self.outlet_pressure, 
                                                         self.inlet_mass_flowrate/water.rhol)
         elif water.phase == 'g':
@@ -447,50 +446,51 @@ class control_valve(_equipment_one_inlet_outlet):
     @classmethod
     def list_objects(cls):
         return cls.items
-class pressure_safety_valve(_equipment_one_inlet_outlet):
-    items = []
-    def __init__(self, **inputs):
         
-        pressure_safety_valve.items.append(self)
+class PressureSafetyValve(_EquipmentOneInletOutlet):
+    items = []
+    def __init__(self, **inputs) -> None:
+        
+        PressureSafetyValve.items.append(self)
         super().__init__(**inputs)
     @classmethod
     def list_objects(cls):
         return cls.items
 
-class flow_meter(_equipment_one_inlet_outlet):
+class FlowMeter(_EquipmentOneInletOutlet):
     items = []
-    def __init__(self, **inputs):
+    def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
-        flow_meter.items.append(self)
+        FlowMeter.items.append(self)
     @classmethod
     def list_objects(cls):
         return cls.items
 # End of final classes of Piping and instruments
 
 # Start of final classes of vessels
-class vertical_separator(_vessel):
-    def __init__(self, **inputs):
+class VerticalSeparator(_Vessels):
+    def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
 
-class horizontal_separator(_vessel):
-    def __init__(self, **inputs):
+class HorizontalSeparator(_Vessels):
+    def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
 
-class column(_vessel):
-    def __init__(self, **inputs):
+class Column(_Vessels):
+    def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
 
-class tank(_vessel):
-    def __init__(self, **inputs):
+class Tank(_Vessels):
+    def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
 # End of final classes of vessels
 
 # Start of final classes of heat exchangers
-class shell_and_tube_HE(_exchanger):
-    def __init__(self, **inputs):
+class ShellnTubeExchanger(_Exchanger):
+    def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
 
-class air_coolers(_exchanger):
-    def __init__(self, **inputs):
+class AirCoolers(_Exchanger):
+    def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
 # End of final classes of heat exchangers      

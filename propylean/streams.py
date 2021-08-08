@@ -1,10 +1,13 @@
 from thermo.chemical import Chemical
-
-class energy_stream:
+        
+class EnergyStream:
     def __init__(self, value= 0, unit= 'kW', tag= None, 
                  to_equipment_tag= None, from_equipment_tag= None):
         self._value = value
         self._unit = unit
+        self.tag = tag
+        self.to_equipment_tag = to_equipment_tag
+        self.from_equipment_tag = from_equipment_tag
         a = self.get_value_in('W') #To test if the energy unit is supported  
 
     @property
@@ -53,3 +56,13 @@ class energy_stream:
         except:
             self._unit = 'kW'
             raise Exception('Selected unit is not supported or a correct unit of Power. Using kW instead.')
+
+class MaterialStream:
+    def __init__(self, mass_flow_rate = 0,
+                 Pressure = 1,
+                 Temperature = 25,
+                 tag = None):
+                 self.tag = tag
+                 self.mass_flow_rate = mass_flow_rate
+                 self.Pressure = Pressure
+                 self.Temperature = Temperature
