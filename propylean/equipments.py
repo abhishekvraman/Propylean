@@ -1,5 +1,6 @@
 import pandas as pd
 import propylean.streams as strm
+import propylean.properties as prop
 from thermo.chemical import Chemical
 from fluids import control_valve as cv_calculations
 import fluids.compressible as compressible_fluid 
@@ -17,8 +18,8 @@ class _EquipmentOneInletOutlet:
         self.design_flowrate = 0 if 'design_flowrate' not in inputs else inputs['design_flowrate']
 
         #Pressure properties
-        self._inlet_pressure = None if 'inlet_pressure' not in inputs else inputs['inlet_pressure']
-        self._outlet_pressure = None if 'outlet_pressure' not in inputs else inputs['outlet_pressure']
+        self._inlet_pressure = prop.Pressure(1) if 'inlet_pressure' not in inputs else prop.Pressure(inputs['inlet_pressure'])
+        self._outlet_pressure = prop.Pressure(1) if 'outlet_pressure' not in inputs else prop.Pressure(inputs['outlet_pressure'])
         if 'pressure_drop' in inputs:
             self.pressure_drop = inputs['pressure_drop']
         self.design_pressure = None if 'design_pressure' not in inputs else inputs['design_pressure']
@@ -34,28 +35,28 @@ class _EquipmentOneInletOutlet:
         return self._inlet_pressure
     @inlet_pressure.setter
     def inlet_pressure(self,value):
-        self._inlet_pressure = value
-        self._outlet_pressure = self._inlet_pressure - self.pressure_drop
+        self._inlet_pressure.value = value
+        self._outlet_pressure.value = self._inlet_pressure.value - self.pressure_drop
     @property
     def outlet_pressure(self):
         return self._outlet_pressure
     @outlet_pressure.setter
     def outlet_pressure(self,value):
-        self._outlet_pressure = value
-        self._inlet_pressure = self._outlet_pressure + self.pressure_drop
+        self._outlet_pressure.value = value
+        self._inlet_pressure.value = self._outlet_pressure.value + self.pressure_drop
     @property
     def pressure_drop(self):
-        if (self.inlet_pressure == None or
-            self.outlet_pressure == None or
-            self.inlet_mass_flowrate == 0):
+        if (self._inlet_pressure.value == None or
+            self._outlet_pressure.value == None or
+            self._inlet_mass_flowrate == 0):
             return 0            
-        return self.inlet_pressure - self.outlet_pressure
+        return self._inlet_pressure.value - self._outlet_pressure.value
     @pressure_drop.setter
     def pressure_drop(self,value):
-        if self.inlet_pressure != None:
-            self._outlet_pressure = self.inlet_pressure - value
-        elif self.outlet_pressure != None:
-            self._inlet_pressure = self.outlet_pressure + value
+        if self._inlet_pressure.value != None:
+            self._outlet_pressure.value = self._inlet_pressure.value - value
+        elif self._outlet_pressure.value != None:
+            self._inlet_pressure.value = self._outlet_pressure.value + value
         else:
             raise Exception("Error! Assign inlet value or outlet outlet before assigning differential")
     
@@ -93,7 +94,7 @@ class _EquipmentOneInletOutlet:
 #Defining generic base class for all equipments with multiple inlet and outlet. TO BE UPDATED!!!!!!       
 class _EquipmentMultipleInletOutlet:
     def __init__(self) -> None:
-        self.inlet_pressure = list()
+        self._inlet_pressure.value = list()
 
 #Defining generic class for all types of pressure changers like Pumps, Compressors and Expanders
 class _PressureChangers(_EquipmentOneInletOutlet):
@@ -111,7 +112,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         
         super().__init__(**inputs)
         if 'suction_pressure' in inputs:
-            self.inlet_pressure = inputs['suction_pressure']
+            self._inlet_pressure.value = inputs['suction_pressure']
             if ('differential_pressure' in inputs and 'performance_curve' in inputs or
                 'differential_pressure' in inputs and 'discharge_pressure' in inputs or
                 'performance_curve' in inputs and 'discharge_pressure' in inputs):
@@ -121,7 +122,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
             if (self.suction_pressure != None and 
                 'differential_pressure' in inputs):
                 raise Exception("Please enter ethier one of discharge_pressure or differential_pressure")
-            self.outlet_pressure = inputs['discharge_pressure']
+            self._outlet_pressure = inputs['discharge_pressure']
         
         if 'differential_pressure' in inputs:
             if ((self.suction_pressure != None or self.discharge_pressure != None) and
@@ -137,32 +138,30 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         
     @_EquipmentOneInletOutlet.inlet_pressure.getter
     def inlet_pressure(self):
-        print('child getter')
-        return self._inlet_pressure
+        return str(self._inlet_pressure.value)
     @_EquipmentOneInletOutlet.inlet_pressure.setter
     def inlet_pressure(self,value):
-        self._inlet_pressure = value
+        self._inlet_pressure.value = value
         if self._differential_pressure!=None:
-            self._outlet_pressure = self._inlet_pressure + self._differential_pressure
+            self._outlet_pressure.value = self._inlet_pressure.value + self._differential_pressure
     @property
     def suction_pressure(self):
-        return self.inlet_pressure
+        return self._inlet_pressure
     @suction_pressure.setter
     def suction_pressure(self, value):
         self.inlet_pressure = value
 
     @_EquipmentOneInletOutlet.outlet_pressure.getter
     def outlet_pressure(self):
-        print('child getter')
         return self._outlet_pressure
     @_EquipmentOneInletOutlet.outlet_pressure.setter
     def outlet_pressure(self,value):
-        self._outlet_pressure = value
+        self._outlet_pressure.value = value
         if self._differential_pressure!=None:
-            self._inlet_pressure = self._outlet_pressure - self._differential_pressure
+            self._inlet_pressure.value = self._outlet_pressure.value - self._differential_pressure
     @property
     def discharge_pressure(self):
-        return self.outlet_pressure
+        return self._outlet_pressure
     @discharge_pressure.setter
     def discharge_pressure(self, value):
         self.outlet_pressure = value
@@ -180,10 +179,10 @@ class _PressureChangers(_EquipmentOneInletOutlet):
     @differential_pressure.setter
     def differential_pressure(self, value):
         self._differential_pressure = value
-        if self.inlet_pressure != None:
-            self._outlet_pressure = self._inlet_pressure + value
-        elif self.outlet_pressure != None:
-            self._inlet_pressure = self._outlet_pressure - value
+        if self._inlet_pressure.value != None:
+            self._outlet_pressure.value = self._inlet_pressure.value + value
+        elif self._outlet_pressure.value != None:
+            self._inlet_pressure.value = self._outlet_pressure.value - value
 
     @property
     def performance_curve(self):
@@ -281,7 +280,7 @@ class CentrifugalCompressor(_PressureChangers):
         super().__init__(**inputs)
         self.methane = Chemical('methane',
                          T = self.inlet_temperature,
-                         P = self.inlet_pressure)
+                         P = self._inlet_pressure.value)
         if 'adiabatic_efficiency' not in inputs and 'polytropic_efficiency' in inputs:
             self.polytropic_efficiency = inputs['polytropic_efficiency']
         else:
@@ -299,23 +298,23 @@ class CentrifugalCompressor(_PressureChangers):
     
     @property
     def polytropic_efficiency(self):
-        return compressible_fluid.isentropic_efficiency(P1 = self.inlet_pressure,
-                                                        P2 = self.outlet_pressure,
+        return compressible_fluid.isentropic_efficiency(P1 = self._inlet_pressure.value,
+                                                        P2 = self._outlet_pressure.value,
                                                         k = self.methane.isentropic_exponent,
                                                         eta_s = self.adiabatic_efficiency)
     @polytropic_efficiency.setter
     def polytropic_efficiency(self, value):
-        self.adiabatic_efficiency = compressible_fluid.isentropic_efficiency(P1 = self.inlet_pressure,
-                                                                                 P2 = self.outlet_pressure,
-                                                                                 k = self.methane.isentropic_exponent,
-                                                                                 eta_p = value)
+        self.adiabatic_efficiency = compressible_fluid.isentropic_efficiency(P1 = self._inlet_pressure.value,
+                                                                             P2 = self._outlet_pressure.value,
+                                                                             k = self.methane.isentropic_exponent,
+                                                                             eta_p = value)
     @property
     def power(self):
         work = compressible_fluid.isentropic_work_compression(T1 = self.inlet_temperature,
                                                               k = self.methane.isentropic_exponent,
                                                               Z = self.methane.Z,
-                                                              P1 = self.suction_pressure,
-                                                              P2 = self.discharge_pressure,
+                                                              P1 = self._inlet_pressure.value,
+                                                              P2 = self._outlet_pressure.value,
                                                               eta = self.adiabatic_efficiency)
         return work * self.inlet_mass_flowrate / self.methane.MW
     @classmethod
@@ -388,8 +387,8 @@ class PipeSegment(_EquipmentOneInletOutlet):
         PipeSegment.items.append(self)
     @property
     def pressure_drop(self):
-        if (self.inlet_pressure == None or
-            self.outlet_pressure == None or
+        if (self._inlet_pressure.value == None or
+            self._outlet_pressure.value == None or
             self.inlet_mass_flowrate == 0):
             return 0
         roughness = (4.57e-5, 4.5e-5, 0.000259, 1.5e-5, 1.5e-6) #in meters
@@ -426,10 +425,10 @@ class ControlValve(_EquipmentOneInletOutlet):
         # UPDATE BELOW BASED ON STREAMS
         water = Chemical('water',
                          T = self.inlet_temperature,
-                         P = self.inlet_pressure)
+                         P = self._inlet_pressure.value)
         if water.phase == 'l':
             return cv_calculations.size_control_valve_l(water.rhol, water.Psat, water.Pc, water.mul,
-                                                        self.inlet_pressure, self.outlet_pressure, 
+                                                        self._inlet_pressure.value, self._outlet_pressure.value, 
                                                         self.inlet_mass_flowrate/water.rhol)
         elif water.phase == 'g':
             return cv_calculations.size_control_valve_g(T = self.inlet_temperature, 
@@ -437,8 +436,8 @@ class ControlValve(_EquipmentOneInletOutlet):
                                                         mu= 1.48712E-05,#water.mug,
                                                         gamma = water.isentropic_exponent, 
                                                         Z = water.Zg,
-                                                        P1 = self.inlet_pressure, 
-                                                        P2 = self.outlet_pressure, 
+                                                        P1 = self._inlet_pressure.value, 
+                                                        P2 = self._outlet_pressure.value, 
                                                         Q = self.inlet_mass_flowrate/Chemical('water',T=273.15,P=101325).rhog)
         else:
             raise Exception('Possibility of fluid solification at control valve')
