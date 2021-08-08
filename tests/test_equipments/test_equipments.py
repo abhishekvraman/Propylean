@@ -1,5 +1,6 @@
 import pytest
 import pandas as pd
+from propylean import properties
 
 from propylean import equipments
 
@@ -8,17 +9,18 @@ def test_CentrifugalPump_instantiation():
     cp = equipments.CentrifugalPump(inlet_pressure=50, 
                                      design_pressure = 50,
                                      pressure_drop=-60)
-    assert cp.suction_pressure == 50
-    assert cp.outlet_pressure == 110
-    assert cp.discharge_pressure == 110
+    assert cp.suction_pressure.value == 50
+    assert cp.outlet_pressure.value == 110
+    assert cp.discharge_pressure.value == 110
+    assert cp.discharge_pressure.unit == 'Pa'
     cp.discharge_pressure = 90
-    assert cp.outlet_pressure == 90
+    assert cp.outlet_pressure.value == 90
     cp.inlet_mass_flowrate = 10
     assert cp.pressure_drop == -60
     assert cp.differential_pressure == 60
-    assert cp.inlet_pressure == 30
+    assert cp.inlet_pressure.value == 30
     cp.differential_pressure = 50
-    assert cp.discharge_pressure == 80
+    assert cp.discharge_pressure.value == 80
     
     with pytest.raises(Exception):
         cp.efficiency = -1
@@ -45,20 +47,20 @@ def test_CentrifugalPump_instantiation():
 def test_CentrifugalPump_wrong_instantiation():
     with pytest.raises(Exception):
         cp = equipments.CentrifugalPump(suction_pressure = 30,
-                                         discharge_pressure = 40,
-                                         differential_pressure = 10)
+                                        discharge_pressure = 40,
+                                        differential_pressure = 10)
     with pytest.raises(Exception):
         cp = equipments.CentrifugalPump(suction_pressure = 30,
-                                         discharge_pressure = 40,
-                                         performance_curve = pd.DataFrame([{'flow':[2,10,30,67], 'head':[45,20,10,2]}]))
+                                        discharge_pressure = 40,
+                                        performance_curve = pd.DataFrame([{'flow':[2,10,30,67], 'head':[45,20,10,2]}]))
     with pytest.raises(Exception):
         cp = equipments.CentrifugalPump(suction_pressure = 30,
-                                         differential_pressure = 10,
-                                         performance_curve = pd.DataFrame([{'flow':[2,10,30,67], 'head':[45,20,10,2]}]))
+                                        differential_pressure = 10,
+                                        performance_curve = pd.DataFrame([{'flow':[2,10,30,67], 'head':[45,20,10,2]}]))
     with pytest.raises(Exception):
         cp = equipments.CentrifugalPump(discharge_pressure = 40,
-                                         differential_pressure = 10,
-                                         performance_curve = pd.DataFrame([{'flow':[2,10,30,67], 'head':[45,20,10,2]}]))
+                                        differential_pressure = 10,
+                                        performance_curve = pd.DataFrame([{'flow':[2,10,30,67], 'head':[45,20,10,2]}]))
 
 def test_PipeSegment_instantiation():
     p = equipments.PipeSegment(thickness=2, OD=15, length = 10)
@@ -108,11 +110,11 @@ def test_ControlValve_instantiation():
 def test_CentrifugalCompressor_instantiation():
     
     compressor = equipments.CentrifugalCompressor(suction_pressure = 1013250.0, #Pa
-                                                    differential_pressure = 5000000.0, #Pa
-                                                    inlet_temperature = 248.15, #K
-                                                    inlet_mass_flowrate = 0.02778) #kg/s
+                                                  differential_pressure = 5000000.0, #Pa
+                                                  inlet_temperature = 248.15, #K
+                                                  inlet_mass_flowrate = 0.02778) #kg/s
     
-    assert compressor.discharge_pressure == 1013250.0 + 5000000.0
+    assert compressor.discharge_pressure.value == 1013250.0 + 5000000.0
     
     assert abs(compressor.power - 10.58) < 0.5 # kW
 
