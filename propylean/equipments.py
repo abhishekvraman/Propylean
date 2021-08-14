@@ -4,7 +4,7 @@ import propylean.properties as prop
 from thermo.chemical import Chemical
 from fluids import control_valve as cv_calculations
 import fluids.compressible as compressible_fluid 
-from pipe_pressure_loss_calculator import PressureLoss as PL 
+from math import pi
 
 #Defining generic base class for all equipments with one inlet and outlet
 class _EquipmentOneInletOutlet:
@@ -387,14 +387,23 @@ class PipeSegment(_EquipmentOneInletOutlet):
         PipeSegment.items.append(self)
     @property
     def pressure_drop(self):
+        from fluids.friction import friction_factor
+        from fluids.core import Reynolds, K_from_f, dP_from_K
         if (self._inlet_pressure.value == None or
             self._outlet_pressure.value == None or
             self.inlet_mass_flowrate == 0):
             return 0
         roughness = (4.57e-5, 4.5e-5, 0.000259, 1.5e-5, 1.5e-6) #in meters
-        
-        drop = round(PL.PressureLoss_DW(self.length, self.ID, self.inlet_mass_flowrate,
-                                  self.inlet_temperature, 1000*roughness[self.material-1]),3)
+        water = Chemical('water',
+                         T = self.inlet_temperature,
+                         P = self._inlet_pressure.value)
+        Re = Reynolds(V=(self.inlet_mass_flowrate/water.rhol)/(pi* self.ID**2)/4,
+                      D=self.ID, 
+                      rho=water.rhol, 
+                      mu=water.mul)
+        fd = friction_factor(Re, eD=roughness[self.material-1]/self.ID)
+        K = K_from_f(fd=fd, L=self.length, D=self.ID)        
+        drop = round(dP_from_K(K, rho=1000, V=3),3)
         return drop
         
     @property
@@ -433,12 +442,12 @@ class ControlValve(_EquipmentOneInletOutlet):
         elif water.phase == 'g':
             return cv_calculations.size_control_valve_g(T = self.inlet_temperature, 
                                                         MW = water.MW,
-                                                        mu= 1.48712E-05,#water.mug,
+                                                        mu= 1.48712E-05, # water.mug,
                                                         gamma = water.isentropic_exponent, 
                                                         Z = water.Zg,
                                                         P1 = self._inlet_pressure.value, 
                                                         P2 = self._outlet_pressure.value, 
-                                                        Q = self.inlet_mass_flowrate/Chemical('water',T=273.15,P=101325).rhog)
+                                                        Q = self.inlet_mass_flowrate/water.rhog)
         else:
             raise Exception('Possibility of fluid solification at control valve')
 
