@@ -1,11 +1,14 @@
 from thermo.chemical import Chemical
-        
-class EnergyStream:
-    def __init__(self, value= 0, unit= 'kW', tag= None, 
+import propylean.properties as prop  
+class EnergyStream (prop.Power):
+    def __init__(self, value= 0, unit= 'W', tag= None, 
                  to_equipment_tag= None, from_equipment_tag= None):
-        a=2    
-
-        
+                 super().__init__(value= value, unit=unit)
+                 self.tag = tag
+                 self.to_equipment_tag = to_equipment_tag
+                 self.from_equipment_tag = from_equipment_tag
+            
+      
 class MaterialStream:
     def __init__(self, mass_flow_rate = 0,
                  Pressure = 1,
