@@ -133,21 +133,45 @@ class MassFlowRate(_Property):
     def unit(self, unit):
         try:
             conversion_factors = {'g/s': 1000,
-                                'kg/min': 1/60,
-                                'kg/d': 1/(24*60*60),
-                                'kg/h': 1/(60*60),
-                                'lb/s': 1/2.204,
-                                'lb/min': 1/(2.204*60),
-                                'lb/h': 1/(2.204*60*60),
-                                'lb/d': 1/(2.204*60*60*24),
-                                'ton/h': 1000/(60*24),
-                                'ton/d': 1000/(60*60*24),
+                                'kg/min': 1/(1/60),
+                                'kg/d': 1*(24*60*60),
+                                'kg/h': 1*(60*60),
+                                'lb/s': 2.204,
+                                'lb/min': 2.204*60,
+                                'lb/h': 2.204*(60*60),
+                                'lb/d': 2.204*(60*60*24),
+                                'ton/h': 0.001*(60*24),
+                                'ton/d': 0.001*(60*60*24),
                                 'kg/s': 1
                                 }
-            self._value =  conversion_factors[self._unit] * self._value / conversion_factors[unit]
+            self._value =  conversion_factors[unit] * self._value / conversion_factors[self._unit]
             self._unit = unit
         except:
             raise Exception('Selected unit is not supported or a correct unit of Mass Flow Rate.')
+
+class MolarFlowRate(_Property):
+    def __init__(self, value = 1, unit= 'mol/s'):
+        super().__init__(value,unit)
+        self.unit = unit
+    
+    @_Property.unit.setter
+    def unit(self, unit):
+        try:
+            conversion_factors = {'lbmol/h': 7.93664,
+                                'mol/min': 1*60,
+                                'mol/d': 1*(24*60*60),
+                                'mol/h': 1*(60*60),
+                                'lbmol/s': 7.93664*3600,
+                                'lbmol/min': 7.93664*60,
+                                'lbmol/d': 7.93664*24,
+                                'kmol/h': 1/1000*(60*24),
+                                'kmol/d': 1000*(60*60*24),
+                                'mol/s': 1
+                                }
+            self._value =  conversion_factors[unit] * self._value / conversion_factors[self._unit]
+            self._unit = unit
+        except:
+            raise Exception('Selected unit is not supported or a correct unit of Molar Flow Rate.')
 
 class VolumetricFlowRate(_Property):
     def __init__(self, value = 1, unit= 'm^3/s'):
