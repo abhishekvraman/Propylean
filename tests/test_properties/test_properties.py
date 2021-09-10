@@ -71,6 +71,9 @@ def test_Temperature_instantiation_conversion():
 
 def test_MassFlowRate_instantiation_conversion():
     mfr = properties.MassFlowRate(value=10)
+    mfr.unit = 'g/s'
+    assert mfr.value == 10000
+    mfr = properties.MassFlowRate(value=10)
     assert mfr.value == 10
     assert mfr.unit == 'kg/s'
     mfr.unit = 'lb/min'
@@ -86,6 +89,25 @@ def test_MassFlowRate_instantiation_conversion():
     
     with pytest.raises(Exception):
         mfr = properties.MassFlowRate(value=10)
+        mfr.unit = 'lb/mn'
+
+def test_MolarFlowRate_instantiation_conversion():
+    mfr = properties.MolarFlowRate(value=10)
+    assert mfr.value == 10
+    assert mfr.unit == 'mol/s'
+    mfr.unit = 'lbmol/h'
+    assert abs(mfr.value - 79.3664) <= 0.01
+    mfr = properties.MolarFlowRate(value=10, unit='kmol/d') # changed to 10 ton/d
+    assert mfr.unit == 'kmol/d'
+    mfr.value = 100 #changed to 100 kmol/day
+    mfr.unit = 'lbmol/min' # changed unit to see new value
+    assert abs(mfr.value - 9.18593/60) < 0.5
+
+    with pytest.raises(Exception):
+        mfr = properties.MolarFlowRate(value=10, unit='gmol/h')
+    
+    with pytest.raises(Exception):
+        mfr = properties.MolarFlowRate(value=10)
         mfr.unit = 'lb/mn'
 
 def test_Power_instantiation_conversion():
