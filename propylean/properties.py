@@ -41,7 +41,18 @@ class Length(_Property):
             self._value =  conversion_factors[self._unit] * self._value / conversion_factors[unit]
             self._unit = unit
         except:
-            raise Exception('Selected unit is not supported or a correct unit of Length.')
+            self._unit = 'm'
+            raise Exception('''Selected unit is not supported or a correct unit of Length.
+                               Unit set as meter (m). Supported units are:
+                               1. m for meters
+                               2. mm for millimeters
+                               3. km for Kilometers
+                               4. cm for centimeters
+                               5. inch
+                               6. mile
+                               7. yard
+                               8. foot
+                               ''')
 
 class Time(_Property):
     def __init__(self, value = 0, unit= 'sec'):
@@ -63,10 +74,20 @@ class Time(_Property):
             self._value =  conversion_factors[self._unit] * self._value / conversion_factors[unit]
             self._unit = unit
         except:
-            raise Exception('Selected unit is not supported or a correct unit of Time.')
+            self._unit = 's'
+            raise Exception('''Selected unit is not supported or a correct unit of Time.
+                               Unit set as second (s). Supported units are:
+                               1. s for seconds
+                               2. min for minutes
+                               3. hour
+                               4. day
+                               5. week
+                               6. month
+                               7. year
+                               ''')
     
 class Pressure(_Property):
-    def __init__(self, value = 1, unit= 'Pa'):
+    def __init__(self, value = 101325, unit= 'Pa'):
         super().__init__(value,unit)
         self.unit = unit
 
@@ -83,16 +104,31 @@ class Pressure(_Property):
                                 'Torr': 133.3,
                                 'mm Hg': 133.3,
                                 'in water':2490,
-                                'mm water': 9.81,
+                                'm water': 0.00981,
                                 'Pa': 1
                                 }
             self._value =  conversion_factors[self._unit] * self._value / conversion_factors[unit]
             self._unit = unit
         except:
-            raise Exception('Selected unit is not supported or a correct unit of Pressure.')
+            self._unit = 'Pa'
+            raise Exception('''Selected unit is not supported or a correct unit of Length.
+                               Unit set as Pascal (Pa). Supported units are:
+                               1. Pa for Pascals
+                               2. m water for meters of water column
+                               3. in water for inches of water column
+                               4. mm Hg for millimeters of Mercury
+                               5. Torr
+                               6. ata
+                               7. kg/cm^2 for kilogram per square centimeter 
+                               8. MPa for Mega Pascal
+                               9. kPa for Kilo Pascal
+                               10. psi for Pound per square inch
+                               11. bar
+                               12. atm for Atmospheres
+                               ''')
 
 class Temperature(_Property):
-    def __init__(self, value = 1, unit= 'K'):
+    def __init__(self, value = 298, unit= 'K'):
         super().__init__(value,unit)
         self.unit = unit
     
@@ -122,10 +158,16 @@ class Temperature(_Property):
                     if unit == self._unit:
                         break
         else:
-            raise Exception('Selected unit is not supported or a correct unit of Temperature.')
+            self._unit = 'K'
+            raise Exception('''Selected unit is not supported or a correct unit of Temperature.
+                               Unit set as Kelvin (K). Supported units are:
+                               1. K for Kelvin
+                               2. C for Degrees Celsius
+                               3. F for Degree Fahrenheit
+                               4. R for Degree Rankine''')
 
 class MassFlowRate(_Property):
-    def __init__(self, value = 1, unit= 'kg/s'):
+    def __init__(self, value = 0, unit= 'kg/s'):
         super().__init__(value,unit)
         self.unit = unit
     
@@ -147,7 +189,21 @@ class MassFlowRate(_Property):
             self._value =  conversion_factors[unit] * self._value / conversion_factors[self._unit]
             self._unit = unit
         except:
-            raise Exception('Selected unit is not supported or a correct unit of Mass Flow Rate.')
+            self._unit = 'kg/s'
+            raise Exception('''Selected unit is not supported or a correct unit of Mass Flow Rate.
+                               Unit set as kilogram per second (kg/s). Supported units are:
+                               1. kg/s for kilogram per seconds
+                               2. kg/min for kilogram per minutes
+                               3. kg/h for kilogram per hour
+                               4. kg/d for kilogram per day
+                               5. g/s for gram per second
+                               6. lb/s for pound per second
+                               7. lb/min for pound per minutes
+                               8. lb/h for pound per hour
+                               9. lb/d for pound per day
+                               10. ton/d for metric ton per day
+                               11. ton/h for metric ton per hour
+                               ''')
 
 class MolarFlowRate(_Property):
     def __init__(self, value = 1, unit= 'mol/s'):
@@ -171,7 +227,19 @@ class MolarFlowRate(_Property):
             self._value =  conversion_factors[unit] * self._value / conversion_factors[self._unit]
             self._unit = unit
         except:
-            raise Exception('Selected unit is not supported or a correct unit of Molar Flow Rate.')
+            self._unit = 'mol/s'
+            raise Exception('''Selected unit is not supported or a correct unit of Molar Flow Rate.
+                               Unit set as moles per second (mol/s). Supported units are:
+                               1. mol/s for moles per seconds
+                               2. mol/min for moles per minutes
+                               3. mol/h for moles per hour
+                               4. mol/d for moles per day
+                               5. lbmol/s for poundmole per second
+                               6. lbmol/min for poundmole per minute
+                               7. lbmol/d for poundmole per day
+                               8. kmol/h for kilomole per hour
+                               9. kmol/d for kilomole per day
+                               ''')
 
 class VolumetricFlowRate(_Property):
     def __init__(self, value = 1, unit= 'm^3/s'):
@@ -180,22 +248,47 @@ class VolumetricFlowRate(_Property):
     @_Property.unit.setter
     def unit(self, unit):
         try:
-            conversion_factors = {'g/s': 1000,
-                                'kg/min': 1/60,
-                                'kg/d': 1/(24*60*60),
-                                'kg/h': 1/(60*60),
-                                'lb/s': 1/2.204,
-                                'lb/min': 1/(2.204*60),
-                                'lb/h': 1/(2.204*60*60),
-                                'lb/d': 1/(2.204*60*60*24),
-                                'ton/h': 1000/(60*24),
-                                'ton/d': 1000/(60*60*24),
-                                'kg/s': 1
+            conversion_factors = {'ft^3/s': 35.3146,
+                                'cm^3/s': 1000000,
+                                'm^3/min': 60,
+                                'm^3/h': 3600,
+                                'm^3/d': 3600*24,
+                                'ft^3/min': 35.3146*60,
+                                'ft^3/h': 35.3146*60*60,
+                                'ft^3/d': 35.3146*60*60*24,
+                                'gal/s': 264.172,
+                                'gal/min': 264.172*60,
+                                'gal/h': 264.172*60*60,
+                                'gal/d': 264.172*60*60*24,
+                                'lit/s': 1000,
+                                'lit/min': 60000,
+                                'lit/h': 3600000,
+                                'lit/d': 3600000*24,
+                                'm^3/s': 1
                                 }
-            self._value =  conversion_factors[self._unit] * self._value / conversion_factors[unit]
+            self._value =  conversion_factors[unit] * self._value / conversion_factors[self._unit]
             self._unit = unit
         except:
-            raise Exception('Selected unit is not supported or a correct unit of Volume Flow Rate.')
+            self._unit = 'm^3/s'
+            raise Exception('''Selected unit is not supported or a correct unit of Volume Flow Rate.
+                               Unit selected in cubic meter per second (m^3/s). Following are the supported units:
+                               1. m^3/s for cubic meter per second
+                               2. ft^3/s for cubic feet per second
+                               3. cm^3/s for cubic centimeter per second
+                               4. m^3/min for cubic meter per minute
+                               5. m^3/h for cubic meter per hour
+                               6. m^3/d for cubic meter per day,
+                               7. ft^3/min for cubic feet per minute,
+                               8. ft^3/h for cubic feet per hour
+                               9. ft^3/d for cubic feet per day
+                               10. gal/s for US Gallons per second
+                               11. gal/min for US Gallon per minute
+                               12. gal/h for US Gallon per hour
+                               13. gal/d for US Gallin per day
+                               14. lit/s for Liters per second
+                               15. lit/min for Liters per minute
+                               16. lit/h for Liters per hour
+                               17. lit/d  for Liters per day''')
 
 class Power(_Property):
     def __init__(self, value = 0, unit= 'W'):
