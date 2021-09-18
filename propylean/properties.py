@@ -324,4 +324,27 @@ class Power(_Property):
             self._unit = unit
         except:
             self._unit = 'W'
-            raise Exception('Selected unit is not supported or a correct unit of Power. Using W instead.')
+            raise Exception('''Selected unit is not supported or a correct unit of Power. 
+                               Using Watts (W) instead. Following units are supported:
+                               1. W for Watts
+                               2. BTU/h for British Termal Units per hour
+                               3. BTU/min for Brititsh Termal Units per minutes
+                               4. BTU/s for British Termal Units per second
+                               5. cal/h for calories per hour
+                               6. cal/s for calories per second
+                               7. erg/h for ergs per hour
+                               8. erg/min for ergs per minutes
+                               9. erg/s for ergs per second
+                               10. hp for Horse Power
+                               11. MMBTU/h for Million Metric BTU/h
+                               12. MMBTU/min
+                               13. MMBTU/s
+                               14. kW for kilo watts
+                               15. MW for mega watts
+                               16. GW for giga watts
+                               17. TW for tera watts
+                               18. kWh/d for kilo watt hours per day
+                               19. MWh/d for Mega watt hours per day
+                               20. GWh/d for Giga watt hour per day
+                               21. TWh/d for Tera watt hour per day
+                               ''')
