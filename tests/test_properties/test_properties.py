@@ -110,6 +110,24 @@ def test_MolarFlowRate_instantiation_conversion():
         mfr = properties.MolarFlowRate(value=10)
         mfr.unit = 'lb/mn'
 
+def test_VolumeFlowRate_instantiation_conversion():
+    vf = properties.VolumetricFlowRate(10)
+    assert vf.value == 10
+    assert vf.unit == 'm^3/s'
+    vf.unit = 'gal/min'
+    assert abs(vf.value - 158502.972) < 1
+    vf = properties.VolumetricFlowRate(100, 'lit/h')
+    assert vf.unit == 'lit/h'
+    vf.unit = 'ft^3/d'
+    assert abs(vf.value-84.7553) < 0.01
+
+    with pytest.raises(Exception):
+        vf = properties.VolumetricFlowRate(value=10, unit='gmol/h')
+    
+    with pytest.raises(Exception):
+        vf = properties.VolumetricFlowRate(value=10)
+        vf.unit = 'pints per day'
+
 def test_Power_instantiation_conversion():
     power = properties.Power()
     assert power.value == 0
