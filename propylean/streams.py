@@ -7,14 +7,23 @@ class EnergyStream (prop.Power):
                  self.tag = tag
                  self.to_equipment_tag = to_equipment_tag
                  self.from_equipment_tag = from_equipment_tag
-            
+    
+    def __repr__(self) -> str:
+        return 'Energy Stream Tag: ' + self.tag         
       
 class MaterialStream:
     def __init__(self, mass_flow_rate = 0,
-                 Pressure = 1,
-                 Temperature = 25,
-                 tag = None):
+                 pressure = 101325,
+                 temperature = 298,
+                 tag = None,
+                 to_equipment_tag= None, from_equipment_tag= None):
                  self.tag = tag
-                 self.mass_flow_rate = mass_flow_rate
-                 self.Pressure = Pressure
-                 self.Temperature = Temperature
+                 self.mass_flow_rate = prop.MassFlowRate(mass_flow_rate)
+                 self.pressure = prop.Pressure(pressure)
+                 self.temperature = prop.Temperature(temperature)
+                 self.molar_flow_rate = prop.MolarFlowRate()
+                 self.to_equipment_tag = to_equipment_tag
+                 self.from_equipment_tag = from_equipment_tag 
+    
+    def __repr__(self) -> str:
+        return 'Material Stream Tag: ' + self.tag
