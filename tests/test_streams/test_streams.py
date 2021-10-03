@@ -37,4 +37,20 @@ def test_MaterialStream_print(capsys):
     captured = capsys.readouterr()
     assert captured.out == 'Material Stream Tag: Input Stream 1\n'
     
+def test_listing_of_streams():
+    energy_stream_1 = streams.EnergyStream(tag='ES1')
+    energy_stream_2 = streams.EnergyStream(tag='ES2')
+    energy_stream_3 = streams.EnergyStream(tag='ES3')
     
+    material_streams = []
+    for i in range(1,6):
+        material_streams.append(streams.MaterialStream(tag='MS_'+str(i)))
+    
+    assert energy_stream_2.tag=='ES2'
+
+    assert len(streams.EnergyStream.list_objects())!=0
+    for es in streams.EnergyStream.list_objects():
+        assert es.tag in [None, 'ES1', 'ES2', 'ES3', 'Heat input']
+  
+    for ms in streams.MaterialStream.list_objects():
+        assert ms.tag in [None, 'MS_1', 'MS_2', 'MS_3', 'MS_4', 'MS_5', 'Input Stream 1']
