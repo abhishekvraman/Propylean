@@ -1,10 +1,10 @@
 import pandas as pd
-import propylean.streams as strm
 import propylean.properties as prop
 from thermo.chemical import Chemical
 from fluids import control_valve as cv_calculations
 import fluids.compressible as compressible_fluid 
 from math import pi
+from propylean import streams
 
 #Defining generic base class for all equipments with one inlet and outlet
 class _EquipmentOneInletOutlet:
@@ -29,6 +29,10 @@ class _EquipmentOneInletOutlet:
         self.outlet_temperature = None if 'outlet_temperature' not in inputs else inputs['outlet_temperature']
         self.design_temperature = None if 'design_temperature' not in inputs else inputs['design_temperature']
 
+        #Inlet and outlet material streams
+        self._inlet_stream_index = None if 'inlet_stream_index' not in inputs else streams.get_stream_index('m', inputs['inlet_stream_index'])
+        
+        self._outlet_stream_index = None if 'outlet_stream_index' not in inputs else streams.get_stream_index('m',inputs['outlet_stream_index'])
         
     @property
     def inlet_pressure(self):
@@ -479,26 +483,107 @@ class FlowMeter(_EquipmentOneInletOutlet):
 class VerticalSeparator(_Vessels):
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
+        VerticalSeparator.items.append(self)
+    @classmethod
+    def list_objects(cls):
+        return cls.items
 
 class HorizontalSeparator(_Vessels):
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
+        HorizontalSeparator.items.append(self)
+    @classmethod
+    def list_objects(cls):
+        return cls.items
 
 class Column(_Vessels):
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
+        Column.items.append(self)
+    @classmethod
+    def list_objects(cls):
+        return cls.items
 
 class Tank(_Vessels):
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
+        Tank.items.append(self)
+    @classmethod
+    def list_objects(cls):
+        return cls.items
 # End of final classes of vessels
 
 # Start of final classes of heat exchangers
 class ShellnTubeExchanger(_Exchanger):
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
+        ShellnTubeExchanger.items.append(self)
+    @classmethod
+    def list_objects(cls):
+        return cls.items
 
 class AirCoolers(_Exchanger):
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
+        AirCoolers.items.append(self)
+    @classmethod
+    def list_objects(cls):
+        return cls.items
 # End of final classes of heat exchangers      
+
+#Get equipment index function
+def get_equipment_index(equipment_type, tag):
+    if equipment_type in ['Centrifugal Pump', 'centrifugal pump', 'centrifugal pumps', 'Centrifugal Pumps']:
+        equipment_list = CentrifugalPump.list_objects()
+    elif equipment_type in ['Positive Displacement Pump', 'PD pumps', 'resiprocating pumps', 
+                            'positive displacement pump']:
+        equipment_list = PositiveDisplacementPump.list_objects()
+    elif equipment_type in ['Centrifugal Compressor', 'centrifugal compressor', 'centrifugal compressors',
+                            'Centrifugal COmpressors']:
+        equipment_list = CentrifugalCompressor.list_objects()
+    elif equipment_type in ['Expander', 'expander','expanders','Expanders']:
+        equipment_list = Expander.list_objects()
+    elif equipment_type in ['Pipe Segment', 'pipe segment', 'piping', 'pipe','Pipe','pipes','Pipes']:
+        equipment_list = PipeSegment.list_objects()
+    elif equipment_type in ['Control Value', 'cv', 'control valve', 'CV', 'control valves', 'Control Valves']:
+        equipment_list = ControlValve.list_objects()
+    elif equipment_type in ['Pressure Safety Valve', 'PSV', 'psv', 'safety valves', 'PSVs']:
+        equipment_list =  PressureSafetyValve.list_objects()
+    elif equipment_type in ['Flow Meter', 'flow meter', 'Flow Meters', 'flow meters']:
+        equipment_list = FlowMeter.list_objects()
+    elif equipment_type in ['Vertical Separator']:
+        equipment_list = VerticalSeparator.list_objects()
+    elif equipment_type in ['Horizontal Separator']:
+        equipment_list = HorizontalSeparator.list_objects()
+    elif equipment_type in ['Column', 'column', 'columns', 'Columns']:
+        equipment_list = Column.list_objects()
+    elif equipment_type in ['Tank', 'tank', 'Tanks', 'tanks']:
+        equipment_list = Tank.list_objects()
+    elif equipment_type in ['Shell and Tube Heat exchanger', 'S&T HE', 'S&T Heat Exchanger'] :
+        equipment_list = ShellnTubeExchanger.list_objects()
+    elif equipment_type in ['Air Cooler', 'Air Coolers', 'air coolers']:
+        equipment_list = AirCoolers.list_objects()
+    
+    elif equipment_type in ['Pump', 'pump', 'Pumps', 'pumps']:
+        equipment_list = CentrifugalPump.list_objects() + PositiveDisplacementPump.list_objects()
+
+    elif equipment_type in ['vessel', 'vessels', 'Vessels', 'Vessel']:
+        equipment_list = (VerticalSeparator.list_objects() 
+                        + HorizontalSeparator.list_objects() 
+                        + Column.list_objects()
+                        + Tank.list_objects())
+    
+    elif equipment_type in ['exchangers', 'Exchanger', 'heat exchanger', 'Heat Exchanger',
+                            'Heat Exchangers', 'heat exchangers']:
+        equipment_list = ShellnTubeExchanger.list_objects() + AirCoolers.list_objects()
+
+
+    list_of_none_tag_equipments =[]
+    for index, equipment in enumerate(equipment_list):
+        
+        if equipment.tag == None and tag==None:
+            list_of_none_tag_equipments.append(index)           
+        elif equipment.tag == tag:
+            return index
+
+    return list_of_none_tag_equipments
