@@ -6,11 +6,19 @@ class EnergyStream (prop.Power):
                  to_equipment_tag= None, from_equipment_tag= None):
                  super().__init__(value= value, unit=unit)
                  self.tag = tag
-                 self.to_equipment_tag = to_equipment_tag
-                 self.from_equipment_tag = from_equipment_tag
+                 self.assign_equipment('to', to_equipment_tag)
+                 self.assign_equipment('from', from_equipment_tag)
 
                  EnergyStream.items.append(self)
-    
+    def assign_equipment(self, to_or_from, equipment_index): 
+        inlet_outlet = None
+        if to_or_from in ['to','To','TO']:
+            inlet_outlet = 'inlet'
+            self.to_equipment_index = equipment_index if equipment_index != None else None
+        elif to_or_from in ['from','From','FROM']:
+            inlet_outlet = 'outlet'
+            self.from_equipment_index = equipment_index if equipment_index != None else None
+
     def __repr__(self) -> str:
         return 'Energy Stream Tag: ' + self.tag  
 
@@ -43,3 +51,25 @@ class MaterialStream:
 
     def __repr__(self) -> str:
         return 'Material Stream Tag: ' + self.tag
+
+#Get stream index function
+def get_stream_index(stream_type, tag):
+    if stream_type in ['energy', 'Energy', 'Power','e','E']:
+        stream_list = EnergyStream.list_objects()
+    elif stream_type in ['material', 'Material', 'mass', 'Mass','m','M']:
+        stream_list = MaterialStream.list_objects()
+    else:
+        raise Exception('Stream type does not exist! Please ensure stream types are either Energy or Material')
+    list_of_none_tag_streams =[]
+
+    for index, stream in enumerate(stream_list):
+        if stream.tag == None and tag==None:
+            list_of_none_tag_streams.append(index)           
+        elif stream.tag == tag:
+            return index
+        
+    if tag != None:
+        raise Exception("Stream tag not found!!")
+
+    return list_of_none_tag_streams
+
