@@ -1,7 +1,5 @@
 import pytest
 import pandas as pd
-from propylean import properties
-
 from propylean import equipments
 
 
@@ -141,8 +139,14 @@ def test_listing_of_equipments():
     
     assert first_pump.tag == '1'
     for pump in equipments.CentrifugalPump.list_objects():
-        print(pump.tag)
         assert pump.tag in [None, '1', '2', '3']
   
     for valve in equipments.ControlValve.list_objects():
         assert valve.tag in [None, '1', '2','3', '4', '5']
+
+def test_indexing_of_equipments():
+    assert equipments.get_equipment_index('centrifugal pump','1') == 1
+    control_valve = equipments.ControlValve()
+    assert len(equipments.get_equipment_index('control valves',tag= None)) == 3
+    with pytest.raises(Exception):
+        equipments.get_equipment_index('Trucks', tag=None)
