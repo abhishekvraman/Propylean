@@ -11,7 +11,7 @@ def test_EnergyStream_instantiation():
     assert energy.value == 10
     assert energy.unit == 'MW'
     with pytest.raises(Exception):
-        en = streams.EnergyStream(10, 'Barrels of oil per day')
+        en = streams.EnergyStream(10, 'Barrels of oil equivalent per day')
     energy = streams.EnergyStream(10, 'MW')
     energy.unit = 'W'
     assert energy.value == 10000000
@@ -43,7 +43,7 @@ def test_listing_of_streams():
     energy_stream_3 = streams.EnergyStream(tag='ES3')
     
     material_streams = []
-    for i in range(1,6):
+    for i in range(1,7):
         material_streams.append(streams.MaterialStream(tag='MS_'+str(i)))
     
     assert energy_stream_2.tag=='ES2'
@@ -53,4 +53,23 @@ def test_listing_of_streams():
         assert es.tag in [None, 'ES1', 'ES2', 'ES3', 'Heat input']
   
     for ms in streams.MaterialStream.list_objects():
-        assert ms.tag in [None, 'MS_1', 'MS_2', 'MS_3', 'MS_4', 'MS_5', 'Input Stream 1']
+        assert ms.tag in [None, 'MS_1', 'MS_2', 'MS_3', 'MS_4', 'MS_5', 'MS_6', 'Input Stream 1']
+
+def test_indexing_of_streams():
+    energy_stream_4 = streams.EnergyStream(tag='ES4')
+    assert streams.get_stream_index(stream_type='energy',tag='ES4') == 7
+    assert len(streams.get_stream_index(stream_type='energy', tag=None)) == 3
+
+    materia_stream_1 = streams.MaterialStream(mass_flow_rate=10,tag='Pump Inlet')
+    material_streams = []
+    for i in range(1,11):
+        material_streams.append(streams.MaterialStream())
+
+    assert streams.get_stream_index(stream_type='material',tag='Pump Inlet') == 8
+    assert len(streams.get_stream_index(stream_type='material', tag=None)) == 11
+
+    with pytest.raises(Exception):
+        streams.get_stream_index(stream_type='gas', tag=None)
+
+    with pytest.raises(Exception):
+        streams.get_stream_index('material', 'Pump Outlet')
