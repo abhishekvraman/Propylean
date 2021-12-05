@@ -61,15 +61,20 @@ def test_indexing_of_streams():
     assert len(streams.get_stream_index(stream_type='energy', tag=None)) == 3
 
     materia_stream_1 = streams.MaterialStream(mass_flow_rate=10,tag='Pump Inlet')
+    
+
+    assert streams.get_stream_index(stream_type='material',tag='Pump Inlet') == 8
+
+    materia_stream_3 = streams.MaterialStream(mass_flow_rate=10,tag='ES4')
+    assert streams.get_stream_index('ES4')==[(7,'Energy Stream'),(9,'Material Stream')]
+    
     material_streams = []
     for i in range(1,11):
         material_streams.append(streams.MaterialStream())
-
-    assert streams.get_stream_index(stream_type='material',tag='Pump Inlet') == 8
     assert len(streams.get_stream_index(stream_type='material', tag=None)) == 11
+    
+    with pytest.raises(Exception):
+        i = streams.get_stream_index(stream_type='gas', tag=None)
 
     with pytest.raises(Exception):
-        streams.get_stream_index(stream_type='gas', tag=None)
-
-    with pytest.raises(Exception):
-        streams.get_stream_index('material', 'Pump Outlet')
+        i = streams.get_stream_index('Pump Outlet', 'material')
