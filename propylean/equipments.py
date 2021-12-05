@@ -251,7 +251,18 @@ class CentrifugalPump(_PressureChangers):
         self.NPSHa = None if 'NPSHa' not in inputs else inputs['NPSHa']
         self.inlet_energy_tag = None if 'inlet_energy_tag' not in inputs else inputs['inlet_energy_tag']
         CentrifugalPump.items.append(self)
-                
+    
+    def __eq__(self, other):
+        if isinstance(other, CentrifugalPump):
+            return self.tag == other.tag
+        else:
+            return False
+    
+    def __repr__(self):
+        return "Centrifugal Pump with tag: " + self.tag
+    def __hash__(self):
+        return hash(self.__repr__())
+
     @property
     def head(self):
         fluid_density = 1000 # THIS NEEDS TO BE UPDATED WITH STREAM PROPERTY
@@ -272,6 +283,18 @@ class PositiveDisplacementPump(_PressureChangers):
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
         PositiveDisplacementPump.items.append(self)
+    
+    def __eq__(self, other):
+        if isinstance(other, PositiveDisplacementPump):
+            return self.tag == other.tag
+        else:
+            return False
+    
+    def __repr__(self):
+        return "Positive Displacement Pump with tag: " + self.tag
+    def __hash__(self):
+        return hash(self.__repr__())
+    
     @classmethod
     def list_objects(cls):
         return cls.items
@@ -291,6 +314,18 @@ class CentrifugalCompressor(_PressureChangers):
             self.adiabatic_efficiency = 0.7 if 'adiabatic_efficiency' not in inputs else inputs['adiabatic_efficiency']
         self.inlet_energy_tag = None if 'inlet_energy_tag' not in inputs else inputs['inlet_energy_tag']
         CentrifugalCompressor.items.append(self)
+    
+    def __eq__(self, other):
+        if isinstance(other, CentrifugalCompressor):
+            return self.tag == other.tag
+        else:
+            return False
+    
+    def __repr__(self):
+        return "Positive Displacement Pump with tag: " + self.tag
+    def __hash__(self):
+        return hash(self.__repr__())
+
     @property
     def adiabatic_efficiency(self):
         return self._adiabatic_efficiency
@@ -331,6 +366,18 @@ class Expander(_PressureChangers):
         self.outlet_energy_tag = None if 'outlet_energy_tag' not in inputs else inputs['outlet_energy_tag']
         super().__init__(**inputs)
         Expander.items.append(self)
+        
+    def __eq__(self, other):
+        if isinstance(other, Expander):
+            return self.tag == other.tag
+        else:
+            return False
+    
+    def __repr__(self):
+        return "Expander with tag: " + self.tag
+    def __hash__(self):
+        return hash(self.__repr__())
+    
     @classmethod
     def list_objects(cls):
         return cls.items
@@ -389,6 +436,18 @@ class PipeSegment(_EquipmentOneInletOutlet):
         else:
             raise Exception('Define atleast ID or OD with thickness to define a pipe segment object') 
         PipeSegment.items.append(self)
+        
+    def __eq__(self, other):
+        if isinstance(other, PipeSegment):
+            return self.tag == other.tag
+        else:
+            return False
+    
+    def __repr__(self):
+        return "Pipe Segment with tag: " + self.tag   #ADD SEGMENT TYPE!!
+    def __hash__(self):
+        return hash(self.__repr__())
+
     @property
     def pressure_drop(self):
         from fluids.friction import friction_factor
@@ -433,6 +492,18 @@ class ControlValve(_EquipmentOneInletOutlet):
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
         ControlValve.items.append(self)
+    
+    def __eq__(self, other):
+        if isinstance(other, ControlValve):
+            return self.tag == other.tag
+        else:
+            return False
+    
+    def __repr__(self):
+        return "Control Valve with tag: " + self.tag   
+    def __hash__(self):
+        return hash(self.__repr__())
+
     @property
     def Kv(self):
         # UPDATE BELOW BASED ON STREAMS
@@ -465,6 +536,19 @@ class PressureSafetyValve(_EquipmentOneInletOutlet):
         
         PressureSafetyValve.items.append(self)
         super().__init__(**inputs)
+    
+    def __eq__(self, other):
+        if isinstance(other, PressureSafetyValve):
+            return self.tag == other.tag
+        else:
+            return False
+
+    
+    def __repr__(self):
+        return "Pressure Safety Valve with tag: " + self.tag   
+    def __hash__(self):
+        return hash(self.__repr__())
+
     @classmethod
     def list_objects(cls):
         return cls.items
@@ -474,6 +558,18 @@ class FlowMeter(_EquipmentOneInletOutlet):
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
         FlowMeter.items.append(self)
+    
+    def __eq__(self, other):
+        if isinstance(other, FlowMeter):
+            return self.tag == other.tag
+        else:
+            return False
+    
+    def __repr__(self):
+        return "Flow Meter with tag: " + self.tag   
+    def __hash__(self):
+        return hash(self.__repr__())
+
     @classmethod
     def list_objects(cls):
         return cls.items
@@ -481,33 +577,85 @@ class FlowMeter(_EquipmentOneInletOutlet):
 
 # Start of final classes of vessels
 class VerticalSeparator(_Vessels):
+    items = []
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
         VerticalSeparator.items.append(self)
+    
+    def __eq__(self, other):
+        if isinstance(other, VerticalSeparator):
+            return self.tag == other.tag
+        else:
+            return False
+    
+    def __repr__(self):
+        return "Vertical Separator with tag: " + self.tag   
+    def __hash__(self):
+        return hash(self.__repr__())
+
     @classmethod
     def list_objects(cls):
         return cls.items
 
 class HorizontalSeparator(_Vessels):
+    items = []
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
         HorizontalSeparator.items.append(self)
+    
+    def __eq__(self, other):
+        if isinstance(other, HorizontalSeparator):
+            return self.tag == other.tag
+        else:
+            return False
+    
+    def __repr__(self):
+        return "Horizontal Separator with tag: " + self.tag   
+    def __hash__(self):
+        return hash(self.__repr__())
+
     @classmethod
     def list_objects(cls):
         return cls.items
 
 class Column(_Vessels):
+    items = []
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
         Column.items.append(self)
+    
+    def __eq__(self, other):
+        if isinstance(other, Column):
+            return self.tag == other.tag
+        else:
+            return False
+    
+    def __repr__(self):
+        return "Column with tag: " + self.tag   
+    def __hash__(self):
+        return hash(self.__repr__())
+    
     @classmethod
     def list_objects(cls):
         return cls.items
 
 class Tank(_Vessels):
+    items = []
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
         Tank.items.append(self)
+    
+    def __eq__(self, other):
+        if isinstance(other, Tank):
+            return self.tag == other.tag
+        else:
+            return False
+    
+    def __repr__(self):
+        return "Tank with tag: " + self.tag   
+    def __hash__(self):
+        return hash(self.__repr__())
+    
     @classmethod
     def list_objects(cls):
         return cls.items
@@ -515,72 +663,138 @@ class Tank(_Vessels):
 
 # Start of final classes of heat exchangers
 class ShellnTubeExchanger(_Exchanger):
+    items = []
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
         ShellnTubeExchanger.items.append(self)
+    
+    def __eq__(self, other):
+        if isinstance(other, ShellnTubeExchanger):
+            return self.tag == other.tag
+        else:
+            return False
+    
+    def __repr__(self):
+        return "Shell & Tube Exchanger with tag: " + self.tag   
+    def __hash__(self):
+        return hash(self.__repr__())
+    
     @classmethod
     def list_objects(cls):
         return cls.items
 
 class AirCoolers(_Exchanger):
+    items = []
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
         AirCoolers.items.append(self)
+    
+    def __eq__(self, other):
+        if isinstance(other, AirCoolers):
+            return self.tag == other.tag
+        else:
+            return False
+    
+    def __repr__(self):
+        return "Air Coolers with tag: " + self.tag   
+    def __hash__(self):
+        return hash(self.__repr__())
+    
     @classmethod
     def list_objects(cls):
         return cls.items
 # End of final classes of heat exchangers      
 
 #Get equipment index function
-def get_equipment_index(equipment_type, tag):
-    if equipment_type in ['Centrifugal Pump', 'centrifugal pump', 'centrifugal pumps', 'Centrifugal Pumps']:
-        equipment_list = CentrifugalPump.list_objects()
-    elif equipment_type in ['Positive Displacement Pump', 'PD pumps', 'resiprocating pumps', 
-                            'positive displacement pump']:
-        equipment_list = PositiveDisplacementPump.list_objects()
-    elif equipment_type in ['Centrifugal Compressor', 'centrifugal compressor', 'centrifugal compressors',
-                            'Centrifugal COmpressors']:
-        equipment_list = CentrifugalCompressor.list_objects()
-    elif equipment_type in ['Expander', 'expander','expanders','Expanders']:
-        equipment_list = Expander.list_objects()
-    elif equipment_type in ['Pipe Segment', 'pipe segment', 'piping', 'pipe','Pipe','pipes','Pipes']:
-        equipment_list = PipeSegment.list_objects()
-    elif equipment_type in ['Control Value', 'cv', 'control valve', 'CV', 'control valves', 'Control Valves']:
-        equipment_list = ControlValve.list_objects()
-    elif equipment_type in ['Pressure Safety Valve', 'PSV', 'psv', 'safety valves', 'PSVs']:
-        equipment_list =  PressureSafetyValve.list_objects()
-    elif equipment_type in ['Flow Meter', 'flow meter', 'Flow Meters', 'flow meters']:
-        equipment_list = FlowMeter.list_objects()
-    elif equipment_type in ['Vertical Separator']:
-        equipment_list = VerticalSeparator.list_objects()
-    elif equipment_type in ['Horizontal Separator']:
-        equipment_list = HorizontalSeparator.list_objects()
-    elif equipment_type in ['Column', 'column', 'columns', 'Columns']:
-        equipment_list = Column.list_objects()
-    elif equipment_type in ['Tank', 'tank', 'Tanks', 'tanks']:
-        equipment_list = Tank.list_objects()
-    elif equipment_type in ['Shell and Tube Heat exchanger', 'S&T HE', 'S&T Heat Exchanger'] :
-        equipment_list = ShellnTubeExchanger.list_objects()
-    elif equipment_type in ['Air Cooler', 'Air Coolers', 'air coolers']:
-        equipment_list = AirCoolers.list_objects()
+def get_equipment_index(tag, equipment_type=None):
     
+    #If equipment_type is known to the user
+    if equipment_type in ['Centrifugal Pump', 'centrifugal pump', 'centrifugal pumps', 'Centrifugal Pumps']:
+        return _get_equipment_index_from_quipment_list(tag, CentrifugalPump.list_objects())
+    elif equipment_type in ['Positive Displacement Pump', 'PD pumps', 'resiprocating pumps', 'positive displacement pump']:
+        return _get_equipment_index_from_quipment_list(tag, PositiveDisplacementPump.list_objects())
+    elif equipment_type in ['Centrifugal Compressor', 'centrifugal compressor', 'centrifugal compressors','Centrifugal COmpressors']:
+        return _get_equipment_index_from_quipment_list(tag, CentrifugalCompressor.list_objects())
+    elif equipment_type in ['Expander', 'expander','expanders','Expanders']:
+        return _get_equipment_index_from_quipment_list(tag, Expander.list_objects())
+    elif equipment_type in ['Pipe Segment', 'pipe segment', 'piping', 'pipe','Pipe','pipes','Pipes']:
+        return _get_equipment_index_from_quipment_list(tag, PipeSegment.list_objects())
+    elif equipment_type in ['Control Value', 'cv', 'control valve', 'CV', 'control valves', 'Control Valves']:
+        return _get_equipment_index_from_quipment_list(tag, ControlValve.list_objects())
+    elif equipment_type in ['Pressure Safety Valve', 'PSV', 'psv', 'safety valves', 'PSVs']:
+        return _get_equipment_index_from_quipment_list(tag, PressureSafetyValve.list_objects())
+    elif equipment_type in ['Flow Meter', 'flow meter', 'Flow Meters', 'flow meters']:
+        return _get_equipment_index_from_quipment_list(tag, FlowMeter.list_objects())
+    elif equipment_type in ['Vertical Separator']:
+        return _get_equipment_index_from_quipment_list(tag, VerticalSeparator.list_objects())
+    elif equipment_type in ['Horizontal Separator']:
+        return _get_equipment_index_from_quipment_list(tag, HorizontalSeparator.list_objects())
+    elif equipment_type in ['Column', 'column', 'columns', 'Columns']:
+        return _get_equipment_index_from_quipment_list(tag, Column.list_objects())
+    elif equipment_type in ['Tank', 'tank', 'Tanks', 'tanks']:
+        return _get_equipment_index_from_quipment_list(tag, Tank.list_objects())
+    elif equipment_type in ['Shell and Tube Heat exchanger', 'S&T HE', 'S&T Heat Exchanger'] :
+        return _get_equipment_index_from_quipment_list(tag, ShellnTubeExchanger.list_objects())
+    elif equipment_type in ['Air Cooler', 'Air Coolers', 'air coolers']:
+        return _get_equipment_index_from_quipment_list(tag, AirCoolers.list_objects())
+    
+    
+    #If user knows the general type of the equipment
     elif equipment_type in ['Pump', 'pump', 'Pumps', 'pumps']:
-        equipment_list = CentrifugalPump.list_objects() + PositiveDisplacementPump.list_objects()
+        return [(_get_equipment_index_from_quipment_list(tag, CentrifugalPump.list_objects()),'Centrifugal Pump'),
+                (_get_equipment_index_from_quipment_list(tag, PositiveDisplacementPump.list_objects()),'Positive Displacement Pump')]
+
 
     elif equipment_type in ['vessel', 'vessels', 'Vessels', 'Vessel']:
-        equipment_list = (VerticalSeparator.list_objects() 
-                        + HorizontalSeparator.list_objects() 
-                        + Column.list_objects()
-                        + Tank.list_objects())
+        return [(_get_equipment_index_from_quipment_list(tag, VerticalSeparator.list_objects()),'Verticle Vessel'),
+                (_get_equipment_index_from_quipment_list(tag, HorizontalSeparator.list_objects()),'Horizontal Separator'),
+                (_get_equipment_index_from_quipment_list(tag, Column.list_objects()),'Column'),
+                (_get_equipment_index_from_quipment_list(tag, Tank.list_objects()),'Tank')
+                ]
+    
+    elif equipment_type in ['valve', 'Valve', 'instrument', 'Instrument']:
+        return [(_get_equipment_index_from_quipment_list(tag, ControlValve.list_objects()),'Control Valve'),
+                (_get_equipment_index_from_quipment_list(tag, PressureSafetyValve.list_objects()),'Pressure Safety Valve'),
+                (_get_equipment_index_from_quipment_list(tag, FlowMeter.list_objects()),'Flow Meter')
+                ]
     
     elif equipment_type in ['exchangers', 'Exchanger', 'heat exchanger', 'Heat Exchanger',
                             'Heat Exchangers', 'heat exchangers']:
-        equipment_list = ShellnTubeExchanger.list_objects() + AirCoolers.list_objects()
+        return  [(_get_equipment_index_from_quipment_list(tag, ShellnTubeExchanger.list_objects()),'Shell and Tube Exchanger'),
+                (_get_equipment_index_from_quipment_list(tag, AirCoolers.list_objects()),'Air Cooler')]
+    
+    # If the user does not know the type of equipment at all
+    elif equipment_type == None:
+        return (get_equipment_index(tag,'Pump') + 
+                get_equipment_index(tag, 'vessel') +
+                get_equipment_index(tag, 'valve') +
+                get_equipment_index(tag, 'exchangers'))
+    else:
+        raise Exception('''Invalid Equipment type!! 
+                           Valid equipment types are:
+                            * Centrifugal Pump
+                            * Positive Displacement Pump
+                            * Pump if you don't remember the exact type
+                            * Centrifugal Compressor
+                            * Expander
+                            * Pipe Segment
+                            * Control Value or CV
+                            * Pressure Safety Valve or PSV
+                            * Flow Meter
+                            * Instruments or Valves if you don't remember the exact type
+                            * Vertical Separator
+                            * Horizontal Separator
+                            * Column
+                            * Tank
+                            * Vessels if you don't remember the exact type
+                            * S&T Heat Exchanger
+                            * Air Cooler
+                            * Exchanger if you don't remember the exact type''')
+    
 
-
+def _get_equipment_index_from_quipment_list(tag, equipment_list):
     list_of_none_tag_equipments =[]
     for index, equipment in enumerate(equipment_list):
-        
         if equipment.tag == None and tag==None:
             list_of_none_tag_equipments.append(index)           
         elif equipment.tag == tag:
