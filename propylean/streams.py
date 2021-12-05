@@ -3,14 +3,17 @@ import propylean.properties as prop
 class EnergyStream (prop.Power):
     items = [] 
     def __init__(self, value= 0, unit= 'W', tag= None, 
-                 to_equipment_tag= None, from_equipment_tag= None):
+                 to_equipment_tag= None, to_equipment_type=None,
+                 from_equipment_tag= None, from_equipment_type=None):
                  super().__init__(value= value, unit=unit)
                  self.tag = tag
                  self.assign_equipment('to', to_equipment_tag)
                  self.assign_equipment('from', from_equipment_tag)
 
                  EnergyStream.items.append(self)
-    def assign_equipment(self, to_or_from, equipment_index): 
+    
+    def assign_equipment(self, to_or_from, equipment_tag):
+        equipment_index = None # get_equipment_index()
         inlet_outlet = None
         if to_or_from in ['to','To','TO']:
             inlet_outlet = 'inlet'
@@ -53,11 +56,13 @@ class MaterialStream:
         return 'Material Stream Tag: ' + self.tag
 
 #Get stream index function
-def get_stream_index(stream_type, tag):
+def get_stream_index(tag,stream_type=None):
     if stream_type in ['energy', 'Energy', 'Power','e','E']:
         stream_list = EnergyStream.list_objects()
     elif stream_type in ['material', 'Material', 'mass', 'Mass','m','M']:
         stream_list = MaterialStream.list_objects()
+    elif stream_type==None:
+        return [(get_stream_index(tag, 'energy'),'Energy Stream'),(get_stream_index(tag, 'material'),'Material Stream')]
     else:
         raise Exception('Stream type does not exist! Please ensure stream types are either Energy or Material')
     list_of_none_tag_streams =[]
