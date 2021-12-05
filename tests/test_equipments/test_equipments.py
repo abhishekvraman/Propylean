@@ -42,6 +42,7 @@ def test_CentrifugalPump_instantiation():
 
     del cp
 
+
 def test_CentrifugalPump_wrong_instantiation():
     with pytest.raises(Exception):
         cp = equipments.CentrifugalPump(suction_pressure = 30,
@@ -91,6 +92,11 @@ def test_PipeSegment_pressure_drop():
     assert p.ID != None
     assert p.outlet_pressure != None
     assert abs(p.pressure_drop - 115555)<150000 #Pa  NEEDS UPDATE !!!!!
+def test_PipeSegment_print(capsys):
+    pipe = equipments.PipeSegment(tag='Pump_1_Inlet', length=100, ID=2)
+    print(pipe)
+    captured = capsys.readouterr()
+    assert captured.out == 'Pipe Segment with tag: Pump_1_Inlet\n'
 
 def test_ControlValve_instantiation():
     #All units in SI
@@ -142,11 +148,25 @@ def test_listing_of_equipments():
         assert pump.tag in [None, '1', '2', '3']
   
     for valve in equipments.ControlValve.list_objects():
-        assert valve.tag in [None, '1', '2','3', '4', '5']
+        assert valve.tag in [None, '1', '2', '3', '4', '5']
 
 def test_indexing_of_equipments():
-    assert equipments.get_equipment_index('centrifugal pump','1') == 1
+    assert equipments.get_equipment_index('1','centrifugal pump') == 1
     control_valve = equipments.ControlValve()
-    assert len(equipments.get_equipment_index('control valves',tag= None)) == 3
+    assert len(equipments.get_equipment_index(None,'control valves')) == 3
     with pytest.raises(Exception):
-        equipments.get_equipment_index('Trucks', tag=None)
+        equipments.get_equipment_index(None,'Trucks')
+    
+    assert equipments.get_equipment_index('1','pump')==[(1,'Centrifugal Pump'),([],'Positive Displacement Pump')]
+    
+    search_result = equipments.get_equipment_index('2')
+    for result in search_result:
+        if result[1] in ['Centrifugal Pump', 'Control Valve']:
+            assert isinstance(result[0],int)
+        else:
+            assert isinstance(result[0],list)
+
+def test_no_equipment_with_same_tag_and_type():
+    a = set([equipments.CentrifugalPump(tag='1'),equipments.CentrifugalPump(tag='1'),equipments.CentrifugalPump(tag='2')])
+    assert len(a) == 2
+    
