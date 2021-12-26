@@ -30,9 +30,9 @@ class _EquipmentOneInletOutlet:
         self.design_temperature = None if 'design_temperature' not in inputs else inputs['design_temperature']
 
         #Inlet and outlet material streams
-        self._inlet_stream_index = None if 'inlet_stream_index' not in inputs else streams.get_stream_index('m', inputs['inlet_stream_index'])
+        self._inlet_stream_index = None if 'inlet_stream_tag' not in inputs else streams.get_stream_index(inputs['inlet_stream_tag'], 'm')
         
-        self._outlet_stream_index = None if 'outlet_stream_index' not in inputs else streams.get_stream_index('m',inputs['outlet_stream_index'])
+        self._outlet_stream_index = None if 'outlet_stream_tag' not in inputs else streams.get_stream_index(inputs['outlet_stream_tag'], 'm')
         
     @property
     def inlet_pressure(self):
@@ -791,7 +791,6 @@ def get_equipment_index(tag, equipment_type=None):
                             * Air Cooler
                             * Exchanger if you don't remember the exact type''')
     
-
 def _get_equipment_index_from_quipment_list(tag, equipment_list):
     list_of_none_tag_equipments =[]
     for index, equipment in enumerate(equipment_list):

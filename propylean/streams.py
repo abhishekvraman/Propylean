@@ -1,29 +1,33 @@
 from thermo.chemical import Chemical
-import propylean.properties as prop  
+import propylean.properties as prop
+
 class EnergyStream (prop.Power):
     items = [] 
-    def __init__(self, value= 0, unit= 'W', tag= None, 
-                 to_equipment_tag= None, to_equipment_type=None,
-                 from_equipment_tag= None, from_equipment_type=None):
-                 super().__init__(value= value, unit=unit)
+    def __init__(self, value=0, unit='W', tag=None, 
+                 to_equipment_tag=None, to_equipment_type=None,
+                 from_equipment_tag=None, from_equipment_type=None):
+                 super().__init__(value=value, unit=unit)
                  self.tag = tag
-                 self.assign_equipment('to', to_equipment_tag)
-                 self.assign_equipment('from', from_equipment_tag)
+                 self.assign_equipment('to', to_equipment_tag, to_equipment_type)
+                 self.assign_equipment('from', from_equipment_tag, from_equipment_type)
 
                  EnergyStream.items.append(self)
     
-    def assign_equipment(self, to_or_from, equipment_tag):
-        equipment_index = None # get_equipment_index()
+    def assign_equipment(self, to_or_from, equipment_tag, equipment_type, equipment_index=None):
         inlet_outlet = None
         if to_or_from in ['to','To','TO']:
             inlet_outlet = 'inlet'
+            self.to_equipment_tag = equipment_tag
+            self.to_equipment_type = equipment_type
             self.to_equipment_index = equipment_index if equipment_index != None else None
         elif to_or_from in ['from','From','FROM']:
             inlet_outlet = 'outlet'
+            self.from_equipment_tag = equipment_tag
+            self.from_equipment_type = equipment_type
             self.from_equipment_index = equipment_index if equipment_index != None else None
 
     def __repr__(self) -> str:
-        return 'Energy Stream Tag: ' + self.tag  
+        return 'Energy Stream Tag: ' + self.tag
 
     @classmethod
     def list_objects(cls):
@@ -35,7 +39,8 @@ class MaterialStream:
                  pressure = 101325,
                  temperature = 298,
                  tag = None,
-                 to_equipment_tag= None, from_equipment_tag= None):
+                 to_equipment_tag=None, to_equipment_type=None,
+                 from_equipment_tag= None, from_equipment_type=None):
                  
                  self.tag = tag
                  self.mass_flow_rate = prop.MassFlowRate(mass_flow_rate)
@@ -43,8 +48,10 @@ class MaterialStream:
                  self.temperature = prop.Temperature(temperature)
                  self.molar_flow_rate = prop.MolarFlowRate()
                  self.to_equipment_tag = to_equipment_tag
+                 self.to_equipment_type = to_equipment_type
                  self.to_equipment_index = None
-                 self.from_equipment_tag = from_equipment_tag 
+                 self.from_equipment_tag = from_equipment_tag
+                 self.from_equipment_type = from_equipment_type 
 
                  MaterialStream.items.append(self)
 
@@ -64,7 +71,7 @@ def get_stream_index(tag,stream_type=None):
     elif stream_type==None:
         return [(get_stream_index(tag, 'energy'),'Energy Stream'),(get_stream_index(tag, 'material'),'Material Stream')]
     else:
-        raise Exception('Stream type does not exist! Please ensure stream types are either Energy or Material')
+        raise Exception('Stream type does not exist! Please ensure stream type is either Energy or Material')
     list_of_none_tag_streams =[]
 
     for index, stream in enumerate(stream_list):
