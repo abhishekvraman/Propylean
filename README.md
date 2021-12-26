@@ -12,14 +12,15 @@ To increase the utilization of open-source software and analytics tools in the c
 ## Vision
 Vision of Propylean is to:
 - Enable chemical and related industries to use analytics and ML frameworks
-- Improve operation agility and efficiency of the plant
+- Improve operational agility and efficiency of the plant
 - Be a cheap simulation-software alternative for small manufacturers
 - Help the industry transition to Net-Zero emissions
 - Inculcate coding/programing skills in manufacturing engineers
 
 ## Installation and Requirements
 When published in PyPi, user will be able to download using pip or directly from PyPi website. 
+
 Pip command:
-    `pip install propylean`
+`pip install propylean`
 
 
