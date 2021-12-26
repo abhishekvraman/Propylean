@@ -1,10 +1,12 @@
 import pytest
 import pandas as pd
-from propylean import equipments
+from propylean.equipments import CentrifugalPump, PipeSegment, ControlValve, CentrifugalCompressor
+from propylean.equipments import get_equipment_index 
+from propylean import streams
 
 
 def test_CentrifugalPump_instantiation():
-    cp = equipments.CentrifugalPump(inlet_pressure=50, 
+    cp = CentrifugalPump(inlet_pressure=50, 
                                      design_pressure = 50,
                                      pressure_drop=-60)
     assert cp.suction_pressure.value == 50
@@ -45,46 +47,46 @@ def test_CentrifugalPump_instantiation():
 
 def test_CentrifugalPump_wrong_instantiation():
     with pytest.raises(Exception):
-        cp = equipments.CentrifugalPump(suction_pressure = 30,
+        cp = CentrifugalPump(suction_pressure = 30,
                                         discharge_pressure = 40,
                                         differential_pressure = 10)
     with pytest.raises(Exception):
-        cp = equipments.CentrifugalPump(suction_pressure = 30,
+        cp = CentrifugalPump(suction_pressure = 30,
                                         discharge_pressure = 40,
                                         performance_curve = pd.DataFrame([{'flow':[2,10,30,67], 'head':[45,20,10,2]}]))
     with pytest.raises(Exception):
-        cp = equipments.CentrifugalPump(suction_pressure = 30,
+        cp = CentrifugalPump(suction_pressure = 30,
                                         differential_pressure = 10,
                                         performance_curve = pd.DataFrame([{'flow':[2,10,30,67], 'head':[45,20,10,2]}]))
     with pytest.raises(Exception):
-        cp = equipments.CentrifugalPump(discharge_pressure = 40,
+        cp = CentrifugalPump(discharge_pressure = 40,
                                         differential_pressure = 10,
                                         performance_curve = pd.DataFrame([{'flow':[2,10,30,67], 'head':[45,20,10,2]}]))
 
 def test_PipeSegment_instantiation():
-    p = equipments.PipeSegment(thickness=2, OD=15, length = 10)
+    p = PipeSegment(thickness=2, OD=15, length = 10)
     assert p.ID == 13
     
     #Raise exception if ID is not calculatable or explicitly defined
     with pytest.raises(Exception):
-            p = equipments.PipeSegment(thickness=2, length = 10)
+            p = PipeSegment(thickness=2, length = 10)
     
     #Raise exception if length is not defined in case of straight segement as it is a default type
     with pytest.raises(Exception):
-        p = equipments.PipeSegment(thickness=2, ID=15)
+        p = PipeSegment(thickness=2, ID=15)
     
     #Raise exception if segment is not in range of the list or material is not in range of the list
     with pytest.raises(Exception):
-        p = equipments.PipeSegment(thickness=2, ID=15, segment_type = 30, material = 22)
+        p = PipeSegment(thickness=2, ID=15, segment_type = 30, material = 22)
     
     # Do not raise exception if length is not defined but segement is not straight pipe
     try:
-        p = equipments.PipeSegment(ID=15, segment_type = 6)
+        p = PipeSegment(ID=15, segment_type = 6)
     except Exception as exc:
         assert False, f"'Ball valve instantiation' raised an exception {exc}"
 
 def test_PipeSegment_pressure_drop():
-    p = equipments.PipeSegment(ID=0.018, OD=0.020, length = 10) # in meters 
+    p = PipeSegment(ID=0.018, OD=0.020, length = 10) # in meters 
     p.inlet_pressure = 1.053713e7  #Pascal
     p.inlet_temperature = 298.17 #degree Celsius
     p.inlet_mass_flowrate = 1   #kg/s
@@ -93,20 +95,20 @@ def test_PipeSegment_pressure_drop():
     assert p.outlet_pressure != None
     assert abs(p.pressure_drop - 115555)<150000 #Pa  NEEDS UPDATE !!!!!
 def test_PipeSegment_print(capsys):
-    pipe = equipments.PipeSegment(tag='Pump_1_Inlet', length=100, ID=2)
+    pipe = PipeSegment(tag='Pump_1_Inlet', length=100, ID=2)
     print(pipe)
     captured = capsys.readouterr()
     assert captured.out == 'Pipe Segment with tag: Pump_1_Inlet\n'
 
 def test_ControlValve_instantiation():
     #All units in SI
-    valve = equipments.ControlValve(inlet_pressure=1.04217e7, outlet_pressure=9.92167e6, inlet_temperature=299.18)
+    valve = ControlValve(inlet_pressure=1.04217e7, outlet_pressure=9.92167e6, inlet_temperature=299.18)
     valve.inlet_mass_flowrate = 1 #kg/s
     assert abs(valve.pressure_drop - (1.04217e7-9.92167e6)) < 0.001
     assert abs(valve.Kv - 1.61259) < 0.001
 
     # Gas phase calculation
-    valve = equipments.ControlValve(inlet_pressure=202650, outlet_pressure=197650, inlet_temperature=423.15)
+    valve = ControlValve(inlet_pressure=202650, outlet_pressure=197650, inlet_temperature=423.15)
     valve.inlet_mass_flowrate = 1 #kg/s
     assert valve.pressure_drop == 5000
     assert abs(valve.Kv - 502.88) <= 118.5 #NEEDS UPDATE 
@@ -114,7 +116,7 @@ def test_ControlValve_instantiation():
 
 def test_CentrifugalCompressor_instantiation():
     
-    compressor = equipments.CentrifugalCompressor(suction_pressure = 1013250.0, #Pa
+    compressor = CentrifugalCompressor(suction_pressure = 1013250.0, #Pa
                                                   differential_pressure = 5000000.0, #Pa
                                                   inlet_temperature = 248.15, #K
                                                   inlet_mass_flowrate = 0.02778) #kg/s
@@ -128,38 +130,38 @@ def test_CentrifugalCompressor_instantiation():
     assert abs(compressor.power - 9.6698) < 0.5 # kW 
 
 def test_listing_of_equipments():
-    first_pump = equipments.CentrifugalPump(tag='1', inlet_pressure=50, 
+    first_pump = CentrifugalPump(tag='1', inlet_pressure=50, 
                                      design_pressure = 50,
                                      pressure_drop=-60)
-    second_pump = equipments.CentrifugalPump(tag='2', inlet_pressure=50, 
+    second_pump = CentrifugalPump(tag='2', inlet_pressure=50, 
                                      design_pressure = 50,
                                      pressure_drop=-60)
-    third_pump = equipments.CentrifugalPump(tag='3', inlet_pressure=50, 
+    third_pump = CentrifugalPump(tag='3', inlet_pressure=50, 
                                      design_pressure = 50,
                                      pressure_drop=-60)
-    first_valve = equipments.ControlValve(tag='1', inlet_pressure=1.04217e7, outlet_pressure=9.92167e6, inlet_temperature=299.18)
-    second_valve = equipments.ControlValve(tag='2', inlet_pressure=1.04217e7, outlet_pressure=9.92167e6, inlet_temperature=299.18)
-    third_valve = equipments.ControlValve(tag='3', inlet_pressure=1.04217e7, outlet_pressure=9.92167e6, inlet_temperature=299.18)
-    forth_valve = equipments.ControlValve(tag='4', inlet_pressure=1.04217e7, outlet_pressure=9.92167e6, inlet_temperature=299.18)
-    fifth_valve = equipments.ControlValve(tag='5', inlet_pressure=1.04217e7, outlet_pressure=9.92167e6, inlet_temperature=299.18)
+    first_valve = ControlValve(tag='1', inlet_pressure=1.04217e7, outlet_pressure=9.92167e6, inlet_temperature=299.18)
+    second_valve = ControlValve(tag='2', inlet_pressure=1.04217e7, outlet_pressure=9.92167e6, inlet_temperature=299.18)
+    third_valve = ControlValve(tag='3', inlet_pressure=1.04217e7, outlet_pressure=9.92167e6, inlet_temperature=299.18)
+    forth_valve = ControlValve(tag='4', inlet_pressure=1.04217e7, outlet_pressure=9.92167e6, inlet_temperature=299.18)
+    fifth_valve = ControlValve(tag='5', inlet_pressure=1.04217e7, outlet_pressure=9.92167e6, inlet_temperature=299.18)
     
     assert first_pump.tag == '1'
-    for pump in equipments.CentrifugalPump.list_objects():
+    for pump in CentrifugalPump.list_objects():
         assert pump.tag in [None, '1', '2', '3']
   
-    for valve in equipments.ControlValve.list_objects():
+    for valve in ControlValve.list_objects():
         assert valve.tag in [None, '1', '2', '3', '4', '5']
 
 def test_indexing_of_equipments():
-    assert equipments.get_equipment_index('1','centrifugal pump') == 1
-    control_valve = equipments.ControlValve()
-    assert len(equipments.get_equipment_index(None,'control valves')) == 3
+    assert get_equipment_index('1','centrifugal pump') == 1
+    control_valve = ControlValve()
+    assert len(get_equipment_index(None,'control valves')) == 3
     with pytest.raises(Exception):
-        equipments.get_equipment_index(None,'Trucks')
+        get_equipment_index(None,'Trucks')
     
-    assert equipments.get_equipment_index('1','pump')==[(1,'Centrifugal Pump'),([],'Positive Displacement Pump')]
+    assert get_equipment_index('1','pump')==[(1,'Centrifugal Pump'),([],'Positive Displacement Pump')]
     
-    search_result = equipments.get_equipment_index('2')
+    search_result = get_equipment_index('2')
     for result in search_result:
         if result[1] in ['Centrifugal Pump', 'Control Valve']:
             assert isinstance(result[0],int)
@@ -167,6 +169,10 @@ def test_indexing_of_equipments():
             assert isinstance(result[0],list)
 
 def test_no_equipment_with_same_tag_and_type():
-    a = set([equipments.CentrifugalPump(tag='1'),equipments.CentrifugalPump(tag='1'),equipments.CentrifugalPump(tag='2')])
+    a = set([CentrifugalPump(tag='1'),CentrifugalPump(tag='1'),CentrifugalPump(tag='2')])
     assert len(a) == 2
-    
+
+def test_equipment_stream_connection():
+    s1 = streams.MaterialStream(tag='1')
+    s2 = streams.MaterialStream(tag='2')
+    eq1 = CentrifugalPump(tag="P-234", inlet_stream_tag=s1.tag, outlet_stream_tag=s2.tag)
