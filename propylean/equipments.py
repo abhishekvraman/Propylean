@@ -6,6 +6,113 @@ import fluids.compressible as compressible_fluid
 from math import pi
 from propylean import streams
 
+# _material_stream_equipment_mapper and __energy_stream_equipment_mapper are dictionary of list 
+# which store index of coming from and going to equipment and type of equipment.
+# Structured like {12: [10, CentrifugalPump, 21, PipeSegment], 
+#                  23: [21, PipeSegment, 36, FlowMeter]]} 
+# were 12th index stream will have data in key no. 12 
+# stream is coming from equipment index is 10 of type CentrifugalPump and  
+# going into equipment index is 21 of type PipeSegment.
+ 
+_material_stream_equipment_mapper = dict()
+__energy_stream_equipment_mapper = dict()
+
+#Get equipment index function
+def get_equipment_index(tag, equipment_type=None):
+    
+    #If equipment_type is known to the user
+    if equipment_type in ['Centrifugal Pump', 'centrifugal pump', 'centrifugal pumps', 'Centrifugal Pumps', CentrifugalPump]:
+        return _get_equipment_index_from_quipment_list(tag, CentrifugalPump.list_objects())
+    elif equipment_type in ['Positive Displacement Pump', 'PD pumps', 'resiprocating pumps', 'positive displacement pump', type(PositiveDisplacementPump)]:
+        return _get_equipment_index_from_quipment_list(tag, PositiveDisplacementPump.list_objects())
+    elif equipment_type in ['Centrifugal Compressor', 'centrifugal compressor', 'centrifugal compressors','Centrifugal COmpressors']:
+        return _get_equipment_index_from_quipment_list(tag, CentrifugalCompressor.list_objects())
+    elif equipment_type in ['Expander', 'expander','expanders','Expanders']:
+        return _get_equipment_index_from_quipment_list(tag, Expander.list_objects())
+    elif equipment_type in ['Pipe Segment', 'pipe segment', 'piping', 'pipe','Pipe','pipes','Pipes']:
+        return _get_equipment_index_from_quipment_list(tag, PipeSegment.list_objects())
+    elif equipment_type in ['Control Value', 'cv', 'control valve', 'CV', 'control valves', 'Control Valves']:
+        return _get_equipment_index_from_quipment_list(tag, ControlValve.list_objects())
+    elif equipment_type in ['Pressure Safety Valve', 'PSV', 'psv', 'safety valves', 'PSVs']:
+        return _get_equipment_index_from_quipment_list(tag, PressureSafetyValve.list_objects())
+    elif equipment_type in ['Flow Meter', 'flow meter', 'Flow Meters', 'flow meters']:
+        return _get_equipment_index_from_quipment_list(tag, FlowMeter.list_objects())
+    elif equipment_type in ['Vertical Separator']:
+        return _get_equipment_index_from_quipment_list(tag, VerticalSeparator.list_objects())
+    elif equipment_type in ['Horizontal Separator']:
+        return _get_equipment_index_from_quipment_list(tag, HorizontalSeparator.list_objects())
+    elif equipment_type in ['Column', 'column', 'columns', 'Columns']:
+        return _get_equipment_index_from_quipment_list(tag, Column.list_objects())
+    elif equipment_type in ['Tank', 'tank', 'Tanks', 'tanks']:
+        return _get_equipment_index_from_quipment_list(tag, Tank.list_objects())
+    elif equipment_type in ['Shell and Tube Heat exchanger', 'S&T HE', 'S&T Heat Exchanger'] :
+        return _get_equipment_index_from_quipment_list(tag, ShellnTubeExchanger.list_objects())
+    elif equipment_type in ['Air Cooler', 'Air Coolers', 'air coolers']:
+        return _get_equipment_index_from_quipment_list(tag, AirCoolers.list_objects())
+    
+    
+    #If user knows the general type of the equipment
+    elif equipment_type in ['Pump', 'pump', 'Pumps', 'pumps']:
+        return [(_get_equipment_index_from_quipment_list(tag, CentrifugalPump.list_objects()),'Centrifugal Pump'),
+                (_get_equipment_index_from_quipment_list(tag, PositiveDisplacementPump.list_objects()),'Positive Displacement Pump')]
+
+
+    elif equipment_type in ['vessel', 'vessels', 'Vessels', 'Vessel']:
+        return [(_get_equipment_index_from_quipment_list(tag, VerticalSeparator.list_objects()),'Verticle Vessel'),
+                (_get_equipment_index_from_quipment_list(tag, HorizontalSeparator.list_objects()),'Horizontal Separator'),
+                (_get_equipment_index_from_quipment_list(tag, Column.list_objects()),'Column'),
+                (_get_equipment_index_from_quipment_list(tag, Tank.list_objects()),'Tank')
+                ]
+    
+    elif equipment_type in ['valve', 'Valve', 'instrument', 'Instrument']:
+        return [(_get_equipment_index_from_quipment_list(tag, ControlValve.list_objects()),'Control Valve'),
+                (_get_equipment_index_from_quipment_list(tag, PressureSafetyValve.list_objects()),'Pressure Safety Valve'),
+                (_get_equipment_index_from_quipment_list(tag, FlowMeter.list_objects()),'Flow Meter')
+                ]
+    
+    elif equipment_type in ['exchangers', 'Exchanger', 'heat exchanger', 'Heat Exchanger',
+                            'Heat Exchangers', 'heat exchangers']:
+        return  [(_get_equipment_index_from_quipment_list(tag, ShellnTubeExchanger.list_objects()),'Shell and Tube Exchanger'),
+                (_get_equipment_index_from_quipment_list(tag, AirCoolers.list_objects()),'Air Cooler')]
+    
+    # If the user does not know the type of equipment at all
+    elif equipment_type == None:
+        return (get_equipment_index(tag,'Pump') + 
+                get_equipment_index(tag, 'vessel') +
+                get_equipment_index(tag, 'valve') +
+                get_equipment_index(tag, 'exchangers'))
+    else:
+        raise Exception('''Invalid Equipment type!! 
+                           Valid equipment types are:
+                            * Centrifugal Pump
+                            * Positive Displacement Pump
+                            * Pump if you don't remember the exact type
+                            * Centrifugal Compressor
+                            * Expander
+                            * Pipe Segment
+                            * Control Value or CV
+                            * Pressure Safety Valve or PSV
+                            * Flow Meter
+                            * Instruments or Valves if you don't remember the exact type
+                            * Vertical Separator
+                            * Horizontal Separator
+                            * Column
+                            * Tank
+                            * Vessels if you don't remember the exact type
+                            * S&T Heat Exchanger
+                            * Air Cooler
+                            * Exchanger if you don't remember the exact type''')
+    
+def _get_equipment_index_from_quipment_list(tag, equipment_list):
+    list_of_none_tag_equipments =[]
+    for index, equipment in enumerate(equipment_list):
+        if equipment.tag == None and tag==None:
+            list_of_none_tag_equipments.append(index)           
+        elif equipment.tag == tag:
+            return index
+
+    return list_of_none_tag_equipments
+
 #Defining generic base class for all equipments with one inlet and outlet
 class _EquipmentOneInletOutlet:
     def __init__(self, **inputs) -> None:
@@ -30,9 +137,8 @@ class _EquipmentOneInletOutlet:
         self.design_temperature = None if 'design_temperature' not in inputs else inputs['design_temperature']
 
         #Inlet and outlet material streams
-        self._inlet_stream_index = None if 'inlet_stream_tag' not in inputs else streams.get_stream_index(inputs['inlet_stream_tag'], 'm')
-        
-        self._outlet_stream_index = None if 'outlet_stream_tag' not in inputs else streams.get_stream_index(inputs['outlet_stream_tag'], 'm')
+        self.inlet_stream_tag = None if 'inlet_stream_tag' not in inputs else inputs['inlet_stream_tag']
+        self.outlet_stream_tag = None if 'outlet_stream_tag' not in inputs else inputs['outlet_stream_tag']
         
     @property
     def inlet_pressure(self):
@@ -94,6 +200,53 @@ class _EquipmentOneInletOutlet:
             self._inlet_mass_flowrate = self._outlet_mass_flowrate + value
         else:
             raise Exception("Error! Assign inlet value or outlet outlet before assigning differential")
+    
+    @property
+    def inlet_stream_tag(self):
+        return self._inlet_stream_tag
+    @inlet_stream_tag.setter
+    def inlet_stream_tag(self, tag):
+        self._inlet_stream_tag = tag
+        self._inlet_stream_index = streams.get_stream_index(tag, 'm')
+        if self._inlet_stream_index is None or isinstance(self._inlet_stream_index, list):
+            return
+        going_in_equipment_type = type(self)
+        going_in_equipment_index = get_equipment_index(self.tag, going_in_equipment_type)
+        try:
+            _material_stream_equipment_mapper[self._inlet_stream_index][2] = going_in_equipment_type
+            _material_stream_equipment_mapper[self._inlet_stream_index][3] = going_in_equipment_index
+        except:
+            try:
+                _material_stream_equipment_mapper[self._inlet_stream_index] = [None, 
+                                                                            None,
+                                                                            going_in_equipment_type, 
+                                                                            going_in_equipment_index]
+            except Exception as e:
+                raise Exception("Error occured in equipment-stream mapping:", e)
+
+    @property
+    def outlet_stream_tag(self):
+        return self._outlet_stream_tag
+    @outlet_stream_tag.setter
+    def outlet_stream_tag(self, tag):
+        self._outlet_stream_tag = tag
+        self._outlet_stream_index = streams.get_stream_index(tag, 'm')
+        if self._inlet_stream_index is None or isinstance(self._inlet_stream_index, list):
+            return
+        coming_out_equipment_type = type(self)
+        coming_out_equipment_index = get_equipment_index(self.tag, coming_out_equipment_type)
+        try:
+            _material_stream_equipment_mapper[self._outlet_stream_index][0] = coming_out_equipment_type
+            _material_stream_equipment_mapper[self._outlet_stream_index][1] = coming_out_equipment_index
+        except:
+            try:
+                _material_stream_equipment_mapper[self._inlet_stream_index] = [coming_out_equipment_type, 
+                                                                            coming_out_equipment_index,
+                                                                            None,
+                                                                            None]
+            except Exception as e:
+                raise Exception("Error occured in equipment-stream mapping:", e)
+        
 
 #Defining generic base class for all equipments with multiple inlet and outlet. TO BE UPDATED!!!!!!       
 class _EquipmentMultipleInletOutlet:
@@ -705,98 +858,3 @@ class AirCoolers(_Exchanger):
         return cls.items
 # End of final classes of heat exchangers      
 
-#Get equipment index function
-def get_equipment_index(tag, equipment_type=None):
-    
-    #If equipment_type is known to the user
-    if equipment_type in ['Centrifugal Pump', 'centrifugal pump', 'centrifugal pumps', 'Centrifugal Pumps']:
-        return _get_equipment_index_from_quipment_list(tag, CentrifugalPump.list_objects())
-    elif equipment_type in ['Positive Displacement Pump', 'PD pumps', 'resiprocating pumps', 'positive displacement pump']:
-        return _get_equipment_index_from_quipment_list(tag, PositiveDisplacementPump.list_objects())
-    elif equipment_type in ['Centrifugal Compressor', 'centrifugal compressor', 'centrifugal compressors','Centrifugal COmpressors']:
-        return _get_equipment_index_from_quipment_list(tag, CentrifugalCompressor.list_objects())
-    elif equipment_type in ['Expander', 'expander','expanders','Expanders']:
-        return _get_equipment_index_from_quipment_list(tag, Expander.list_objects())
-    elif equipment_type in ['Pipe Segment', 'pipe segment', 'piping', 'pipe','Pipe','pipes','Pipes']:
-        return _get_equipment_index_from_quipment_list(tag, PipeSegment.list_objects())
-    elif equipment_type in ['Control Value', 'cv', 'control valve', 'CV', 'control valves', 'Control Valves']:
-        return _get_equipment_index_from_quipment_list(tag, ControlValve.list_objects())
-    elif equipment_type in ['Pressure Safety Valve', 'PSV', 'psv', 'safety valves', 'PSVs']:
-        return _get_equipment_index_from_quipment_list(tag, PressureSafetyValve.list_objects())
-    elif equipment_type in ['Flow Meter', 'flow meter', 'Flow Meters', 'flow meters']:
-        return _get_equipment_index_from_quipment_list(tag, FlowMeter.list_objects())
-    elif equipment_type in ['Vertical Separator']:
-        return _get_equipment_index_from_quipment_list(tag, VerticalSeparator.list_objects())
-    elif equipment_type in ['Horizontal Separator']:
-        return _get_equipment_index_from_quipment_list(tag, HorizontalSeparator.list_objects())
-    elif equipment_type in ['Column', 'column', 'columns', 'Columns']:
-        return _get_equipment_index_from_quipment_list(tag, Column.list_objects())
-    elif equipment_type in ['Tank', 'tank', 'Tanks', 'tanks']:
-        return _get_equipment_index_from_quipment_list(tag, Tank.list_objects())
-    elif equipment_type in ['Shell and Tube Heat exchanger', 'S&T HE', 'S&T Heat Exchanger'] :
-        return _get_equipment_index_from_quipment_list(tag, ShellnTubeExchanger.list_objects())
-    elif equipment_type in ['Air Cooler', 'Air Coolers', 'air coolers']:
-        return _get_equipment_index_from_quipment_list(tag, AirCoolers.list_objects())
-    
-    
-    #If user knows the general type of the equipment
-    elif equipment_type in ['Pump', 'pump', 'Pumps', 'pumps']:
-        return [(_get_equipment_index_from_quipment_list(tag, CentrifugalPump.list_objects()),'Centrifugal Pump'),
-                (_get_equipment_index_from_quipment_list(tag, PositiveDisplacementPump.list_objects()),'Positive Displacement Pump')]
-
-
-    elif equipment_type in ['vessel', 'vessels', 'Vessels', 'Vessel']:
-        return [(_get_equipment_index_from_quipment_list(tag, VerticalSeparator.list_objects()),'Verticle Vessel'),
-                (_get_equipment_index_from_quipment_list(tag, HorizontalSeparator.list_objects()),'Horizontal Separator'),
-                (_get_equipment_index_from_quipment_list(tag, Column.list_objects()),'Column'),
-                (_get_equipment_index_from_quipment_list(tag, Tank.list_objects()),'Tank')
-                ]
-    
-    elif equipment_type in ['valve', 'Valve', 'instrument', 'Instrument']:
-        return [(_get_equipment_index_from_quipment_list(tag, ControlValve.list_objects()),'Control Valve'),
-                (_get_equipment_index_from_quipment_list(tag, PressureSafetyValve.list_objects()),'Pressure Safety Valve'),
-                (_get_equipment_index_from_quipment_list(tag, FlowMeter.list_objects()),'Flow Meter')
-                ]
-    
-    elif equipment_type in ['exchangers', 'Exchanger', 'heat exchanger', 'Heat Exchanger',
-                            'Heat Exchangers', 'heat exchangers']:
-        return  [(_get_equipment_index_from_quipment_list(tag, ShellnTubeExchanger.list_objects()),'Shell and Tube Exchanger'),
-                (_get_equipment_index_from_quipment_list(tag, AirCoolers.list_objects()),'Air Cooler')]
-    
-    # If the user does not know the type of equipment at all
-    elif equipment_type == None:
-        return (get_equipment_index(tag,'Pump') + 
-                get_equipment_index(tag, 'vessel') +
-                get_equipment_index(tag, 'valve') +
-                get_equipment_index(tag, 'exchangers'))
-    else:
-        raise Exception('''Invalid Equipment type!! 
-                           Valid equipment types are:
-                            * Centrifugal Pump
-                            * Positive Displacement Pump
-                            * Pump if you don't remember the exact type
-                            * Centrifugal Compressor
-                            * Expander
-                            * Pipe Segment
-                            * Control Value or CV
-                            * Pressure Safety Valve or PSV
-                            * Flow Meter
-                            * Instruments or Valves if you don't remember the exact type
-                            * Vertical Separator
-                            * Horizontal Separator
-                            * Column
-                            * Tank
-                            * Vessels if you don't remember the exact type
-                            * S&T Heat Exchanger
-                            * Air Cooler
-                            * Exchanger if you don't remember the exact type''')
-    
-def _get_equipment_index_from_quipment_list(tag, equipment_list):
-    list_of_none_tag_equipments =[]
-    for index, equipment in enumerate(equipment_list):
-        if equipment.tag == None and tag==None:
-            list_of_none_tag_equipments.append(index)           
-        elif equipment.tag == tag:
-            return index
-
-    return list_of_none_tag_equipments

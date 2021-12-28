@@ -63,7 +63,7 @@ class MaterialStream:
         return 'Material Stream Tag: ' + self.tag
 
 #Get stream index function
-def get_stream_index(tag,stream_type=None):
+def get_stream_index(tag, stream_type=None):
     if stream_type in ['energy', 'Energy', 'Power','e','E']:
         stream_list = EnergyStream.list_objects()
     elif stream_type in ['material', 'Material', 'mass', 'Mass','m','M']:

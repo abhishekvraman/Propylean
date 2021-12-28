@@ -5,6 +5,7 @@ from propylean.equipments import get_equipment_index
 from propylean import streams
 
 
+@pytest.mark.instantiation
 def test_CentrifugalPump_instantiation():
     cp = CentrifugalPump(inlet_pressure=50, 
                                      design_pressure = 50,
@@ -44,7 +45,7 @@ def test_CentrifugalPump_instantiation():
 
     del cp
 
-
+@pytest.mark.instantiation
 def test_CentrifugalPump_wrong_instantiation():
     with pytest.raises(Exception):
         cp = CentrifugalPump(suction_pressure = 30,
@@ -63,6 +64,7 @@ def test_CentrifugalPump_wrong_instantiation():
                                         differential_pressure = 10,
                                         performance_curve = pd.DataFrame([{'flow':[2,10,30,67], 'head':[45,20,10,2]}]))
 
+@pytest.mark.instantiation
 def test_PipeSegment_instantiation():
     p = PipeSegment(thickness=2, OD=15, length = 10)
     assert p.ID == 13
@@ -85,6 +87,7 @@ def test_PipeSegment_instantiation():
     except Exception as exc:
         assert False, f"'Ball valve instantiation' raised an exception {exc}"
 
+@pytest.mark.pressure_drop
 def test_PipeSegment_pressure_drop():
     p = PipeSegment(ID=0.018, OD=0.020, length = 10) # in meters 
     p.inlet_pressure = 1.053713e7  #Pascal
@@ -94,12 +97,15 @@ def test_PipeSegment_pressure_drop():
     assert p.ID != None
     assert p.outlet_pressure != None
     assert abs(p.pressure_drop - 115555)<150000 #Pa  NEEDS UPDATE !!!!!
+
+@pytest.mark.printing
 def test_PipeSegment_print(capsys):
     pipe = PipeSegment(tag='Pump_1_Inlet', length=100, ID=2)
     print(pipe)
     captured = capsys.readouterr()
     assert captured.out == 'Pipe Segment with tag: Pump_1_Inlet\n'
 
+@pytest.mark.instantiation
 def test_ControlValve_instantiation():
     #All units in SI
     valve = ControlValve(inlet_pressure=1.04217e7, outlet_pressure=9.92167e6, inlet_temperature=299.18)
@@ -114,6 +120,7 @@ def test_ControlValve_instantiation():
     assert abs(valve.Kv - 502.88) <= 118.5 #NEEDS UPDATE 
     del valve
 
+@pytest.mark.instantiation
 def test_CentrifugalCompressor_instantiation():
     
     compressor = CentrifugalCompressor(suction_pressure = 1013250.0, #Pa
@@ -129,6 +136,7 @@ def test_CentrifugalCompressor_instantiation():
     assert abs(compressor.adiabatic_efficiency - 0.766) < 0.1
     assert abs(compressor.power - 9.6698) < 0.5 # kW 
 
+@pytest.mark.listing
 def test_listing_of_equipments():
     first_pump = CentrifugalPump(tag='1', inlet_pressure=50, 
                                      design_pressure = 50,
@@ -152,6 +160,7 @@ def test_listing_of_equipments():
     for valve in ControlValve.list_objects():
         assert valve.tag in [None, '1', '2', '3', '4', '5']
 
+@pytest.mark.indexing
 def test_indexing_of_equipments():
     assert get_equipment_index('1','centrifugal pump') == 1
     control_valve = ControlValve()
@@ -168,11 +177,25 @@ def test_indexing_of_equipments():
         else:
             assert isinstance(result[0],list)
 
+@pytest.mark.unique_equipment
 def test_no_equipment_with_same_tag_and_type():
-    a = set([CentrifugalPump(tag='1'),CentrifugalPump(tag='1'),CentrifugalPump(tag='2')])
-    assert len(a) == 2
+    for i in range(10):
+        some_pumps = []
+        try:
+            some_pumps.append([CentrifugalPump(tag='Pump_'+str(i)), CentrifugalPump(tag='Pump_'+str(i+1))])
+        except:
+            continue
+    a = set(CentrifugalPump.list_objects())
+    assert len(a) == len(CentrifugalPump.list_objects())
 
+@pytest.mark.connections
 def test_equipment_stream_connection():
     s1 = streams.MaterialStream(tag='1')
     s2 = streams.MaterialStream(tag='2')
     eq1 = CentrifugalPump(tag="P-234", inlet_stream_tag=s1.tag, outlet_stream_tag=s2.tag)
+    assert eq1.inlet_stream_tag == s1.tag
+    assert eq1.outlet_stream_tag == s2.tag
+    eq1.inlet_stream_tag = '2'
+    eq1.outlet_stream_tag = '1'
+    assert eq1.inlet_stream_tag == s2.tag
+    assert eq1.outlet_stream_tag == s1.tag

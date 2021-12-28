@@ -4,6 +4,7 @@ from propylean.streams import EnergyStream, MaterialStream
 from propylean.streams import get_stream_index
 from propylean.equipments import ControlValve
 
+@pytest.mark.instantiation
 def test_EnergyStream_instantiation():
     energy = EnergyStream()
     assert energy.value == 0
@@ -18,12 +19,15 @@ def test_EnergyStream_instantiation():
     assert energy.value == 10000000
     energy.unit = 'BTU/h'
     assert abs(energy.value- 34121416.331279) <0.0001
+
+@pytest.mark.printing
 def test_EnergyStream_print(capsys):
     energy = EnergyStream(tag='Heat input')
     print(energy)
     captured = capsys.readouterr()
     assert captured.out == 'Energy Stream Tag: Heat input\n'
 
+@pytest.mark.instantiation
 def test_MaterialStream_instantiation():
     MS_1 = MaterialStream()
     assert MS_1.mass_flow_rate.value == 0
@@ -32,12 +36,15 @@ def test_MaterialStream_instantiation():
     assert MS_1.temperature.unit == 'K'
     assert MS_1.pressure.value == 101325
     assert MS_1.pressure.unit == 'Pa'
+
+@pytest.mark.printing
 def test_MaterialStream_print(capsys):
     ms = MaterialStream(tag='Input Stream 1')
     print(ms)
     captured = capsys.readouterr()
     assert captured.out == 'Material Stream Tag: Input Stream 1\n'
-    
+
+@pytest.mark.listing    
 def test_listing_of_streams():
     energy_stream_1 = EnergyStream(tag='ES1')
     energy_stream_2 = EnergyStream(tag='ES2')
@@ -56,6 +63,7 @@ def test_listing_of_streams():
     for ms in MaterialStream.list_objects():
         assert ms.tag in [None, 'MS_1', 'MS_2', 'MS_3', 'MS_4', 'MS_5', 'MS_6', 'Input Stream 1', '1', '2']
 
+@pytest.mark.indexing
 def test_indexing_of_streams():
     energy_stream_4 = EnergyStream(tag='ES4')
     assert get_stream_index(stream_type='energy',tag='ES4') == 7
@@ -82,6 +90,7 @@ def test_indexing_of_streams():
     with pytest.raises(Exception):
         i = get_stream_index('Pump Outlet', 'material')
 
+@pytest.mark.connection
 def test_stream_equipment_connection():
     e1 = ControlValve(tag="CV1")
     s1 = MaterialStream(tag='1', to_equipment_tag=e1.tag,
