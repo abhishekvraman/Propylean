@@ -509,6 +509,13 @@ class PositiveDisplacementPump(_PressureChangers):
     @classmethod
     def list_objects(cls):
         return cls.items
+
+    def connect_stream(self, stream_object=None, direction=None, stream_tag=None, stream_type=None):
+        if ((stream_object is not None and 
+            isinstance(stream_object, streams.EnergyStream)) or
+            stream_type in ['energy', 'power', 'e', 'p']):
+            direction = 'in'
+        return super().connect_stream(direction=direction, stream_object=stream_object, stream_tag=stream_tag, stream_type=stream_type)
 # End of final classes of pumps
 
 # Start of final classes of Compressors and Expanders
@@ -570,6 +577,13 @@ class CentrifugalCompressor(_PressureChangers):
     @classmethod
     def list_objects(cls):
         return cls.items
+    
+    def connect_stream(self, stream_object=None, direction=None, stream_tag=None, stream_type=None):
+        if ((stream_object is not None and 
+            isinstance(stream_object, streams.EnergyStream)) or
+            stream_type in ['energy', 'power', 'e', 'p']):
+            direction = 'in'
+        return super().connect_stream(direction=direction, stream_object=stream_object, stream_tag=stream_tag, stream_type=stream_type)
 
 class Expander(_PressureChangers):
     items = []
@@ -592,6 +606,13 @@ class Expander(_PressureChangers):
     @classmethod
     def list_objects(cls):
         return cls.items
+    
+    def connect_stream(self, stream_object=None, direction=None, stream_tag=None, stream_type=None):
+        if ((stream_object is not None and 
+            isinstance(stream_object, streams.EnergyStream)) or
+            stream_type in ['energy', 'power', 'e', 'p']):
+            direction = 'out'
+        return super().connect_stream(direction=direction, stream_object=stream_object, stream_tag=stream_tag, stream_type=stream_type)
 
 # End of final classes of compressors
 
