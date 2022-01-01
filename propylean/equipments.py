@@ -6,7 +6,7 @@ import fluids.compressible as compressible_fluid
 from math import pi
 from propylean import streams
 
-# _material_stream_equipment_mapper and __energy_stream_equipment_mapper are dictionary of list 
+# _material_stream_equipment_map and __energy_stream_equipment_map are dictionary of list 
 # which store index of coming from and going to equipment and type of equipment.
 # Structured like {12: [10, CentrifugalPump, 21, PipeSegment], 
 #                  23: [21, PipeSegment, 36, FlowMeter]]} 
@@ -14,8 +14,8 @@ from propylean import streams
 # stream is coming from equipment index is 10 of type CentrifugalPump and  
 # going into equipment index is 21 of type PipeSegment.
  
-_material_stream_equipment_mapper = dict()
-__energy_stream_equipment_mapper = dict()
+_material_stream_equipment_map = dict()
+_energy_stream_equipment_map = dict()
 
 #Get equipment index function
 def get_equipment_index(tag, equipment_type=None):
@@ -136,9 +136,11 @@ class _EquipmentOneInletOutlet:
         self.outlet_temperature = None if 'outlet_temperature' not in inputs else inputs['outlet_temperature']
         self.design_temperature = None if 'design_temperature' not in inputs else inputs['design_temperature']
 
-        #Inlet and outlet material streams
-        self.inlet_stream_tag = None if 'inlet_stream_tag' not in inputs else inputs['inlet_stream_tag']
-        self.outlet_stream_tag = None if 'outlet_stream_tag' not in inputs else inputs['outlet_stream_tag']
+        #Inlet and outlet material and energy streams
+        self._inlet_material_stream_tag = None
+        self._outlet_material_stream_tag = None
+        self._inlet_energy_stream_tag = None
+        self._outlet_energy_stream_tag = None
         
     @property
     def inlet_pressure(self):
@@ -201,51 +203,100 @@ class _EquipmentOneInletOutlet:
         else:
             raise Exception("Error! Assign inlet value or outlet outlet before assigning differential")
     
-    @property
-    def inlet_stream_tag(self):
-        return self._inlet_stream_tag
-    @inlet_stream_tag.setter
-    def inlet_stream_tag(self, tag):
-        self._inlet_stream_tag = tag
-        self._inlet_stream_index = streams.get_stream_index(tag, 'm')
-        if self._inlet_stream_index is None or isinstance(self._inlet_stream_index, list):
+    def get_stream_tag(self, stream_type, direction):
+        if stream_type.lower() in ['material', 'mass', 'm']:
+            stream_tag = [self._inlet_material_stream_tag, self._outlet_material_stream_tag]
+        elif stream_type.lower() in ['energy', 'power', 'e', 'p']:
+            stream_tag = [self._inlet_energy_stream_tag, self._outlet_energy_stream_tag]
+        else:
+            raise Exception('Incorrect stream_type specified! Provided \"'+stream_type+'\". Can only be "material/mass/m" or "energy/e/power/p"]')
+        
+        if direction.lower() in ['in', 'inlet']:
+                return stream_tag[0]
+        elif direction.lower() in ['out', 'outlet']:
+            return stream_tag[1]
+        else:
+            raise Exception('Incorrect direction specified! Provided \"'+direction+'\". Can only be ["in", "out", "inlet", "outlet"]')
+
+    def connect_stream(self,
+                       stream_object=None,
+                       direction=None, 
+                       stream_tag=None,
+                       stream_type=None):
+        print("connect_stream eneter")
+        if stream_object is not None:
+            stream_tag = stream_object.tag
+            if isinstance(stream_object, streams.MaterialStream):
+                stream_type = 'material'
+            elif isinstance(stream_object, streams.EnergyStream):
+                stream_type = 'energy'
+
+        if stream_type.lower() not in ['material', 'mass', 'm', 'energy', 'power', 'e', 'p']:
+            raise Exception('Incorrect stream_type specified! Provided \"'+stream_type+'\". Can only be "material/mass/m" or "energy/e/power/p"]')
+        if direction not in ['in', 'inlet', 'out', 'outlet']:
+            raise Exception('Incorrect direction specified! Provided \"'+direction+'\". Can only be ["in", "out", "inlet", "outlet"]')
+        
+        stream_index = streams.get_stream_index(stream_tag, stream_type)
+        is_inlet = True if direction.lower() in ['in', 'inlet'] else False 
+        self._stream_equipment_mapper(stream_index, stream_type, is_inlet)
+        
+        if stream_type.lower() in ['material', 'mass', 'm']:
+            if direction.lower() in ['in', 'inlet']:
+                self._inlet_material_stream_tag = stream_tag
+            else:
+                self._outlet_material_stream_tag = stream_tag
+        else:
+            if direction.lower() in ['in', 'inlet']:
+                self._inlet_energy_stream_tag = stream_tag
+            else:
+                self._outlet_energy_stream_tag = stream_tag
+    
+    def disconnect_stream(self, stream_type, direction):
+        self.connect_stream(None, stream_type, direction)
+    
+    def disconnect_stream_tag(self, stream_tag):
+        if stream_tag == self._inlet_material_stream_tag:
+            self.disconnect_stream('m', 'in')
+        elif stream_tag == self._outlet_material_stream_tag:
+            self.discconnect_stream('m', 'out')
+        elif stream_tag == self._inlet_energy_stream_tag:
+            self.disconnect_stream('e','in')
+        else:
+            self.disconnect_stream('e','out')
+        
+    def _stream_equipment_mapper(self, stream_index, stream_type, is_inlet):
+
+        if stream_index is None or isinstance(stream_index, list):
             return
-        going_in_equipment_type = type(self)
-        going_in_equipment_index = get_equipment_index(self.tag, going_in_equipment_type)
+        e_type, e_index = (3, 2) if is_inlet else (1, 0)
+        global _material_stream_equipment_map
+        global _energy_stream_equipment_map
+        stream_equipment_map = _material_stream_equipment_map if stream_type == 'm' else _energy_stream_equipment_map
+        equipment_type = type(self)
+        equipment_index = get_equipment_index(self.tag, equipment_type)
+        def set_type_index():
+            old_equipment_type = stream_equipment_map[stream_index][e_type]
+            old_equipment_index = stream_equipment_map[stream_index][e_index]
+            stream_equipment_map[stream_index][e_type] = equipment_type
+            stream_equipment_map[stream_index][e_index] = equipment_index
+            if (old_equipment_index is not None
+                and old_equipment_type is not None):
+                old_equipment_type.list_objects()[old_equipment_index].disconnect(stream_type, 
+                                                                                  'in' if is_inlet else 'out')
         try:
-            _material_stream_equipment_mapper[self._inlet_stream_index][2] = going_in_equipment_type
-            _material_stream_equipment_mapper[self._inlet_stream_index][3] = going_in_equipment_index
+            set_type_index()   
         except:
             try:
-                _material_stream_equipment_mapper[self._inlet_stream_index] = [None, 
-                                                                            None,
-                                                                            going_in_equipment_type, 
-                                                                            going_in_equipment_index]
+                stream_equipment_map[stream_index] = [None, None, None, None]
+                set_type_index()
             except Exception as e:
                 raise Exception("Error occured in equipment-stream mapping:", e)
 
-    @property
-    def outlet_stream_tag(self):
-        return self._outlet_stream_tag
-    @outlet_stream_tag.setter
-    def outlet_stream_tag(self, tag):
-        self._outlet_stream_tag = tag
-        self._outlet_stream_index = streams.get_stream_index(tag, 'm')
-        if self._inlet_stream_index is None or isinstance(self._inlet_stream_index, list):
-            return
-        coming_out_equipment_type = type(self)
-        coming_out_equipment_index = get_equipment_index(self.tag, coming_out_equipment_type)
-        try:
-            _material_stream_equipment_mapper[self._outlet_stream_index][0] = coming_out_equipment_type
-            _material_stream_equipment_mapper[self._outlet_stream_index][1] = coming_out_equipment_index
-        except:
-            try:
-                _material_stream_equipment_mapper[self._inlet_stream_index] = [coming_out_equipment_type, 
-                                                                            coming_out_equipment_index,
-                                                                            None,
-                                                                            None]
-            except Exception as e:
-                raise Exception("Error occured in equipment-stream mapping:", e)
+        if stream_type == 'm':
+            _material_stream_equipment_map = stream_equipment_map
+        else:
+            _energy_stream_equipment_map = stream_equipment_map
+
         
 
 #Defining generic base class for all equipments with multiple inlet and outlet. TO BE UPDATED!!!!!!       
@@ -430,6 +481,13 @@ class CentrifugalPump(_PressureChangers):
     @classmethod
     def list_objects(cls):
         return cls.items
+    
+    def connect_stream(self, stream_object=None, direction=None, stream_tag=None, stream_type=None):
+        if ((stream_object is not None and 
+            isinstance(stream_object, streams.EnergyStream)) or
+            stream_type in ['energy', 'power', 'e', 'p']):
+            direction = 'in'
+        return super().connect_stream(direction=direction, stream_object=stream_object, stream_tag=stream_tag, stream_type=stream_type)
     
 class PositiveDisplacementPump(_PressureChangers):
     items = []

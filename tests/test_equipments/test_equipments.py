@@ -190,12 +190,13 @@ def test_no_equipment_with_same_tag_and_type():
 
 @pytest.mark.connections
 def test_equipment_stream_connection():
-    s1 = streams.MaterialStream(tag='1')
-    s2 = streams.MaterialStream(tag='2')
-    eq1 = CentrifugalPump(tag="P-234", inlet_stream_tag=s1.tag, outlet_stream_tag=s2.tag)
-    assert eq1.inlet_stream_tag == s1.tag
-    assert eq1.outlet_stream_tag == s2.tag
-    eq1.inlet_stream_tag = '2'
-    eq1.outlet_stream_tag = '1'
-    assert eq1.inlet_stream_tag == s2.tag
-    assert eq1.outlet_stream_tag == s1.tag
+    s1 = streams.MaterialStream(tag='Pump-inlet')
+    s2 = streams.MaterialStream(tag='Pump-outlet')
+    en1 = streams.EnergyStream(tag='Pump-power')
+    eq1 = CentrifugalPump(tag="P-234")
+    eq1.connect_stream(s1,'in')
+    assert eq1.get_stream_tag('m', 'in') == 'Pump-inlet'
+    eq1.connect_stream(direction='out', stream_tag='Pump-outlet', stream_type='m')
+    assert eq1.get_stream_tag('Material', 'out') == 'Pump-outlet'
+    eq1.connect_stream(en1)
+    assert eq1.get_stream_tag('energy', 'in') == 'Pump-power'
