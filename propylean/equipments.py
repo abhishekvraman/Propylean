@@ -1,3 +1,4 @@
+from attr import s
 import pandas as pd
 import propylean.properties as prop
 from thermo.chemical import Chemical
@@ -23,13 +24,13 @@ def get_equipment_index(tag, equipment_type=None):
     #If equipment_type is known to the user
     if equipment_type in ['Centrifugal Pump', 'centrifugal pump', 'centrifugal pumps', 'Centrifugal Pumps', CentrifugalPump]:
         return _get_equipment_index_from_quipment_list(tag, CentrifugalPump.list_objects())
-    elif equipment_type in ['Positive Displacement Pump', 'PD pumps', 'resiprocating pumps', 'positive displacement pump', type(PositiveDisplacementPump)]:
+    elif equipment_type in ['Positive Displacement Pump', 'PD pumps', 'resiprocating pumps', 'positive displacement pump', PositiveDisplacementPump]:
         return _get_equipment_index_from_quipment_list(tag, PositiveDisplacementPump.list_objects())
     elif equipment_type in ['Centrifugal Compressor', 'centrifugal compressor', 'centrifugal compressors','Centrifugal COmpressors']:
         return _get_equipment_index_from_quipment_list(tag, CentrifugalCompressor.list_objects())
     elif equipment_type in ['Expander', 'expander','expanders','Expanders']:
         return _get_equipment_index_from_quipment_list(tag, Expander.list_objects())
-    elif equipment_type in ['Pipe Segment', 'pipe segment', 'piping', 'pipe','Pipe','pipes','Pipes']:
+    elif equipment_type in ['Pipe Segment', 'pipe segment', 'piping', 'pipe','Pipe','pipes','Pipes', PipeSegment]:
         return _get_equipment_index_from_quipment_list(tag, PipeSegment.list_objects())
     elif equipment_type in ['Control Value', 'cv', 'control valve', 'CV', 'control valves', 'Control Valves']:
         return _get_equipment_index_from_quipment_list(tag, ControlValve.list_objects())
@@ -82,8 +83,8 @@ def get_equipment_index(tag, equipment_type=None):
                 get_equipment_index(tag, 'valve') +
                 get_equipment_index(tag, 'exchangers'))
     else:
-        raise Exception('''Invalid Equipment type!! 
-                           Valid equipment types are:
+        raise Exception('Invalid Equipment type!! Got'+ str(equipment_type)+ 
+                           '''Valid equipment types are:
                             * Centrifugal Pump
                             * Positive Displacement Pump
                             * Pump if you don't remember the exact type
@@ -142,6 +143,8 @@ class _EquipmentOneInletOutlet:
         self._inlet_energy_stream_tag = None
         self._outlet_energy_stream_tag = None
         
+        #Other Porperties
+        self._is_disconnection = False
     @property
     def inlet_pressure(self):
         return self._inlet_pressure
@@ -223,23 +226,30 @@ class _EquipmentOneInletOutlet:
                        direction=None, 
                        stream_tag=None,
                        stream_type=None):
-        print("connect_stream eneter")
         if stream_object is not None:
+            if not (isinstance(stream_object, streams.EnergyStream) or
+                    isinstance(stream_object, streams.MaterialStream)):
+                    raise Exception("Stream object should be of type EnergyStream or Material Stream not "+
+                                    +type(stream_object))
             stream_tag = stream_object.tag
             if isinstance(stream_object, streams.MaterialStream):
                 stream_type = 'material'
             elif isinstance(stream_object, streams.EnergyStream):
                 stream_type = 'energy'
-
+        elif not self._is_disconnection and stream_tag is None:
+            raise Exception("Either of Stream Object or Stream Tag is required for connection!")
+        
         if stream_type.lower() not in ['material', 'mass', 'm', 'energy', 'power', 'e', 'p']:
             raise Exception('Incorrect stream_type specified! Provided \"'+stream_type+'\". Can only be "material/mass/m" or "energy/e/power/p"]')
-        if direction not in ['in', 'inlet', 'out', 'outlet']:
+        if direction.lower() not in ['in', 'inlet', 'out', 'outlet']:
             raise Exception('Incorrect direction specified! Provided \"'+direction+'\". Can only be ["in", "out", "inlet", "outlet"]')
         
         stream_index = streams.get_stream_index(stream_tag, stream_type)
-        is_inlet = True if direction.lower() in ['in', 'inlet'] else False 
-        self._stream_equipment_mapper(stream_index, stream_type, is_inlet)
-        
+        is_inlet = True if direction.lower() in ['in', 'inlet'] else False
+
+        mapping_result = self._stream_equipment_mapper(stream_index, stream_type, is_inlet)
+        if self._is_disconnection:
+            stream_tag = None
         if stream_type.lower() in ['material', 'mass', 'm']:
             if direction.lower() in ['in', 'inlet']:
                 self._inlet_material_stream_tag = stream_tag
@@ -250,39 +260,73 @@ class _EquipmentOneInletOutlet:
                 self._inlet_energy_stream_tag = stream_tag
             else:
                 self._outlet_energy_stream_tag = stream_tag
-    
-    def disconnect_stream(self, stream_type, direction):
-        self.connect_stream(None, stream_type, direction)
-    
-    def disconnect_stream_tag(self, stream_tag):
-        if stream_tag == self._inlet_material_stream_tag:
-            self.disconnect_stream('m', 'in')
-        elif stream_tag == self._outlet_material_stream_tag:
-            self.discconnect_stream('m', 'out')
-        elif stream_tag == self._inlet_energy_stream_tag:
-            self.disconnect_stream('e','in')
-        else:
-            self.disconnect_stream('e','out')
+        self._is_disconnection = False
+        return mapping_result
+
+    def disconnect_stream(self, 
+                          stream_object=None,
+                          direction=None, 
+                          stream_tag=None,
+                          stream_type=None):
         
+        def define_index_direction(tag):
+            if tag == self._inlet_material_stream_tag:
+                stream_type = "material"
+                direction = "in"
+            elif tag == self._outlet_material_stream_tag:
+                stream_type = "material"
+                direction = "out"
+            elif tag == self._inlet_energy_stream_tag:
+                stream_type = "energy"
+                direction = "in"
+            elif tag == self._outlet_energy_stream_tag:
+                stream_type = "energy"
+                direction = "out"
+            return stream_type, direction
+
+        if stream_object is not None:
+            stream_type, direction = define_index_direction(stream_object.tag)
+        elif stream_tag is not None:
+            stream_type, direction = define_index_direction(stream_tag)
+        elif (direction is not None and 
+              stream_type is not None):
+              stream_tag = self.get_stream_tag(stream_type, direction)
+              stream_type, direction = define_index_direction(stream_tag)
+        else:
+            raise Exception("To disconnect stream from equipment, provide either just connected stream object or \
+                             just stream tag or just direction & stream type") 
+              
+        self._is_disconnection = True
+        return self.connect_stream(stream_object,
+                                   direction, 
+                                   stream_tag,
+                                   stream_type)
+    
+   
     def _stream_equipment_mapper(self, stream_index, stream_type, is_inlet):
 
         if stream_index is None or isinstance(stream_index, list):
-            return
+            return False
         e_type, e_index = (3, 2) if is_inlet else (1, 0)
         global _material_stream_equipment_map
         global _energy_stream_equipment_map
-        stream_equipment_map = _material_stream_equipment_map if stream_type == 'm' else _energy_stream_equipment_map
+        stream_equipment_map = _material_stream_equipment_map if stream_type == 'material' else _energy_stream_equipment_map
         equipment_type = type(self)
         equipment_index = get_equipment_index(self.tag, equipment_type)
         def set_type_index():
             old_equipment_type = stream_equipment_map[stream_index][e_type]
             old_equipment_index = stream_equipment_map[stream_index][e_index]
-            stream_equipment_map[stream_index][e_type] = equipment_type
-            stream_equipment_map[stream_index][e_index] = equipment_index
+            stream_equipment_map[stream_index][e_type] = equipment_type if not self._is_disconnection else None
+            stream_equipment_map[stream_index][e_index] = equipment_index if not self._is_disconnection else None
             if (old_equipment_index is not None
                 and old_equipment_type is not None):
-                old_equipment_type.list_objects()[old_equipment_index].disconnect(stream_type, 
-                                                                                  'in' if is_inlet else 'out')
+                old_equipment_obj = old_equipment_type.list_objects()[old_equipment_index]
+                old_equipment_obj.disconnect_stream(stream_type, 'in' if is_inlet else 'out')
+                raise Warning("Equipment type " + old_equipment_type +
+                              " with tag " + old_equipment_obj.tag + 
+                              " was disconnected from stream type " + stream_type +
+                              " with tag " + self.get_stream_tag(stream_type,
+                                                                'in' if is_inlet else 'out'))
         try:
             set_type_index()   
         except:
@@ -296,6 +340,7 @@ class _EquipmentOneInletOutlet:
             _material_stream_equipment_map = stream_equipment_map
         else:
             _energy_stream_equipment_map = stream_equipment_map
+        return True
 
         
 
