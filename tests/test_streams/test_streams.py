@@ -58,26 +58,27 @@ def test_listing_of_streams():
 
     assert len(EnergyStream.list_objects())!=0
     for es in EnergyStream.list_objects():
-        assert es.tag in [None, 'ES1', 'ES2', 'ES3', 'Heat input']
+        assert es.tag in [None, 'ES1', 'ES2', 'ES3', 'Heat input', 'Pump-power']
   
     for ms in MaterialStream.list_objects():
-        assert ms.tag in [None, 'MS_1', 'MS_2', 'MS_3', 'MS_4', 'MS_5', 'MS_6', 'Input Stream 1', '1', '2']
+        assert ms.tag in [None, 'MS_1', 'MS_2', 'MS_3', 'MS_4', 'MS_5', 'MS_6', 'Input Stream 1', '1', '2', 'Pump-inlet', 'Pump-outlet']
 
 @pytest.mark.indexing
 def test_indexing_of_streams():
     energy_stream_4 = EnergyStream(tag='ES4')
-    assert get_stream_index(stream_type='energy',tag='ES4') == 7
+    assert (get_stream_index(stream_type='energy',tag='ES4') == 7 or
+            get_stream_index(stream_type='energy',tag='ES4') == 9) #change number if add/remove energy stream 
     assert len(get_stream_index(stream_type='energy', tag=None)) == 3
 
     materia_stream_1 = MaterialStream(mass_flow_rate=10,tag='Pump Inlet')
     
 
     assert (get_stream_index(stream_type='material',tag='Pump Inlet') == 8 or
-            get_stream_index(stream_type='material',tag='Pump Inlet') == 10) #change 10 to other value if more material streams defined elsewhere
+            get_stream_index(stream_type='material',tag='Pump Inlet') == 12) #change number if add/remove material stream
 
     materia_stream_3 = MaterialStream(mass_flow_rate=10,tag='ES4')
-    assert (get_stream_index('ES4')==[(7,'Energy Stream'),(9,'Material Stream')] or
-            get_stream_index('ES4')==[(7,'Energy Stream'),(11,'Material Stream')]) #change 10 to other value if more material streams defined elsewhere
+    assert (get_stream_index('ES4')==[(9,'Energy Stream'),(13,'Material Stream')] or
+            get_stream_index('ES4')==[(9,'Energy Stream'),(11,'Material Stream')]) #change number if add/remove material stream
     
     material_streams = []
     for i in range(1,11):
@@ -90,7 +91,7 @@ def test_indexing_of_streams():
     with pytest.raises(Exception):
         i = get_stream_index('Pump Outlet', 'material')
 
-@pytest.mark.connection
+@pytest.mark.connections
 def test_stream_equipment_connection():
     e1 = ControlValve(tag="CV1")
     s1 = MaterialStream(tag='1', to_equipment_tag=e1.tag,
