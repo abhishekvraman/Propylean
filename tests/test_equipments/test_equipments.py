@@ -1,3 +1,4 @@
+from fluids.two_phase_voidage import Turner_Wallis
 import pytest
 import pandas as pd
 from propylean.equipments import CentrifugalPump, PipeSegment, ControlValve, CentrifugalCompressor
@@ -189,14 +190,50 @@ def test_no_equipment_with_same_tag_and_type():
     assert len(a) == len(CentrifugalPump.list_objects())
 
 @pytest.mark.connections
-def test_equipment_stream_connection():
+def test_equipment_stream_connection_disconnection():
     s1 = streams.MaterialStream(tag='Pump-inlet')
     s2 = streams.MaterialStream(tag='Pump-outlet')
     en1 = streams.EnergyStream(tag='Pump-power')
     eq1 = CentrifugalPump(tag="P-234")
-    eq1.connect_stream(s1,'in')
+    assert eq1.connect_stream(s1,'in') is True
     assert eq1.get_stream_tag('m', 'in') == 'Pump-inlet'
-    eq1.connect_stream(direction='out', stream_tag='Pump-outlet', stream_type='m')
+    assert eq1.connect_stream(direction='out', stream_tag='Pump-outlet', stream_type='m') is True
     assert eq1.get_stream_tag('Material', 'out') == 'Pump-outlet'
-    eq1.connect_stream(en1)
+    assert eq1.connect_stream(en1) is True
     assert eq1.get_stream_tag('energy', 'in') == 'Pump-power'
+
+
+    #Checking disconnection
+    assert eq1.disconnect_stream(s1) is True
+    assert eq1.get_stream_tag('m', 'in') is None
+    assert eq1.disconnect_stream(stream_tag='Pump-outlet')
+    assert eq1.get_stream_tag('Material', 'out') is None
+    assert eq1.disconnect_stream(direction='in', stream_type="energy")
+    assert eq1.get_stream_tag('energy', 'in') is None
+
+@pytest.mark.connections
+def test_equipment_stream_incorrec_connection_disconnection():
+    s1 = streams.MaterialStream(tag='Pump-inlet')
+    s2 = streams.MaterialStream(tag='Pump-outlet')
+    en1 = streams.EnergyStream(tag='Pump-power')
+    eq1 = CentrifugalPump(tag="P-234")
+    
+    with pytest.raises(Exception):
+        result = eq1.connect_stream(s1)
+    with pytest.raises(Exception):
+        result = eq1.connect_stream(direction='in', stream_type="energy")
+    with pytest.raises(Exception):
+        result = eq1.connect_stream(s1, direction='North')
+    
+    assert eq1.connect_stream(s1,'in') is True
+    assert eq1.get_stream_tag('m', 'in') == 'Pump-inlet'
+    assert eq1.connect_stream(direction='out', stream_tag='Pump-outlet', stream_type='m') is True
+    assert eq1.get_stream_tag('Material', 'out') == 'Pump-outlet'
+    assert eq1.connect_stream(en1) is True
+
+    with pytest.raises(Exception):
+        result = eq1.disconnect_stream(direction='outlet')
+    with pytest.raises(Exception):
+        result = eq1.disconnect_stream(tag='outlet')
+
+
