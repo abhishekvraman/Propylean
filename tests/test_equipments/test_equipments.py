@@ -163,9 +163,7 @@ def test_listing_of_equipments():
 
 @pytest.mark.indexing
 def test_indexing_of_equipments():
-    assert get_equipment_index('1','centrifugal pump') == 1
-    control_valve = ControlValve()
-    assert len(get_equipment_index(None,'control valves')) == 3
+    assert CentrifugalPump.get_equipment_index('1') == 1
     with pytest.raises(Exception):
         get_equipment_index(None,'Trucks')
     
@@ -212,7 +210,7 @@ def test_equipment_stream_connection_disconnection():
     assert eq1.get_stream_tag('energy', 'in') is None
 
 @pytest.mark.connections
-def test_equipment_stream_incorrec_connection_disconnection():
+def test_equipment_stream_incorrect_connection_disconnection():
     s1 = streams.MaterialStream(tag='Pump-inlet')
     s2 = streams.MaterialStream(tag='Pump-outlet')
     en1 = streams.EnergyStream(tag='Pump-power')
