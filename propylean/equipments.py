@@ -20,61 +20,100 @@ _energy_stream_equipment_map = dict()
 
 #Get equipment index function
 def get_equipment_index(tag, equipment_type=None):
+    """ 
+    DESCRIPTION:
+        Function to get equipment index based on equipment object created.
+    
+    PARAMETERS:
+        tag:
+            Required: Yes
+            Type: str
+            Acceptable values: Any string user has used for tag.
+            Description: Reperesents the tag of equipment user want to know the index of. 
+                         User need to make sure to provide exact tag. Fuzzy search will be provided
+                         later.
+        equipment_type:
+            Required: No
+            Type: str or equipment class type
+            Acceptable values: string or type of equipment object.
+            Default value: None
+            Description: Reperesents the type of equipment user want to know the index of. 
+                         User need to make sure to provide exact tag. Fuzzy search will be provided
+                         later.
+    
+    RETURN VALUE:
+        Type: int or list of tuple
+        Description: When user knows and has provided equipment_type, returned value is int and search is faster.
+                     If not provided, then list of tuple of the form [(1,'Centrifugal Pump'),(3,'Positive Displacement Pump')]
+                     is returned with all possible outcomes. (1,'Centrifugal Pump') represents index and type of equipment.
+    
+    ERROR RAISED:
+        Type: General
+        Description: Error for invalid equipment type is raised.
+    
+    SAMPLE USE CASES:
+        >>> get_equipment_index('1','centrifugal pump')
+        1
+        >>> get_equipment_index('1','pump')
+        [(1,'Centrifugal Pump'),(3,'Positive Displacement Pump')]
+
+
+    """
     
     #If equipment_type is known to the user
     if equipment_type in ['Centrifugal Pump', 'centrifugal pump', 'centrifugal pumps', 'Centrifugal Pumps', CentrifugalPump]:
-        return _get_equipment_index_from_quipment_list(tag, CentrifugalPump.list_objects())
+        return _get_equipment_index_from_equipment_list(tag, CentrifugalPump.list_objects())
     elif equipment_type in ['Positive Displacement Pump', 'PD pumps', 'resiprocating pumps', 'positive displacement pump', PositiveDisplacementPump]:
-        return _get_equipment_index_from_quipment_list(tag, PositiveDisplacementPump.list_objects())
+        return _get_equipment_index_from_equipment_list(tag, PositiveDisplacementPump.list_objects())
     elif equipment_type in ['Centrifugal Compressor', 'centrifugal compressor', 'centrifugal compressors','Centrifugal COmpressors']:
-        return _get_equipment_index_from_quipment_list(tag, CentrifugalCompressor.list_objects())
+        return _get_equipment_index_from_equipment_list(tag, CentrifugalCompressor.list_objects())
     elif equipment_type in ['Expander', 'expander','expanders','Expanders']:
-        return _get_equipment_index_from_quipment_list(tag, Expander.list_objects())
+        return _get_equipment_index_from_equipment_list(tag, Expander.list_objects())
     elif equipment_type in ['Pipe Segment', 'pipe segment', 'piping', 'pipe','Pipe','pipes','Pipes', PipeSegment]:
-        return _get_equipment_index_from_quipment_list(tag, PipeSegment.list_objects())
+        return _get_equipment_index_from_equipment_list(tag, PipeSegment.list_objects())
     elif equipment_type in ['Control Value', 'cv', 'control valve', 'CV', 'control valves', 'Control Valves']:
-        return _get_equipment_index_from_quipment_list(tag, ControlValve.list_objects())
+        return _get_equipment_index_from_equipment_list(tag, ControlValve.list_objects())
     elif equipment_type in ['Pressure Safety Valve', 'PSV', 'psv', 'safety valves', 'PSVs']:
-        return _get_equipment_index_from_quipment_list(tag, PressureSafetyValve.list_objects())
+        return _get_equipment_index_from_equipment_list(tag, PressureSafetyValve.list_objects())
     elif equipment_type in ['Flow Meter', 'flow meter', 'Flow Meters', 'flow meters']:
-        return _get_equipment_index_from_quipment_list(tag, FlowMeter.list_objects())
+        return _get_equipment_index_from_equipment_list(tag, FlowMeter.list_objects())
     elif equipment_type in ['Vertical Separator']:
-        return _get_equipment_index_from_quipment_list(tag, VerticalSeparator.list_objects())
+        return _get_equipment_index_from_equipment_list(tag, VerticalSeparator.list_objects())
     elif equipment_type in ['Horizontal Separator']:
-        return _get_equipment_index_from_quipment_list(tag, HorizontalSeparator.list_objects())
+        return _get_equipment_index_from_equipment_list(tag, HorizontalSeparator.list_objects())
     elif equipment_type in ['Column', 'column', 'columns', 'Columns']:
-        return _get_equipment_index_from_quipment_list(tag, Column.list_objects())
+        return _get_equipment_index_from_equipment_list(tag, Column.list_objects())
     elif equipment_type in ['Tank', 'tank', 'Tanks', 'tanks']:
-        return _get_equipment_index_from_quipment_list(tag, Tank.list_objects())
+        return _get_equipment_index_from_equipment_list(tag, Tank.list_objects())
     elif equipment_type in ['Shell and Tube Heat exchanger', 'S&T HE', 'S&T Heat Exchanger'] :
-        return _get_equipment_index_from_quipment_list(tag, ShellnTubeExchanger.list_objects())
+        return _get_equipment_index_from_equipment_list(tag, ShellnTubeExchanger.list_objects())
     elif equipment_type in ['Air Cooler', 'Air Coolers', 'air coolers']:
-        return _get_equipment_index_from_quipment_list(tag, AirCoolers.list_objects())
+        return _get_equipment_index_from_equipment_list(tag, AirCoolers.list_objects())
     
     
     #If user knows the general type of the equipment
     elif equipment_type in ['Pump', 'pump', 'Pumps', 'pumps']:
-        return [(_get_equipment_index_from_quipment_list(tag, CentrifugalPump.list_objects()),'Centrifugal Pump'),
-                (_get_equipment_index_from_quipment_list(tag, PositiveDisplacementPump.list_objects()),'Positive Displacement Pump')]
+        return [(_get_equipment_index_from_equipment_list(tag, CentrifugalPump.list_objects()),'Centrifugal Pump'),
+                (_get_equipment_index_from_equipment_list(tag, PositiveDisplacementPump.list_objects()),'Positive Displacement Pump')]
 
 
     elif equipment_type in ['vessel', 'vessels', 'Vessels', 'Vessel']:
-        return [(_get_equipment_index_from_quipment_list(tag, VerticalSeparator.list_objects()),'Verticle Vessel'),
-                (_get_equipment_index_from_quipment_list(tag, HorizontalSeparator.list_objects()),'Horizontal Separator'),
-                (_get_equipment_index_from_quipment_list(tag, Column.list_objects()),'Column'),
-                (_get_equipment_index_from_quipment_list(tag, Tank.list_objects()),'Tank')
+        return [(_get_equipment_index_from_equipment_list(tag, VerticalSeparator.list_objects()),'Verticle Vessel'),
+                (_get_equipment_index_from_equipment_list(tag, HorizontalSeparator.list_objects()),'Horizontal Separator'),
+                (_get_equipment_index_from_equipment_list(tag, Column.list_objects()),'Column'),
+                (_get_equipment_index_from_equipment_list(tag, Tank.list_objects()),'Tank')
                 ]
     
     elif equipment_type in ['valve', 'Valve', 'instrument', 'Instrument']:
-        return [(_get_equipment_index_from_quipment_list(tag, ControlValve.list_objects()),'Control Valve'),
-                (_get_equipment_index_from_quipment_list(tag, PressureSafetyValve.list_objects()),'Pressure Safety Valve'),
-                (_get_equipment_index_from_quipment_list(tag, FlowMeter.list_objects()),'Flow Meter')
+        return [(_get_equipment_index_from_equipment_list(tag, ControlValve.list_objects()),'Control Valve'),
+                (_get_equipment_index_from_equipment_list(tag, PressureSafetyValve.list_objects()),'Pressure Safety Valve'),
+                (_get_equipment_index_from_equipment_list(tag, FlowMeter.list_objects()),'Flow Meter')
                 ]
     
     elif equipment_type in ['exchangers', 'Exchanger', 'heat exchanger', 'Heat Exchanger',
                             'Heat Exchangers', 'heat exchangers']:
-        return  [(_get_equipment_index_from_quipment_list(tag, ShellnTubeExchanger.list_objects()),'Shell and Tube Exchanger'),
-                (_get_equipment_index_from_quipment_list(tag, AirCoolers.list_objects()),'Air Cooler')]
+        return  [(_get_equipment_index_from_equipment_list(tag, ShellnTubeExchanger.list_objects()),'Shell and Tube Exchanger'),
+                (_get_equipment_index_from_equipment_list(tag, AirCoolers.list_objects()),'Air Cooler')]
     
     # If the user does not know the type of equipment at all
     elif equipment_type == None:
@@ -104,7 +143,32 @@ def get_equipment_index(tag, equipment_type=None):
                             * Air Cooler
                             * Exchanger if you don't remember the exact type''')
     
-def _get_equipment_index_from_quipment_list(tag, equipment_list):
+def _get_equipment_index_from_equipment_list(tag, equipment_list):
+    """ 
+    DESCRIPTION:
+        Internal function to get equipment index from equipment_list we know to search from.
+    
+    PARAMETERS:
+        tag:
+            Required: Yes
+            Type: str
+            Acceptable values: Any string user has used for tag.
+            Description: Reperesents the tag of equipment user want to know the index of. 
+                         User need to make sure to provide exact tag. Fuzzy search will be provided
+                         later.
+    
+    RETURN VALUE:
+        Type: int or list of int
+        Description: Returned value is integer if tag is known and correct.
+                     TODO: Remove none_tag searches 
+    
+    ERROR RAISED:
+        Type: None
+        Description:
+    
+    SAMPLE USE CASES:
+        
+    """
     list_of_none_tag_equipments =[]
     for index, equipment in enumerate(equipment_list):
         if equipment.tag == None and tag==None:
@@ -117,6 +181,103 @@ def _get_equipment_index_from_quipment_list(tag, equipment_list):
 #Defining generic base class for all equipments with one inlet and outlet
 class _EquipmentOneInletOutlet:
     def __init__(self, **inputs) -> None:
+        """ 
+        DESCRIPTION:
+            Internal base class to define an equipment with one inlet and outlet.
+            All final classes inherits from this base class.
+            Read individual final classed for further description.
+    
+        PARAMETERS:
+            tag:
+                Required: No TODO: Make tag as required or randomly generate a tag.
+                Type: str
+                Acceptable values: Any string type
+                Default value: None
+                Description: Equipment tag the user wants to provide
+            
+            dynamic_state:
+                Required: No
+                Type: bool
+                Acceptable values: True or False
+                Default value: False
+                Description: If equipment is in dynamic state and inventory is changing.
+                             TODO: Provide dynamic simulation capabilities.
+            
+            inlet_mass_flowrate:
+                Required: No
+                Type: int or float (recommended)
+                Acceptable values: Any
+                Default value: None
+                Description: Represents material inlet flowrate to the equipment.
+            
+            outlet_mass_flowrate:
+                Required: No
+                Type: int or float (recommended)
+                Acceptable values: Any
+                Default value: None
+                Description: Represents material outlet flowrate to the equipment.
+            
+            design_flowrate:
+                Required: No
+                Type: int or float (recommended)
+                Acceptable values: Any
+                Default value: None
+                Description: Represents material design flowrate of the equipment.
+
+            inlet_pressure:
+                Required: No
+                Type: int or float (recommended)
+                Acceptable values: Any
+                Default value: None
+                Description: Represents material inlet pressure to the equipment.
+            
+            outlet_pressure:
+                Required: No
+                Type: int or float (recommended)
+                Acceptable values: Any
+                Default value: None
+                Description: Represents material outlet pressure to the equipment.
+            
+            design_pressure:
+                Required: No
+                Type: int or float (recommended)
+                Acceptable values: Any
+                Default value: None
+                Description: Represents material design pressure of the equipment.
+            
+            inlet_temperature:
+                Required: No
+                Type: int or float (recommended)
+                Acceptable values: Any
+                Default value: None
+                Description: Represents material inlet temperature to the equipment.
+            
+            outlet_temperature:
+                Required: No
+                Type: int or float (recommended)
+                Acceptable values: Any
+                Default value: None
+                Description: Represents material outlet temperature to the equipment.
+            
+            design_temperature:
+                Required: No
+                Type: int or float (recommended)
+                Acceptable values: Any
+                Default value: None
+                Description: Represents material design temperature of the equipment.
+
+        RETURN VALUE:
+            Type: _EquipmentOneInletOutlet
+            Description: Object of type _EquipmentOneInletOutlet
+        
+        ERROR RAISED:
+            Type: Various
+            Description: 
+        
+        SAMPLE USE CASES:
+            >>> class NewEquipment(_EquipmentOneInletOutlet):
+                ......
+        """
         self.tag = None if 'tag' not in inputs else inputs['tag']
         self.dynamic_state = False if 'dynamic_state' not in inputs else inputs['dynamic_state']
 
@@ -207,6 +368,35 @@ class _EquipmentOneInletOutlet:
             raise Exception("Error! Assign inlet value or outlet outlet before assigning differential")
     
     def get_stream_tag(self, stream_type, direction):
+        """ 
+        DESCRIPTION:
+            Class method to get stream tag using steam type and the direction.
+        
+        PARAMETERS:
+            stream_type:
+                Required: Yes
+                Type: str
+                Acceptable values: 'm', 'mass', 'e', 'energy'
+                Description: Type of stream user wants to get tag of.
+            
+            direction:
+                Required: Yes
+                Type: str
+                Acceptable values: 'in', 'out', 'inlet' or 'outlet'
+                Description: Direction of stream with respect to equipment user wants to get tag of.
+        RETURN VALUE:
+            Type: str
+            Description: Tag value of stream user has assigned to the stream
+        
+        ERROR RAISED:
+            Type: General TODO
+            Description: Raises error if arguments are incorrect
+        
+        SAMPLE USE CASES:
+            >>> eq1.get_stream_tag('m', 'out')
+            >>> eq1.get_stream_tag('energy', 'in')
+        """
+
         if stream_type.lower() in ['material', 'mass', 'm']:
             stream_tag = [self._inlet_material_stream_tag, self._outlet_material_stream_tag]
         elif stream_type.lower() in ['energy', 'power', 'e', 'p']:
@@ -226,6 +416,51 @@ class _EquipmentOneInletOutlet:
                        direction=None, 
                        stream_tag=None,
                        stream_type=None):
+        """ 
+        DESCRIPTION:
+            Class method to connect a stream object with equiment.
+        
+        PARAMETERS:
+            stream_object:
+                Required: No if stream_tag is provided else Yes
+                Type: EnergyStream or MaterialStream
+                Acceptable values: object of specified stream types
+                Default value: None
+                Description: Stream object user wants to connect the equipment with.
+            
+            direction:
+                Required: Yes for material stream. For energy stream not needed
+                Type: str
+                Acceptable values: 'in', 'out', 'inlet' or 'outlet'
+                Default value: None
+                Description: Direction in which stream should be with respect to equipment.
+            
+            stream_tag:
+                Required: No if stream_object is provided else Yes
+                Type: str
+                Acceptable values: stream tag provided by user
+                Default value: None
+                Description: Stream object with known stream_tag user wants to connect the equipment with.
+
+            stream_type:
+                Required: No if stream_object provided
+                Type: str
+                Acceptable values: 'm', 'mass', 'e', 'energy'
+                Description: Type of stream user wants to connect.
+
+        RETURN VALUE:
+            Type: bool
+            Description: True is returned if connection is successful else False
+        
+        ERROR RAISED:
+            Type: General
+            Description: Error raised if arguments are wrong
+        
+        SAMPLE USE CASES:
+            >>> eq1.connect_stream(en1)
+            >>> eq1.connect_stream(direction='out', stream_tag='Pump-outlet', stream_type='m')
+            >>> eq1.get_stream_tag('m', 'in')
+        """
         if stream_object is not None:
             if not (isinstance(stream_object, streams.EnergyStream) or
                     isinstance(stream_object, streams.MaterialStream)):
@@ -268,7 +503,51 @@ class _EquipmentOneInletOutlet:
                           direction=None, 
                           stream_tag=None,
                           stream_type=None):
+        """ 
+        DESCRIPTION:
+            Class method to disconnect a stream object from equiment.
         
+        PARAMETERS:
+            stream_object:
+                Required: No if stream_tag is provided else Yes
+                Type: EnergyStream or MaterialStream
+                Acceptable values: object of specified stream types
+                Default value: None
+                Description: Stream object user wants to disconnect the equipment with.
+            
+            direction:
+                Required: Yes is stream_object or stream_tag not provided
+                Type: str
+                Acceptable values: 'in', 'out', 'inlet' or 'outlet'
+                Default value: None
+                Description: Direction in which stream should be with respect to equipment.
+            
+            stream_tag:
+                Required: No if stream_object is provided else Yes
+                Type: str
+                Acceptable values: stream tag provided by user
+                Default value: None
+                Description: Stream object with known stream_tag user wants to disconnect the equipment from.
+
+            stream_type:
+                Required: No if stream_object provided
+                Type: str
+                Acceptable values: 'm', 'mass', 'e', 'energy'
+                Description: Type of stream user wants to disconnect.
+
+        RETURN VALUE:
+            Type: bool
+            Description: True is returned if connection is successful else False
+        
+        ERROR RAISED:
+            Type: General
+            Description: Error raised if arguments are wrong
+        
+        SAMPLE USE CASES:
+            >>> eq1.disconnect_stream(s1)
+            >>> eq1.disconnect_stream(stream_tag='Pump-outlet')
+            >>> eq1.disconnect_stream(direction='in', stream_type="energy")
+        """
         def define_index_direction(tag):
             if tag == self._inlet_material_stream_tag:
                 stream_type = "material"
@@ -301,8 +580,7 @@ class _EquipmentOneInletOutlet:
                                    direction, 
                                    stream_tag,
                                    stream_type)
-    
-   
+      
     def _stream_equipment_mapper(self, stream_index, stream_type, is_inlet):
 
         if stream_index is None or isinstance(stream_index, list):
