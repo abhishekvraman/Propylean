@@ -18,11 +18,11 @@ def test_CentrifugalPump_instantiation():
     cp.discharge_pressure = 90
     assert cp.outlet_pressure.value == 90
     cp.inlet_mass_flowrate = 10
-    assert cp.pressure_drop == -60
-    assert cp.differential_pressure == 60
-    assert cp.inlet_pressure.value == 30
+    assert cp.pressure_drop.value == -40
+    assert cp.differential_pressure.value == 40
+    assert cp.inlet_pressure.value == 50
     cp.differential_pressure = 50
-    assert cp.discharge_pressure.value == 80
+    assert cp.discharge_pressure.value == 100
     
     with pytest.raises(Exception):
         cp.efficiency = -1
@@ -37,7 +37,7 @@ def test_CentrifugalPump_instantiation():
     cp.outlet_mass_flowrate = 30
     if not cp.dynamic_state:
         assert cp.inlet_mass_flowrate == 30
-    assert cp.head ==  cp.differential_pressure/(9.8*1000) #unpdate based on liquid density from stream
+    assert cp.head ==  cp.differential_pressure.value/(9.8*1000) #unpdate based on liquid density from stream
     
     cp.pump_curve = pd.DataFrame([{'flow':[2,10,30,67], 'head':[45,20,10,2]}])
     with pytest.raises(Exception):
@@ -97,7 +97,7 @@ def test_PipeSegment_pressure_drop():
     assert p.inlet_mass_flowrate != None
     assert p.ID != None
     assert p.outlet_pressure != None
-    assert abs(p.pressure_drop - 115555)<150000 #Pa  NEEDS UPDATE !!!!!
+    assert abs(p.pressure_drop.value - 115555)<150000 #Pa  NEEDS UPDATE !!!!!
 
 @pytest.mark.printing
 def test_PipeSegment_print(capsys):
@@ -111,13 +111,13 @@ def test_ControlValve_instantiation():
     #All units in SI
     valve = ControlValve(inlet_pressure=1.04217e7, outlet_pressure=9.92167e6, inlet_temperature=299.18)
     valve.inlet_mass_flowrate = 1 #kg/s
-    assert abs(valve.pressure_drop - (1.04217e7-9.92167e6)) < 0.001
+    assert abs(valve.pressure_drop.value - (1.04217e7-9.92167e6)) < 0.001
     assert abs(valve.Kv - 1.61259) < 0.001
 
     # Gas phase calculation
     valve = ControlValve(inlet_pressure=202650, outlet_pressure=197650, inlet_temperature=423.15)
     valve.inlet_mass_flowrate = 1 #kg/s
-    assert valve.pressure_drop == 5000
+    assert valve.pressure_drop.value == 5000
     assert abs(valve.Kv - 502.88) <= 118.5 #NEEDS UPDATE 
     del valve
 
@@ -125,9 +125,9 @@ def test_ControlValve_instantiation():
 def test_CentrifugalCompressor_instantiation():
     
     compressor = CentrifugalCompressor(suction_pressure = 1013250.0, #Pa
-                                                  differential_pressure = 5000000.0, #Pa
-                                                  inlet_temperature = 248.15, #K
-                                                  inlet_mass_flowrate = 0.02778) #kg/s
+                                       differential_pressure = 5000000.0, #Pa
+                                       inlet_temperature = 248.15, #K
+                                       inlet_mass_flowrate = 0.02778) #kg/s
     
     assert compressor.discharge_pressure.value == 1013250.0 + 5000000.0
     

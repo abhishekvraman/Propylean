@@ -4,6 +4,7 @@ from fluids import control_valve as cv_calculations
 import fluids.compressible as compressible_fluid 
 from math import pi
 from propylean import streams
+import propylean.properties as prop
 
 #Get equipment index function
 def get_equipment_index(tag, equipment_type=None):
@@ -226,11 +227,11 @@ class CentrifugalPump(_PressureChangers):
     @property
     def head(self):
         fluid_density = 1000 # TODO THIS NEEDS TO BE UPDATED WITH STREAM PROPERTY
-        return self.differential_pressure / (9.8 * fluid_density)
+        return self.differential_pressure.value / (9.8 * fluid_density)
     @property
     def hydraulic_power(self):
         fluid_density = 1000 # TODO THIS NEEDS TO BE UPDATED WITH STREAM PROPERTY
-        return self.inlet_mass_flowrate * fluid_density * 9.81 * self.head / (3.6e6)
+        return self.inlet_mass_flowrate.value * fluid_density * 9.81 * self.head / (3.6e6)
     @property
     def brake_horse_power(self):
         return self.hydraulic_power / self.efficiency
@@ -307,8 +308,8 @@ class CentrifugalCompressor(_PressureChangers):
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
         self.methane = Chemical('methane',
-                         T = self.inlet_temperature,
-                         P = self._inlet_pressure.value)
+                         T = self.inlet_temperature.value,
+                         P = self.inlet_pressure.value)
         if 'adiabatic_efficiency' not in inputs and 'polytropic_efficiency' in inputs:
             self.polytropic_efficiency = inputs['polytropic_efficiency']
         else:
@@ -350,7 +351,7 @@ class CentrifugalCompressor(_PressureChangers):
                                                                              eta_p = value)
     @property
     def power(self):
-        work = compressible_fluid.isentropic_work_compression(T1 = self.inlet_temperature,
+        work = compressible_fluid.isentropic_work_compression(T1 = self.inlet_temperature.value,
                                                               k = self.methane.isentropic_exponent,
                                                               Z = self.methane.Z,
                                                               P1 = self._inlet_pressure.value,
@@ -473,7 +474,7 @@ class PipeSegment(_EquipmentOneInletOutlet):
             return 0
         roughness = (4.57e-5, 4.5e-5, 0.000259, 1.5e-5, 1.5e-6) #in meters
         water = Chemical('water',
-                         T = self.inlet_temperature,
+                         T = self.inlet_temperature.value,
                          P = self._inlet_pressure.value)
         Re = Reynolds(V=(self.inlet_mass_flowrate/water.rhol)/(pi* self.ID**2)/4,
                       D=self.ID, 
@@ -482,7 +483,7 @@ class PipeSegment(_EquipmentOneInletOutlet):
         fd = friction_factor(Re, eD=roughness[self.material-1]/self.ID)
         K = K_from_f(fd=fd, L=self.length, D=self.ID)        
         drop = round(dP_from_K(K, rho=1000, V=3),3)
-        return drop
+        return prop.Pressure(drop, self._inlet_pressure.unit)
         
     @property
     def thickness(self):
@@ -523,14 +524,14 @@ class ControlValve(_EquipmentOneInletOutlet):
     def Kv(self):
         # UPDATE BELOW BASED ON STREAMS
         water = Chemical('water',
-                         T = self.inlet_temperature,
+                         T = self.inlet_temperature.value,
                          P = self._inlet_pressure.value)
         if water.phase == 'l':
             return cv_calculations.size_control_valve_l(water.rhol, water.Psat, water.Pc, water.mul,
                                                         self._inlet_pressure.value, self._outlet_pressure.value, 
                                                         self.inlet_mass_flowrate/water.rhol)
         elif water.phase == 'g':
-            return cv_calculations.size_control_valve_g(T = self.inlet_temperature, 
+            return cv_calculations.size_control_valve_g(T = self.inlet_temperature.value, 
                                                         MW = water.MW,
                                                         mu= 1.48712E-05, # water.mug,
                                                         gamma = water.isentropic_exponent, 

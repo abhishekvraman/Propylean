@@ -6,11 +6,11 @@ class EnergyStream (prop.Power):
     def __init__(self, value=0, unit='W', tag=None, 
                  to_equipment_tag=None, to_equipment_type=None,
                  from_equipment_tag=None, from_equipment_type=None):
+                 
                  super().__init__(value=value, unit=unit)
                  self.tag = tag
                  self.assign_equipment('to', to_equipment_tag, to_equipment_type)
                  self.assign_equipment('from', from_equipment_tag, from_equipment_type)
-
                  EnergyStream.items.append(self)
     
     def assign_equipment(self, to_or_from, equipment_tag, equipment_type, equipment_index=None):
