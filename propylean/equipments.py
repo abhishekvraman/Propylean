@@ -1,4 +1,4 @@
-from propylean.generic_equipment_classes import _PressureChangers, _EquipmentOneInletOutlet, _Vessels, _Exchanger
+from propylean.generic_equipment_classes import _PressureChangers, _EquipmentOneInletOutlet, _Vessels, _Exchangers
 from thermo.chemical import Chemical
 from fluids import control_valve as cv_calculations
 import fluids.compressible as compressible_fluid 
@@ -306,7 +306,42 @@ class PositiveDisplacementPump(_PressureChangers):
 class CentrifugalCompressor(_PressureChangers):
     items = []
     def __init__(self, **inputs) -> None:
+        """ 
+        DESCRIPTION:
+            Final class for creating objects to represent a Centrifugal Compressors.
+        
+        PARAMETERS:
+            Read _PressureChangers class for more arguments for this class
+            adiabatic_efficiency:
+                Required: No
+                Type: int or float (recommended)
+                Acceptable values: Non-negative values
+                Default value: None
+                Description: Adiabatic Efficiency of the compressor
+
+            polytropic_efficiency:
+                Required: No
+                Type: int or float (recommended)
+                Acceptable values: Non-negative values
+                Default value: None
+                Description: Adiabatic Efficiency of the compressor 
+        
+        RETURN VALUE:
+            Type: CentrifugalCompressor
+            Description: Returns an object of type CentrifugalCompressor with all properties of
+                         a Centrifugal Compressor used in process industries.
+        
+        ERROR RAISED:
+            Type:
+            Description:
+        
+        SAMPLE USE CASES:
+            >>> CC_1 = CentrifugalCompressor(tag="P1")
+            >>> print(CC_1)
+            Centrifugal Compressor with tag: P1
+        """
         super().__init__(**inputs)
+        # TODO Replace methane wih stream properties
         self.methane = Chemical('methane',
                          T = self.inlet_temperature.value,
                          P = self.inlet_pressure.value)
@@ -314,7 +349,7 @@ class CentrifugalCompressor(_PressureChangers):
             self.polytropic_efficiency = inputs['polytropic_efficiency']
         else:
             self.adiabatic_efficiency = 0.7 if 'adiabatic_efficiency' not in inputs else inputs['adiabatic_efficiency']
-        self.inlet_energy_tag = None if 'inlet_energy_tag' not in inputs else inputs['inlet_energy_tag']
+        
         CentrifugalCompressor.items.append(self)
     
     def __eq__(self, other):
@@ -324,7 +359,7 @@ class CentrifugalCompressor(_PressureChangers):
             return False
     
     def __repr__(self):
-        return "Positive Displacement Pump with tag: " + self.tag
+        return "Centrifugal Compressor with tag: " + self.tag
     def __hash__(self):
         return hash(self.__repr__())
 
@@ -678,7 +713,7 @@ class Tank(_Vessels):
 # End of final classes of vessels
 
 # Start of final classes of heat exchangers
-class ShellnTubeExchanger(_Exchanger):
+class ShellnTubeExchanger(_Exchangers):
     items = []
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
@@ -699,7 +734,7 @@ class ShellnTubeExchanger(_Exchanger):
     def list_objects(cls):
         return cls.items
 
-class AirCoolers(_Exchanger):
+class AirCoolers(_Exchangers):
     items = []
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)

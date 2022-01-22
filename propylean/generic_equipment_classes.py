@@ -3,13 +3,6 @@ import propylean.properties as prop
 from propylean import streams
 
 
-# _material_stream_equipment_map and __energy_stream_equipment_map are dictionary of list 
-# which store index of coming from and going to equipment and type of equipment.
-# Structured like {12: [10, CentrifugalPump, 21, PipeSegment], 
-#                  23: [21, PipeSegment, 36, FlowMeter]]} 
-# were 12th index stream will have data in key no. 12 
-# stream is coming from equipment index is 10 of type CentrifugalPump and  
-# going into equipment index is 21 of type PipeSegment.
  
 _material_stream_equipment_map = dict()
 _energy_stream_equipment_map = dict()
@@ -427,6 +420,7 @@ class _EquipmentOneInletOutlet:
             >>> eq1.disconnect_stream(direction='in', stream_type="energy")
         """
         def define_index_direction(tag):
+            " This function is internal function. Not to be used elsewhere."
             if tag == self._inlet_material_stream_tag:
                 stream_type = "material"
                 direction = "in"
@@ -460,13 +454,67 @@ class _EquipmentOneInletOutlet:
                                    stream_type)
       
     def _stream_equipment_mapper(self, stream_index, stream_type, is_inlet):
+        """ 
+            DESCRIPTION:
+                Internal function to map stream with equipment object.
+                _material_stream_equipment_map and __energy_stream_equipment_map 
+                are dictionary of list which store index of coming from and going 
+                to equipment and type of equipment. Structured like 
+                {12: [10, CentrifugalPump, 21, PipeSegment], 
+                 23: [21, PipeSegment, 36, FlowMeter]]} 
+                were 12th index stream will have data in key no. 12 
+                stream is coming from equipment index is 10 of type CentrifugalPump and  
+                going into equipment index is 21 of type PipeSegment.
+            
+            PARAMETERS:
+                stream_index:
+                    Required: Yes
+                    Type: int
+                    Acceptable values: Non-negative integer
+                    Default value: Not Applicable
+                    Description: Index of the stream in the stream list it belongs to.
+                
+                stream_type:
+                    Required: Yes
+                    Type: string
+                    Acceptable values: 'material' or 'energy'
+                    Default value: Not Applicable
+                    Description: Index of the stream in the stream list it belongs to.
+                
+                is_inlet:
+                    Required: Yes
+                    Type: bool
+                    Acceptable values: True or False
+                    Default value: Not Applicable
+                    Description: True or False if stream is inlet to equipment.
+            
+            RETURN VALUE:
+                Type: bool
+                Description: If mapping was successful True is returned else False
+            
+            ERROR RAISED:
+                Type:
+                Description: 
+            
+            SAMPLE USE CASES:
+                >>>  _stream_equipment_mapper(10, 'm', False)
+                >>> stream_index = get_stream_index("Compressor1_power", "energy")
+                >>>  _stream_equipment_mapper(stream_index, 'e', True)
+                
+        """
 
         if stream_index is None or isinstance(stream_index, list):
             return False
         e_type, e_index = (3, 2) if is_inlet else (1, 0)
         global _material_stream_equipment_map
         global _energy_stream_equipment_map
-        stream_equipment_map = _material_stream_equipment_map if stream_type == 'material' else _energy_stream_equipment_map
+        if stream_type in ['m', 'material']:
+            stream_equipment_map = _material_stream_equipment_map
+        elif stream_type in ['e', 'energy']:
+            stream_equipment_map =_energy_stream_equipment_map
+        else:
+            raise Exception('Incorrect stream type {}'.format(stream_type)+\
+                            " Can only be 'm' or 'e' ")
         equipment_type = type(self)
         equipment_index = self.get_equipment_index(self.tag)
         def set_type_index():
@@ -492,13 +540,13 @@ class _EquipmentOneInletOutlet:
             except Exception as e:
                 raise Exception("Error occured in equipment-stream mapping:", e)
 
-        if stream_type == 'm':
+        if stream_type == 'material':
             _material_stream_equipment_map = stream_equipment_map
         else:
             _energy_stream_equipment_map = stream_equipment_map
         return True
       
-#Defining generic base class for all equipments with multiple inlet and outlet. TO BE UPDATED!!!!!!       
+#Defining generic base class for all equipments with multiple inlet and outlet. TODO !!!!!!       
 class _EquipmentMultipleInletOutlet:
     def __init__(self) -> None:
         self._inlet_pressure.value = list()
@@ -506,7 +554,55 @@ class _EquipmentMultipleInletOutlet:
 #Defining generic class for all types of pressure changers like Pumps, Compressors and Expanders
 class _PressureChangers(_EquipmentOneInletOutlet):
     def __init__(self,**inputs) -> None:
-        self._differential_pressure = prop.Pressure()
+        """ 
+            DESCRIPTION:
+                Parent class for all equipment which has primary task to change
+                pressure of a stream. For e.g. Pumps and compressors.
+            
+            PARAMETERS:
+                inlet_pressure or suction_pressure:
+                    Required: No
+                    Type: int or float (recommended)
+                    Acceptable values: Non-negative integer
+                    Default value: based on unit    
+                    Description: Inlet or suction pressure of the equipment.
+                
+                outlet_pressure or discharge_pressure:
+                    Required: No
+                    Type: int or float (recommended)
+                    Acceptable values: Non-negative integer
+                    Default value: based on unit    
+                    Description: Outlet or discharge pressure of the equipment.
+                
+                pressure_drop or differential_pressure:
+                    Required: No
+                    Type: int or float (recommended)
+                    Acceptable values: Non-negative integer
+                    Default value: based on unit    
+                    Description: Pressure drop or differential pressure of the equipment.
+
+                performance_curve:
+                    Required: No
+                    Type: int or float (recommended)
+                    Acceptable values: Non-negative integer
+                    Default value: based on unit    
+                    Description: Pressure drop or differential pressure of the equipment.
+
+            RETURN VALUE:
+                Type: _PressureChangers
+                Description: object with all _EquipmentOneInletOutlet and other pressure changer properties.
+            
+            ERROR RAISED:
+                Type:
+                Description: 
+            
+            SAMPLE USE CASES:
+                >>>  class AwesomeCompressor(_PressureChangers):
+                >>>     def __init__(**kwargs):
+                >>>         some_property = 20
+                
+        """
+        self._differential_pressure = prop.Pressure() if 'differential_pressure' not in inputs else prop.Pressure(inputs['differential_pressure'])
         if 'pressure_drop' in inputs:
             inputs['differential_pressure'] = -1 * inputs['pressure_drop']
             del inputs['pressure_drop']
@@ -586,19 +682,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
     @differential_pressure.setter
     def differential_pressure(self,value):
         self.pressure_drop = -1 * value      
-    # @property
-    # def differential_pressure(self):
-    #     return self._differential_pressure
-    # @differential_pressure.setter
-    # def differential_pressure(self, value):
-    #     if isinstance(value, tuple):
-    #         self._differential_pressure.unit = value[1]
-    #         value = value[0]
-    #     self._differential_pressure.value = value
-    #     if self._inlet_pressure.value != None:
-    #         self._outlet_pressure.value = self._inlet_pressure.value + value
-    #     elif self._outlet_pressure.value != None:
-    #         self._inlet_pressure.value = self._outlet_pressure.value - value
+    
 
     @property
     def performance_curve(self):
@@ -625,19 +709,83 @@ class _PressureChangers(_EquipmentOneInletOutlet):
 #Defining generic class for all types of vessels.  NEEDS SUPER CLASS WITH MULTI INPUT AND OUTPUT 
 class _Vessels(_EquipmentMultipleInletOutlet):
     def __init__(self, **inputs) -> None:
-        super().__init__(**inputs)
-        self.ID = None if 'ID' not in inputs else inputs['ID']
-        self.length = None if 'length' not in inputs else inputs['length']
+        """ 
+        DESCRIPTION:
+            Parent class for all equipment which has primary task to be a vessel
+            of a stream. For e.g. Tanks and reactors.
         
-        self.LLLL = None if 'LLLL' not in inputs else inputs['LLLL']
-        self.LLL = None if 'LLL' not in inputs else inputs['LLL']
-        self.NLL = None if 'NLL' not in inputs else inputs['NLL']
-        self.HLL = None if 'HLL' not in inputs else inputs['HLL']
-        self.HHLL = None if 'HHLL' not in inputs else inputs['HHLL']
+        PARAMETERS:
+            ID:
+                Required: No
+                Type: int or float (recommended)
+                Acceptable values: Non-negative integer
+                Default value: based on unit    
+                Description: Internal diameter of the vessel.
+            
+            length:
+                Required: No
+                Type: int or float (recommended)
+                Acceptable values: Non-negative integer
+                Default value: based on unit    
+                Description: Length of the vessel.
+            
+            LLL, LLLL, HLL, NLL and HHLL:
+                Required: No
+                Type: int or float (recommended)
+                Acceptable values: Non-negative integer
+                Default value: based on unit    
+                Description: Low Liquid Level(LLL), Low-Low Liquid Level(LLLL), High Liquid Level(HLL),
+                             Normal Liquid Level(NLL), and High-high Liquid Level.
+
+        RETURN VALUE:
+            Type: _Vessels
+            Description: object with all _EquipmentOneInletOutlet and other vessel related properties.
+        
+        ERROR RAISED:
+            Type:
+            Description: 
+        
+        SAMPLE USE CASES:
+            >>>  class AwesomeReactor(_Vessels):
+            >>>     def __init__(**kwargs):
+            >>>         some_property = 20
+                
+    """
+        super().__init__(**inputs)
+        self.ID = prop.Length() if 'ID' not in inputs else prop.Length(inputs['ID'])
+        self.length = prop.Length() if 'length' not in inputs else prop.Length(inputs['length'])
+        
+        self.LLLL = prop.Length() if 'LLLL' not in inputs else prop.Length(inputs['LLLL'])
+        self.LLL = prop.Length() if 'LLL' not in inputs else prop.Length(inputs['LLL'])
+        self.NLL = prop.Length() if 'NLL' not in inputs else prop.Length(inputs['NLL'])
+        self.HLL = prop.Length() if 'HLL' not in inputs else prop.Length(inputs['HLL'])
+        self.HHLL = prop.Length() if 'HHLL' not in inputs else prop.Length(inputs['HHLL'])
 
 #Defining generic class for all types of heat exchangers NEEDS SUPER CLASS WITH MULTI INPUT AND OUTPUT
-class _Exchanger(_EquipmentMultipleInletOutlet):
+class _Exchangers(_EquipmentMultipleInletOutlet):
     def __init__(self, **inputs) -> None:
+        """ 
+        DESCRIPTION:
+            Parent class for all equipment which has primary task to be an exchanger
+            of a stream. For e.g. Tanks and reactors.
+        
+        PARAMETERS:
+            TODO
+
+        RETURN VALUE:
+            Type: _Exchangers
+            Description: object with all _EquipmentOneInletOutlet and other exchanger related properties.
+        
+        ERROR RAISED:
+            Type:
+            Description: 
+        
+        SAMPLE USE CASES:
+            >>>  class AwesomeReactor(_Vessels):
+            >>>     def __init__(**kwargs):
+            >>>         some_property = 20
+                
+    """
         #Hot side
         self.hot_side_operating_pressure = None if 'hot_side_operating_pressure' not in inputs else inputs['hot_side_operating_pressure']
         self.hot_side_flowrate = None if 'hot_side_flowrate' not in inputs else inputs['hot_side_flowrate']
