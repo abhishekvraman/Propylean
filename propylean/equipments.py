@@ -392,7 +392,7 @@ class CentrifugalCompressor(_PressureChangers):
                                                               P1 = self._inlet_pressure.value,
                                                               P2 = self._outlet_pressure.value,
                                                               eta = self.adiabatic_efficiency)
-        return work * self.inlet_mass_flowrate / self.methane.MW
+        return work * self.inlet_mass_flowrate.value / self.methane.MW
     @classmethod
     def list_objects(cls):
         return cls.items
@@ -499,19 +499,19 @@ class PipeSegment(_EquipmentOneInletOutlet):
     def __hash__(self):
         return hash(self.__repr__())
 
-    @property
+    @_PressureChangers.pressure_drop.setter
     def pressure_drop(self):
         from fluids.friction import friction_factor
         from fluids.core import Reynolds, K_from_f, dP_from_K
         if (self._inlet_pressure.value == None or
             self._outlet_pressure.value == None or
-            self.inlet_mass_flowrate == 0):
+            self.inlet_mass_flowrate.value == 0):
             return 0
         roughness = (4.57e-5, 4.5e-5, 0.000259, 1.5e-5, 1.5e-6) #in meters
         water = Chemical('water',
                          T = self.inlet_temperature.value,
                          P = self._inlet_pressure.value)
-        Re = Reynolds(V=(self.inlet_mass_flowrate/water.rhol)/(pi* self.ID**2)/4,
+        Re = Reynolds(V=(self.inlet_mass_flowrate.value/water.rhol)/(pi* self.ID**2)/4,
                       D=self.ID, 
                       rho=water.rhol, 
                       mu=water.mul)
@@ -564,7 +564,7 @@ class ControlValve(_EquipmentOneInletOutlet):
         if water.phase == 'l':
             return cv_calculations.size_control_valve_l(water.rhol, water.Psat, water.Pc, water.mul,
                                                         self._inlet_pressure.value, self._outlet_pressure.value, 
-                                                        self.inlet_mass_flowrate/water.rhol)
+                                                        self.inlet_mass_flowrate.value/water.rhol)
         elif water.phase == 'g':
             return cv_calculations.size_control_valve_g(T = self.inlet_temperature.value, 
                                                         MW = water.MW,
@@ -573,7 +573,7 @@ class ControlValve(_EquipmentOneInletOutlet):
                                                         Z = water.Zg,
                                                         P1 = self._inlet_pressure.value, 
                                                         P2 = self._outlet_pressure.value, 
-                                                        Q = self.inlet_mass_flowrate/water.rhog)
+                                                        Q = self.inlet_mass_flowrate.value/water.rhog)
         else:
             raise Exception('Possibility of fluid solification at control valve')
 

@@ -1,9 +1,10 @@
 from fluids.two_phase_voidage import Turner_Wallis
 import pytest
 import pandas as pd
+from thermo import temperature
 from propylean.equipments import CentrifugalPump, PipeSegment, ControlValve, CentrifugalCompressor
 from propylean.equipments import get_equipment_index 
-from propylean import streams
+from propylean import streams, properties
 
 
 @pytest.mark.instantiation
@@ -31,12 +32,12 @@ def test_CentrifugalPump_instantiation():
     cp.efficiency = 80
     assert cp.efficiency == 0.8
     cp.inlet_mass_flowrate = 20
-    assert cp.inlet_mass_flowrate == 20
+    assert cp.inlet_mass_flowrate == properties.MassFlowRate(20)
     if not cp.dynamic_state:
-        assert cp.outlet_mass_flowrate == 20
-    cp.outlet_mass_flowrate = 30
+        assert cp.outlet_mass_flowrate == properties.MassFlowRate(20)
+    cp.outlet_mass_flowrate = properties.MassFlowRate(30)
     if not cp.dynamic_state:
-        assert cp.inlet_mass_flowrate == 30
+        assert cp.inlet_mass_flowrate == properties.MassFlowRate(30)
     assert cp.head ==  cp.differential_pressure.value/(9.8*1000) #unpdate based on liquid density from stream
     
     cp.pump_curve = pd.DataFrame([{'flow':[2,10,30,67], 'head':[45,20,10,2]}])
@@ -234,4 +235,42 @@ def test_equipment_stream_incorrect_connection_disconnection():
     with pytest.raises(Exception):
         result = eq1.disconnect_stream(tag='outlet')
 
+@pytest.mark.property_matching
+def test_equipment_stream_properties_matching():
+    inlet_pressure = properties.Pressure(10, 'bar')
+    outlet_pressure = properties.Pressure(20, 'bar')
+    flowrate = properties.MassFlowRate(100, 'kg/s')
+    temperature = properties.Temperature(40,'C')
 
+    s1 = streams.MaterialStream(tag='Pump-inlet_1')
+    s1.pressure = inlet_pressure
+    s1.temperature = temperature
+    s1.mass_flowrate = flowrate
+
+    assert s1.pressure == inlet_pressure
+    assert s1.temperature == temperature
+    assert s1.mass_flowrate == flowrate 
+
+    eq1 = CentrifugalPump(tag="P-24")
+
+    assert eq1.connect_stream(s1, 'in') is True
+
+    assert eq1.inlet_temperature == temperature
+    assert eq1.inlet_pressure == inlet_pressure
+    assert eq1.inlet_mass_flowrate == flowrate
+    assert eq1.outlet_mass_flowrate == flowrate
+
+    s2 = streams.MaterialStream(tag='Pump-outlet_2')
+    s2.pressure = outlet_pressure
+    s2.temperature = temperature
+    s2.mass_flowrate = flowrate
+
+    assert s2.pressure == outlet_pressure
+    assert s2.temperature == temperature
+    assert s2.mass_flowrate == flowrate
+    assert eq1.connect_stream(s2, 'out') is True
+    assert eq1.outlet_temperature == temperature
+    assert eq1.outlet_pressure == outlet_pressure
+    assert eq1.outlet_mass_flowrate == flowrate
+    en1 = streams.EnergyStream(tag='Pump-power')
+    

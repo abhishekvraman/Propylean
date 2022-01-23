@@ -2,7 +2,12 @@ class _Property:
     def __init__(self, value = None, unit= None):
         self._value = value
         self._unit = unit
-    
+    def __eq__(self, other):
+        if (isinstance(other, _Property) and
+            self.value == other.value and
+            self.unit == other.unit):
+                return True
+        return False
     @property
     def value(self):
         return self._value
