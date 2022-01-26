@@ -175,7 +175,6 @@ class _EquipmentOneInletOutlet:
     @pressure_drop.setter
     def pressure_drop(self, value):
         if isinstance(value, tuple):
-            self._outlet_pressure.unit = value[1]
             value = value[0]
         elif isinstance(value, prop.Pressure):
             value = value.value
@@ -199,6 +198,7 @@ class _EquipmentOneInletOutlet:
             self._inlet_temperature.unit = value.unit
             value = value.value
         self._inlet_temperature.value = value
+        self._outlet_temperature.value = self._inlet_temperature.value + self.temperature_change.value
     @property
     def outlet_temperature(self):
         return self._outlet_temperature
@@ -211,6 +211,12 @@ class _EquipmentOneInletOutlet:
             self._outlet_temperature.unit = value.unit
             value = value.value
         self._outlet_temperature.value = value
+        self._inlet_temperature.value = self._outlet_temperature.value - self.temperature_change.value
+    @property
+    def temperature_change(self):
+        value = prop.Temperature(0, self._outlet_temperature.unit) # Change as per inlet outlet power
+        return value
+
 
     @property
     def inlet_mass_flowrate(self):
@@ -218,6 +224,9 @@ class _EquipmentOneInletOutlet:
     @inlet_mass_flowrate.setter
     def inlet_mass_flowrate(self, value):
         unit = self._inlet_mass_flowrate.unit
+        if isinstance(value, tuple):
+            unit = value[1]
+            value = value[0]
         if isinstance(value, prop.MassFlowRate):
             unit = value.unit
             value = value.value
@@ -230,6 +239,9 @@ class _EquipmentOneInletOutlet:
     @outlet_mass_flowrate.setter
     def outlet_mass_flowrate(self, value):
         unit = self._outlet_mass_flowrate.unit
+        if isinstance(value, tuple):
+            unit = value[1]
+            value = value[0]
         if isinstance(value, prop.MassFlowRate):
             unit = value.unit
             value = value.value
@@ -311,7 +323,8 @@ class _EquipmentOneInletOutlet:
                        stream_object=None,
                        direction=None, 
                        stream_tag=None,
-                       stream_type=None):
+                       stream_type=None,
+                       stream_governed=True):
         """ 
         DESCRIPTION:
             Class method to connect a stream object with equiment.
@@ -384,7 +397,8 @@ class _EquipmentOneInletOutlet:
         elif mapping_result:
             self._stream_equipment_properties_matcher(stream_index, 
                                                       stream_type,
-                                                      is_inlet)
+                                                      is_inlet,
+                                                      stream_governed)
         if stream_type.lower() in ['material', 'mass', 'm']:
             if direction.lower() in ['in', 'inlet']:
                 self._inlet_material_stream_tag = stream_tag
@@ -767,7 +781,12 @@ class _PressureChangers(_EquipmentOneInletOutlet):
                              self.pressure_drop.unit)
     @differential_pressure.setter
     def differential_pressure(self,value):
-        self.pressure_drop = -1 * value      
+        if isinstance(value, tuple):
+            value = value[0]
+        if isinstance(value, prop.Pressure):
+            value = value.value
+        self.pressure_drop = prop.Pressure(-1 * value,
+                                          self.inlet_pressure.unit)      
     
 
     @property

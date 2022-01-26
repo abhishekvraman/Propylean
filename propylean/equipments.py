@@ -239,12 +239,21 @@ class CentrifugalPump(_PressureChangers):
     def list_objects(cls):
         return cls.items
     
-    def connect_stream(self, stream_object=None, direction=None, stream_tag=None, stream_type=None):
+    def connect_stream(self, 
+                       stream_object=None, 
+                       direction=None, 
+                       stream_tag=None, 
+                       stream_type=None,
+                       stream_governed=True):
         if ((stream_object is not None and 
             isinstance(stream_object, streams.EnergyStream)) or
             stream_type in ['energy', 'power', 'e', 'p']):
             direction = 'in'
-        return super().connect_stream(direction=direction, stream_object=stream_object, stream_tag=stream_tag, stream_type=stream_type)
+        return super().connect_stream(direction=direction, 
+                                      stream_object=stream_object, 
+                                      stream_tag=stream_tag, 
+                                      stream_type=stream_type,
+                                      stream_governed=stream_governed)
     
 class PositiveDisplacementPump(_PressureChangers):
     items = []
@@ -294,12 +303,21 @@ class PositiveDisplacementPump(_PressureChangers):
     def list_objects(cls):
         return cls.items
 
-    def connect_stream(self, stream_object=None, direction=None, stream_tag=None, stream_type=None):
+    def connect_stream(self, 
+                       stream_object=None, 
+                       direction=None, 
+                       stream_tag=None, 
+                       stream_type=None,
+                       stream_governed=True):
         if ((stream_object is not None and 
             isinstance(stream_object, streams.EnergyStream)) or
             stream_type in ['energy', 'power', 'e', 'p']):
             direction = 'in'
-        return super().connect_stream(direction=direction, stream_object=stream_object, stream_tag=stream_tag, stream_type=stream_type)
+        return super().connect_stream(direction=direction, 
+                                      stream_object=stream_object, 
+                                      stream_tag=stream_tag, 
+                                      stream_type=stream_type,
+                                      stream_governed=stream_governed)
 # End of final classes of pumps
 
 # Start of final classes of Compressors and Expanders
@@ -397,12 +415,21 @@ class CentrifugalCompressor(_PressureChangers):
     def list_objects(cls):
         return cls.items
     
-    def connect_stream(self, stream_object=None, direction=None, stream_tag=None, stream_type=None):
+    def connect_stream(self, 
+                       stream_object=None, 
+                       direction=None, 
+                       stream_tag=None, 
+                       stream_type=None,
+                       stream_governed=True):
         if ((stream_object is not None and 
             isinstance(stream_object, streams.EnergyStream)) or
             stream_type in ['energy', 'power', 'e', 'p']):
             direction = 'in'
-        return super().connect_stream(direction=direction, stream_object=stream_object, stream_tag=stream_tag, stream_type=stream_type)
+        return super().connect_stream(direction=direction, 
+                                      stream_object=stream_object, 
+                                      stream_tag=stream_tag, 
+                                      stream_type=stream_type,
+                                      stream_governed=stream_governed)
 
 class Expander(_PressureChangers):
     items = []
@@ -426,12 +453,21 @@ class Expander(_PressureChangers):
     def list_objects(cls):
         return cls.items
     
-    def connect_stream(self, stream_object=None, direction=None, stream_tag=None, stream_type=None):
+    def connect_stream(self,
+                       stream_object=None, 
+                       direction=None, 
+                       stream_tag=None, 
+                       stream_type=None,
+                       stream_governed=True):
         if ((stream_object is not None and 
             isinstance(stream_object, streams.EnergyStream)) or
             stream_type in ['energy', 'power', 'e', 'p']):
             direction = 'out'
-        return super().connect_stream(direction=direction, stream_object=stream_object, stream_tag=stream_tag, stream_type=stream_type)
+        return super().connect_stream(direction=direction, 
+                                      stream_object=stream_object, 
+                                      stream_tag=stream_tag, 
+                                      stream_type=stream_type,
+                                      stream_governed=stream_governed)
 
 # End of final classes of compressors
 
