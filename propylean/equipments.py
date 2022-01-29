@@ -477,6 +477,7 @@ class PipeSegment(_EquipmentOneInletOutlet):
     def __init__(self, **inputs) -> None:
         self.outlet_energy_tag = None if 'outlet_energy_tag' not in inputs else inputs['outlet_energy_tag']
         super().__init__(**inputs)
+        self._pressure_drop = self.pressure_drop
         self.segment_type = 1 if 'segment_type' not in inputs else inputs['segment_type']
         segments = '''\nSegments can be of following types and in range of numbers below:
                     1. Straight Tube
@@ -534,15 +535,13 @@ class PipeSegment(_EquipmentOneInletOutlet):
         return "Pipe Segment with tag: " + self.tag   #ADD SEGMENT TYPE!!
     def __hash__(self):
         return hash(self.__repr__())
-
-    @_PressureChangers.pressure_drop.setter
+    
+    @property
     def pressure_drop(self):
         from fluids.friction import friction_factor
         from fluids.core import Reynolds, K_from_f, dP_from_K
-        if (self._inlet_pressure.value == None or
-            self._outlet_pressure.value == None or
-            self.inlet_mass_flowrate.value == 0):
-            return 0
+        if self.inlet_mass_flowrate.value == 0:
+            return prop.Pressure(0, self._inlet_pressure.unit)
         roughness = (4.57e-5, 4.5e-5, 0.000259, 1.5e-5, 1.5e-6) #in meters
         water = Chemical('water',
                          T = self.inlet_temperature.value,
@@ -555,6 +554,10 @@ class PipeSegment(_EquipmentOneInletOutlet):
         K = K_from_f(fd=fd, L=self.length, D=self.ID)        
         drop = round(dP_from_K(K, rho=1000, V=3),3)
         return prop.Pressure(drop, self._inlet_pressure.unit)
+    @pressure_drop.setter
+    def pressure_drop(self, value):
+        raise Exception('''Cannot manually set pressure drop for PipeSegment!\n
+                         Pressure drop depends on physical properties PipeSegment and Material flowing.''')
         
     @property
     def thickness(self):

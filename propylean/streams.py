@@ -31,7 +31,13 @@ class EnergyStream (prop.Power):
 
     @classmethod
     def list_objects(cls):
-        return cls.items       
+        return cls.items
+
+    @classmethod
+    def update_object(cls, index, object):
+        if not isinstance(object, EnergyStream):
+            raise Exception("Object type should be EnergyStream type. Type passed is ", type(object))
+        cls.items[index] = object
       
 class MaterialStream:
     items = [] 
@@ -58,6 +64,12 @@ class MaterialStream:
     @classmethod
     def list_objects(cls):
         return cls.items
+    
+    @classmethod
+    def update_object(cls, index, object):
+        if not isinstance(object, MaterialStream):
+            raise Exception("Object type should be MaterialStream type. Type passed is ", type(object))
+        cls.items[index] = object
 
     def __repr__(self) -> str:
         return 'Material Stream Tag: ' + self.tag
