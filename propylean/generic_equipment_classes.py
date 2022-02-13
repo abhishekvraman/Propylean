@@ -299,8 +299,7 @@ class _EquipmentOneInletOutlet:
         if isinstance(value, prop.MassFlowRate):
             unit = value.unit
             value = value.value
-        self._inlet_mass_flowrate.value = value
-        self._inlet_mass_flowrate.unit = unit
+        self._inlet_mass_flowrate = prop.MassFlowRate(value, unit)
         self._outlet_mass_flowrate.value = self._inlet_mass_flowrate.value + self.inventory_change_rate.value
         self._update_equipment_object(self.index, self)
     @property

@@ -208,7 +208,7 @@ class MassFlowRate(_Property):
                                9. lb/d for pound per day
                                10. ton/d for metric ton per day
                                11. ton/h for metric ton per hour
-                               ''')
+                               '''+unit)
 
 class MolarFlowRate(_Property):
     def __init__(self, value = 1, unit= 'mol/s'):
