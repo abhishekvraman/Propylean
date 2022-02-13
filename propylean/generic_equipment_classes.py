@@ -124,6 +124,7 @@ class _EquipmentOneInletOutlet:
                 ......
         """
         self.tag = None if 'tag' not in inputs else inputs['tag']
+        self._index = None
         self.dynamic_state = False if 'dynamic_state' not in inputs else inputs['dynamic_state']
         # TODO: Design pressure calcs
 
@@ -157,8 +158,8 @@ class _EquipmentOneInletOutlet:
         self._is_disconnection = False
 
 
-        self.inlet_mass_flowrate = prop.MassFlowRate() if 'inlet_mass_flowrate' not in inputs else prop.MassFlowRate(inputs['inlet_mass_flowrate'])
-        self.outlet_mass_flowrate = prop.MassFlowRate() if 'outlet_mass_flowrate' not in inputs else prop.MassFlowRate(inputs['outlet_mass_flowrate'])
+        self._inlet_mass_flowrate = prop.MassFlowRate() if 'inlet_mass_flowrate' not in inputs else prop.MassFlowRate(inputs['inlet_mass_flowrate'])
+        self._outlet_mass_flowrate = prop.MassFlowRate() if 'outlet_mass_flowrate' not in inputs else prop.MassFlowRate(inputs['outlet_mass_flowrate'])
         
         self._inlet_pressure = prop.Pressure() if 'inlet_pressure' not in inputs else prop.Pressure(inputs['inlet_pressure'])
         self._outlet_pressure = prop.Pressure() if 'outlet_pressure' not in inputs else prop.Pressure(inputs['outlet_pressure'])
@@ -167,15 +168,25 @@ class _EquipmentOneInletOutlet:
         elif 'inlet_pressure' in inputs and 'outlet_pressure' in inputs:
             self.pressure_drop = self._inlet_pressure.value - self._outlet_pressure.value
         self.design_pressure = prop.Pressure() if 'design_pressure' not in inputs else prop.Pressure(inputs['design_pressure'])
-        self.inlet_temperature = prop.Temperature() if 'inlet_temperature' not in inputs else prop.Temperature(inputs['inlet_temperature'])
-        self.outlet_temperature = prop.Temperature() if 'outlet_temperature' not in inputs else prop.Temperature(inputs['outlet_temperature'])
-        self.design_temperature = prop.Temperature() if 'design_temperature' not in inputs else prop.Temperature(inputs['design_temperature'])
+        self._inlet_temperature = prop.Temperature() if 'inlet_temperature' not in inputs else prop.Temperature(inputs['inlet_temperature'])
+        self._outlet_temperature = prop.Temperature() if 'outlet_temperature' not in inputs else prop.Temperature(inputs['outlet_temperature'])
+        self._design_temperature = prop.Temperature() if 'design_temperature' not in inputs else prop.Temperature(inputs['design_temperature'])
+
+    @property
+    def index(self):
+        i = self._get_equipment_index(self.tag)
+        if i is None:
+            i = self._index
+        return i
+
 
     @property
     def inlet_pressure(self):
+        self = self._get_equipment_object(self.index)
         return self._inlet_pressure
     @inlet_pressure.setter
     def inlet_pressure(self, value):
+        self = self._get_equipment_object(self.index)
         unit = self._inlet_pressure.unit
         if isinstance(value, tuple):
             unit = value[1]
@@ -188,18 +199,21 @@ class _EquipmentOneInletOutlet:
             self._outlet_pressure = prop.Pressure(value - self.pressure_drop.value, unit)
         else:
             self._pressure_drop = prop.Pressure(value - self._outlet_pressure.value, unit)
+        self._update_equipment_object(self.index, self)
     
     @property
     def outlet_pressure(self):
-        if ((self._inlet_pressure.value - self._pressure_drop.value) 
+        self = self._get_equipment_object(self.index)
+        eqp = self._get_equipment_object(self.index)
+        if ((eqp._inlet_pressure.value - eqp._pressure_drop.value) 
              !=
-            self._outlet_pressure.value):
-            
-            self._outlet_pressure.value = self._inlet_pressure.value - self._pressure_drop.value
-        
-        return self._outlet_pressure
+            eqp._outlet_pressure.value):
+            eqp._outlet_pressure.value = eqp._inlet_pressure.value - eqp._pressure_drop.value
+            self._update_equipment_object(self.index, self)
+        return eqp._outlet_pressure
     @outlet_pressure.setter
     def outlet_pressure(self, value):
+        self = self._get_equipment_object(self.index)
         unit = self._outlet_pressure.unit
         if isinstance(value, tuple):
             unit = value[1]
@@ -212,12 +226,15 @@ class _EquipmentOneInletOutlet:
             self._inlet_pressure = prop.Pressure(value + self.pressure_drop.value, unit)
         else:
             self._pressure_drop = prop.Pressure(value - self._inlet_pressure.value, unit)
+        self._update_equipment_object(self.index, self)
     
     @property
     def pressure_drop(self):
+        self = self._get_equipment_object(self.index)
         return self._pressure_drop
     @pressure_drop.setter
     def pressure_drop(self, value):
+        self = self._get_equipment_object(self.index)
         unit = self._pressure_drop.unit
         if isinstance(value, tuple):
             unit = value[1]
@@ -226,13 +243,16 @@ class _EquipmentOneInletOutlet:
             unit = value.unit
             value = value.value
         self._pressure_drop = prop.Pressure(value, unit)
+        self._update_equipment_object(self.index, self)
         
     
     @property
     def inlet_temperature(self):
+        self = self._get_equipment_object(self.index)
         return self._inlet_temperature
     @inlet_temperature.setter
     def inlet_temperature(self, value):
+        self = self._get_equipment_object(self.index)
         if isinstance(value, tuple):
             self._inlet_temperature.unit = value[1]
             value = value[0]
@@ -241,11 +261,14 @@ class _EquipmentOneInletOutlet:
             value = value.value
         self._inlet_temperature.value = value
         self._outlet_temperature.value = self._inlet_temperature.value + self.temperature_change.value
+        self._update_equipment_object(self.index, self)
     @property
     def outlet_temperature(self):
+        self = self._get_equipment_object(self.index)
         return self._outlet_temperature
     @outlet_temperature.setter
     def outlet_temperature(self,value):
+        self = self._get_equipment_object(self.index)
         if isinstance(value, tuple):
             self._outlet_temperature.unit = value[1]
             value = value[0]
@@ -254,17 +277,21 @@ class _EquipmentOneInletOutlet:
             value = value.value
         self._outlet_temperature.value = value
         self._inlet_temperature.value = self._outlet_temperature.value - self.temperature_change.value
+        self._update_equipment_object(self.index, self)
     @property
     def temperature_change(self):
+        self = self._get_equipment_object(self.index)
         value = prop.Temperature(0, self._outlet_temperature.unit) # Change as per inlet outlet power
         return value
 
 
     @property
     def inlet_mass_flowrate(self):
+        self = self._get_equipment_object(self.index)
         return self._inlet_mass_flowrate
     @inlet_mass_flowrate.setter
     def inlet_mass_flowrate(self, value):
+        self = self._get_equipment_object(self.index)
         unit = self._inlet_mass_flowrate.unit
         if isinstance(value, tuple):
             unit = value[1]
@@ -275,11 +302,14 @@ class _EquipmentOneInletOutlet:
         self._inlet_mass_flowrate.value = value
         self._inlet_mass_flowrate.unit = unit
         self._outlet_mass_flowrate.value = self._inlet_mass_flowrate.value + self.inventory_change_rate.value
+        self._update_equipment_object(self.index, self)
     @property
     def outlet_mass_flowrate(self):
+        self = self._get_equipment_object(self.index)
         return self._outlet_mass_flowrate
     @outlet_mass_flowrate.setter
     def outlet_mass_flowrate(self, value):
+        self = self._get_equipment_object(self.index)
         unit = self._outlet_mass_flowrate.unit
         if isinstance(value, tuple):
             unit = value[1]
@@ -289,9 +319,11 @@ class _EquipmentOneInletOutlet:
             value = value.value
         self._outlet_mass_flowrate.value = value
         self._outlet_mass_flowrate.unit = unit
-        self._inlet_mass_flowrate.value = self._outlet_mass_flowrate.value - self.inventory_change_rate.value   
+        self._inlet_mass_flowrate.value = self._outlet_mass_flowrate.value - self.inventory_change_rate.value
+        self._update_equipment_object(self.index, self)
     @property
     def inventory_change_rate(self):
+        self = self._get_equipment_object(self.index)
         if not self.dynamic_state:
             return prop.MassFlowRate(0, self.inlet_mass_flowrate.unit)
         if (self._inlet_mass_flowrate.value == None or
@@ -301,19 +333,26 @@ class _EquipmentOneInletOutlet:
                                  self.outlet_mass_flowrate.unit)
     @inventory_change_rate.setter
     def inventory_change_rate(self, value):
+        self = self._get_equipment_object(self.index)
         if self._inlet_mass_flowrate.value != None:
             self._outlet_mass_flowrate.value = self._inlet_mass_flowrate.value - value
         elif self._outlet_mass_flowrate != None:
             self._inlet_mass_flowrate.value = self._outlet_mass_flowrate.value + value
         else:
             raise Exception("Error! Assign inlet value or outlet outlet before assigning differential")
+        self._update_equipment_object(self.index, self)
     
-    @classmethod
-    def get_equipment_index(cls, tag):
+    def _get_equipment_index(cls, tag):
         for index, equipment in enumerate(cls.items):
             if equipment.tag == tag:
                 return index
         return None
+    
+    def _get_equipment_object(cls, index):
+        return cls.items[index]
+    
+    def _update_equipment_object(cls, index, obj):
+        cls.items[index] = obj
 
 
 
@@ -601,7 +640,7 @@ class _EquipmentOneInletOutlet:
             raise Exception('Incorrect stream type {}'.format(stream_type)+\
                             " Can only be 'm' or 'e' ")
         equipment_type = type(self)
-        equipment_index = self.get_equipment_index(self.tag)
+        equipment_index = self._get_equipment_index(self.tag)
         def set_type_index():
             old_equipment_type = stream_equipment_map[stream_index][e_type]
             old_equipment_index = stream_equipment_map[stream_index][e_index]
@@ -659,23 +698,23 @@ class _EquipmentOneInletOutlet:
                     Type: bool
                     Acceptable values: True or False
                     Default value: Not Applicable
-                    Description: True or False if stream is inlet to equipment.
+                    Description: True or False if stream is inlet to equipment or not.
             
             RETURN VALUE:
                 Type: bool
-                Description: If mapping was successful True is returned else False
+                Description: If matching was successful, True is returned else False.
             
             ERROR RAISED:
                 Type:
                 Description: 
             
             SAMPLE USE CASES:
-                >>>  _stream_equipment_mapper(10, 'm', False)
+                >>>  _stream_equipment_properties_matcher(10, 'm', False)
                 >>> stream_index = get_stream_index("Compressor1_power", "energy")
-                >>>  _stream_equipment_mapper(stream_index, 'e', True)
+                >>>  _stream_equipment_properties_matcher(stream_index, 'e', True)
                 
         """
-        def property_matcher(stream_property, equipment_property):
+        def property_matcher(stream_property, equipment_property, stream_governed):
             if stream_governed:
                 equipment_property = stream_property
             else:
@@ -686,36 +725,46 @@ class _EquipmentOneInletOutlet:
             if is_inlet:
                 stream_object.mass_flowrate, \
                 self.inlet_mass_flowrate = property_matcher(stream_object.mass_flowrate,
-                                                            self.inlet_mass_flowrate)
+                                                            self.inlet_mass_flowrate,
+                                                            stream_governed)
                 stream_object.pressure, \
                 self.inlet_pressure = property_matcher(stream_object.pressure,
-                                                            self.inlet_pressure)
+                                                            self.inlet_pressure,
+                                                            stream_governed)
                 stream_object.temperature, \
                 self.inlet_temperature = property_matcher(stream_object.temperature,
-                                                            self.inlet_temperature)
+                                                            self.inlet_temperature,
+                                                            stream_governed)
             else:
                 stream_object.mass_flowrate, \
                 self.outlet_mass_flowrate = property_matcher(stream_object.mass_flowrate,
-                                                            self.outlet_mass_flowrate)
+                                                            self.outlet_mass_flowrate,
+                                                            stream_governed)
                 stream_object.pressure, \
                 self.outlet_pressure = property_matcher(stream_object.pressure,
-                                                            self.outlet_pressure)
+                                                            self.outlet_pressure,
+                                                            stream_governed)
                 stream_object.temperature, \
                 self.outlet_temperature = property_matcher(stream_object.temperature,
-                                                            self.outlet_temperature)
-            streams.MaterialStream.update_object(stream_index, stream_object) 
+                                                            self.outlet_temperature,
+                                                            stream_governed)
+            if not stream_governed:
+                streams.MaterialStream.update_object(stream_index, stream_object)
         else:
             stream_object = streams.EnergyStream.list_objects()[stream_index]
             if is_inlet:
                 stream_object, \
                 self.energy_in = property_matcher(stream_object,
-                                                  self.energy_in)
+                                                  self.energy_in,
+                                                  stream_governed)
                 
             else:
                 stream_object, \
                 self.energy_out = property_matcher(stream_object,
-                                                    self.energy_out)
-            streams.EnergyStream.update_object(stream_index, stream_object) 
+                                                    self.energy_out,
+                                                    stream_governed)
+            if not stream_governed:
+                streams.EnergyStream.update_object(stream_index, stream_object)
         
         
 #Defining generic base class for all equipments with multiple inlet and outlet. TODO !!!!!!       
@@ -831,35 +880,43 @@ class _PressureChangers(_EquipmentOneInletOutlet):
                              self.pressure_drop.unit)
     @differential_pressure.setter
     def differential_pressure(self,value):
+        self = self._get_equipment_object(self.index)
         if isinstance(value, tuple):
             value = value[0]
         if isinstance(value, prop.Pressure):
             value = value.value
         self.pressure_drop = prop.Pressure(-1 * value,
-                                          self.inlet_pressure.unit)      
+                                          self.inlet_pressure.unit)   
+        self._update_equipment_object(self.index, self)   
     
 
     @property
     def performance_curve(self):
+        self = self._get_equipment_object(self.index)
         return self._perfomace_curve
     @performance_curve.setter
     def pump_curve(self,value):
+        self = self._get_equipment_object(self.index)
         if isinstance(value,pd.DataFrame) and value.shape[1] == 2:
                 self._performance_curve = value
         else:
             raise Exception("Please enter performance_curve as pandas dataframe of 2 columns")
+        self._update_equipment_object(self.index, self)
     
     @property
     def efficiency(self):
+        self = self._get_equipment_object(self.index)
         return self._efficiency
     @efficiency.setter
     def efficiency(self, value):
+        self = self._get_equipment_object(self.index)
         if value < 0:
             raise Exception("Please enter a positive value for efficiency")
         elif value <= 1:
             self._efficiency = value
         else:
             self._efficiency = value/100
+        self._update_equipment_object(self.index, self)
 
 #Defining generic class for all types of vessels.  NEEDS SUPER CLASS WITH MULTI INPUT AND OUTPUT 
 class _Vessels(_EquipmentMultipleInletOutlet):
