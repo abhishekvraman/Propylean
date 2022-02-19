@@ -108,14 +108,17 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         return prop.Pressure(-1 * self.pressure_drop.value,
                              self.pressure_drop.unit)
     @differential_pressure.setter
-    def differential_pressure(self,value):
+    def differential_pressure(self, value):
         self = self._get_equipment_object(self.index)
+        unit = self.pressure_drop.unit
         if isinstance(value, tuple):
+            unit = value[1]
             value = value[0]
-        if isinstance(value, prop.Pressure):
-            value = value.value
+        elif isinstance(value, prop.Pressure):
+            unit = value.unit
+            value = value.value         
         self.pressure_drop = prop.Pressure(-1 * value,
-                                          self.inlet_pressure.unit)   
+                                           unit)   
         self._update_equipment_object(self.index, self)   
     
 

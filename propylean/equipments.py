@@ -547,7 +547,7 @@ class PipeSegment(_EquipmentOneInletOutlet):
         roughness = (4.57e-5, 4.5e-5, 0.000259, 1.5e-5, 1.5e-6) #in meters
         water = Chemical('water',
                          T = self.inlet_temperature.value,
-                         P = self._inlet_pressure.value)
+                         P = self.inlet_pressure.value)
         Re = Reynolds(V=(self.inlet_mass_flowrate.value/water.rhol)/(pi* self.ID**2)/4,
                       D=self.ID, 
                       rho=water.rhol, 
@@ -555,7 +555,9 @@ class PipeSegment(_EquipmentOneInletOutlet):
         fd = friction_factor(Re, eD=roughness[self.material-1]/self.ID)
         K = K_from_f(fd=fd, L=self.length, D=self.ID)        
         drop = round(dP_from_K(K, rho=1000, V=3),3)
-        return prop.Pressure(drop, self._inlet_pressure.unit)
+        drop = prop.Pressure(drop, 'Pa')
+        drop.unit = self._inlet_pressure.unit
+        return drop
     @pressure_drop.setter
     def pressure_drop(self, value):
         raise Exception('''Cannot manually set pressure drop for PipeSegment!\n
