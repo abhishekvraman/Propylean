@@ -34,7 +34,7 @@ class EnergyStream (prop.Power):
         return cls.items
 
     @classmethod
-    def update_object(cls, index, object):
+    def _update_stream_object(cls, index, object):
         if not isinstance(object, EnergyStream):
             raise Exception("Object type should be EnergyStream type. Type passed is ", type(object))
         cls.items[index] = object
@@ -83,7 +83,7 @@ class MaterialStream:
             unit = value.unit
             value = value.value
         self._pressure = prop.Pressure(value, unit)
-        self.update_object(self.index, self)
+        self._update_stream_object(self.index, self)
 
     @property
     def temperature(self):
@@ -100,7 +100,7 @@ class MaterialStream:
             unit = value.unit
             value = value.value
         self._temperature = prop.Temperature(value, unit)
-        self.update_object(self.index, self)
+        self._update_stream_object(self.index, self)
 
     @property
     def mass_flowrate(self):
@@ -117,14 +117,14 @@ class MaterialStream:
             unit = value.unit
             value = value.value
         self._mass_flowrate = prop.MassFlowRate(value, unit)
-        self.update_object(self.index, self)
+        self._update_stream_object(self.index, self)
 
     @classmethod
     def list_objects(cls):
         return cls.items
     
     @classmethod
-    def update_object(cls, index, object):
+    def _update_stream_object(cls, index, object):
         if not isinstance(object, MaterialStream):
             raise Exception("Object type should be MaterialStream type. Type passed is ", type(object))
         cls.items[index] = object
