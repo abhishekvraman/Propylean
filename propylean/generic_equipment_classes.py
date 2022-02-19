@@ -72,16 +72,16 @@ class _PressureChangers(_EquipmentOneInletOutlet):
                 raise Exception('Please input only one of discharge_pressure, differential_pressure or performance_curve \
                                  with suction pressure')
         if 'discharge_pressure' in inputs:
-            if (self.suction_pressure != None and 
+            if (self._inlet_pressure != None and 
                 'differential_pressure' in inputs):
                 raise Exception("Please enter ethier one of discharge_pressure or differential_pressure")
-            self._outlet_pressure = inputs['discharge_pressure']
+            self._outlet_pressure.value = inputs['discharge_pressure']
         
         if 'differential_pressure' in inputs:
-            if ((self.suction_pressure != None or self.discharge_pressure != None) and
+            if ((self._inlet_pressure != None or self._outlet_pressure != None) and
                  'performance_curve' in inputs):
                  raise Exception('Please input only one of differential pressure or performance_curve')
-            self.differential_pressure = inputs['differential_pressure'] 
+            self._pressure_drop.value = -1 * inputs['differential_pressure'] 
                  
         self._performance_curve = pd.DataFrame()
         if 'performance_curve' in inputs:

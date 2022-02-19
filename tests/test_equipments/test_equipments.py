@@ -9,7 +9,7 @@ from propylean import streams, properties
 
 @pytest.mark.instantiation
 def test_CentrifugalPump_instantiation():
-    cp = CentrifugalPump(inlet_pressure=50, 
+    cp = CentrifugalPump(inlet_pressure=50, tag = "edcqe",
                                      design_pressure = 50,
                                      pressure_drop=-60)
     assert cp.inlet_pressure.value == 50

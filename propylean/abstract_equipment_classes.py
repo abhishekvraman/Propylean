@@ -120,7 +120,6 @@ class _EquipmentOneInletOutlet:
                 ......
         """
         self.tag = None if 'tag' not in inputs else inputs['tag']
-        self._index = None
         self.dynamic_state = False if 'dynamic_state' not in inputs else inputs['dynamic_state']
         # TODO: Design pressure calcs
 
@@ -162,7 +161,7 @@ class _EquipmentOneInletOutlet:
         if 'pressure_drop' in inputs:
             self.pressure_drop = prop.Pressure(inputs['pressure_drop'])
         elif 'inlet_pressure' in inputs and 'outlet_pressure' in inputs:
-            self.pressure_drop = self._inlet_pressure.value - self._outlet_pressure.value
+            self._pressure_drop = self._inlet_pressure.value - self._outlet_pressure.value
         self.design_pressure = prop.Pressure() if 'design_pressure' not in inputs else prop.Pressure(inputs['design_pressure'])
         self._inlet_temperature = prop.Temperature() if 'inlet_temperature' not in inputs else prop.Temperature(inputs['inlet_temperature'])
         self._outlet_temperature = prop.Temperature() if 'outlet_temperature' not in inputs else prop.Temperature(inputs['outlet_temperature'])
@@ -170,10 +169,10 @@ class _EquipmentOneInletOutlet:
 
     @property
     def index(self):
-        i = self._get_equipment_index(self.tag)
-        if i is None:
-            i = self._index
-        return i
+        if self._index is None:
+            self._index = self._get_equipment_index(self.tag)
+
+        return self._index
 
 
     @property

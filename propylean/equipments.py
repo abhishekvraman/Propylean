@@ -73,8 +73,8 @@ def get_equipment_index(tag, equipment_type=None):
         return _get_equipment_index_from_equipment_list(tag, Tank.list_objects())
     elif equipment_type in ['Shell and Tube Heat exchanger', 'S&T HE', 'S&T Heat Exchanger', ShellnTubeExchanger] :
         return _get_equipment_index_from_equipment_list(tag, ShellnTubeExchanger.list_objects())
-    elif equipment_type in ['Air Cooler', 'Air Coolers', 'air coolers', AirCoolers]:
-        return _get_equipment_index_from_equipment_list(tag, AirCoolers.list_objects())
+    elif equipment_type in ['Air Cooler', 'Air Coolers', 'air coolers', AirCooler]:
+        return _get_equipment_index_from_equipment_list(tag, AirCooler.list_objects())
     
     #If user knows the general type of the equipment
     elif equipment_type in ['Pump', 'pump', 'Pumps', 'pumps']:
@@ -97,7 +97,7 @@ def get_equipment_index(tag, equipment_type=None):
     elif equipment_type in ['exchangers', 'Exchanger', 'heat exchanger', 'Heat Exchanger',
                             'Heat Exchangers', 'heat exchangers']:
         return  [(_get_equipment_index_from_equipment_list(tag, ShellnTubeExchanger.list_objects()),'Shell and Tube Exchanger'),
-                (_get_equipment_index_from_equipment_list(tag, AirCoolers.list_objects()),'Air Cooler')]
+                (_get_equipment_index_from_equipment_list(tag, AirCooler.list_objects()),'Air Cooler')]
     
     # If the user does not know the type of equipment at all
     elif equipment_type == None:
@@ -364,8 +364,8 @@ class CentrifugalCompressor(_PressureChangers):
         super().__init__( **inputs)
         # TODO Replace methane wih stream properties
         self.methane = Chemical('methane',
-                         T = self.inlet_temperature.value,
-                         P = self.inlet_pressure.value)
+                         T = self._inlet_temperature.value,
+                         P = self._inlet_pressure.value)
         if 'adiabatic_efficiency' not in inputs and 'polytropic_efficiency' in inputs:
             self.polytropic_efficiency = inputs['polytropic_efficiency']
         else:
@@ -789,7 +789,7 @@ class AirCooler(_Exchangers):
     def __init__(self, **inputs) -> None:
         self._index = len(AirCooler.items)
         super().__init__( **inputs)
-        AirCoolers.items.append(self)
+        AirCooler.items.append(self)
     
     def __eq__(self, other):
         if isinstance(other, AirCooler):
