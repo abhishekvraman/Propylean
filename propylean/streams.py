@@ -31,7 +31,13 @@ class EnergyStream (prop.Power):
 
     @classmethod
     def list_objects(cls):
-        return cls.items       
+        return cls.items
+
+    @classmethod
+    def _update_stream_object(cls, index, object):
+        if not isinstance(object, EnergyStream):
+            raise Exception("Object type should be EnergyStream type. Type passed is ", type(object))
+        cls.items[index] = object
       
 class MaterialStream:
     items = [] 
@@ -43,10 +49,11 @@ class MaterialStream:
                  from_equipment_tag= None, from_equipment_type=None):
                  
                  self.tag = tag
-                 self.mass_flowrate = prop.MassFlowRate(mass_flowrate)
-                 self.pressure = prop.Pressure(pressure)
-                 self.temperature = prop.Temperature(temperature)
-                 self.molar_flowrate = prop.MolarFlowRate()
+                 self._index = len(MaterialStream.items)
+                 self._mass_flowrate = prop.MassFlowRate(mass_flowrate)
+                 self._pressure = prop.Pressure(pressure)
+                 self._temperature = prop.Temperature(temperature)
+                 self._molar_flowrate = prop.MolarFlowRate()
                  self.to_equipment_tag = to_equipment_tag
                  self.to_equipment_type = to_equipment_type
                  self.to_equipment_index = None
@@ -55,9 +62,80 @@ class MaterialStream:
 
                  MaterialStream.items.append(self)
 
+    @property
+    def index(self):
+        i = self._get_stream_index(self.tag)
+        if i is None:
+            i = self._index
+        return i
+    @property
+    def pressure(self):
+        self = self._get_stream_object(self.index)
+        return self._pressure
+    @pressure.setter
+    def pressure(self, value):
+        self = self._get_stream_object(self.index)
+        unit = self._pressure.unit
+        if isinstance(value, tuple):
+            unit = value[1]
+            value = value[0]
+        elif isinstance(value, prop.Pressure):
+            unit = value.unit
+            value = value.value
+        self._pressure = prop.Pressure(value, unit)
+        self._update_stream_object(self.index, self)
+
+    @property
+    def temperature(self):
+        self = self._get_stream_object(self.index)
+        return self._temperature
+    @temperature.setter
+    def temperature(self, value):
+        self = self._get_stream_object(self.index)
+        unit = self._temperature.unit
+        if isinstance(value, tuple):
+            unit = value[1]
+            value = value[0]
+        elif isinstance(value, prop.Temperature):
+            unit = value.unit
+            value = value.value
+        self._temperature = prop.Temperature(value, unit)
+        self._update_stream_object(self.index, self)
+
+    @property
+    def mass_flowrate(self):
+        self = self._get_stream_object(self.index)
+        return self._mass_flowrate
+    @mass_flowrate.setter
+    def mass_flowrate(self, value):
+        self = self._get_stream_object(self.index)
+        unit = self._mass_flowrate.unit
+        if isinstance(value, tuple):
+            unit = value[1]
+            value = value[0]
+        elif isinstance(value, prop.MassFlowRate):
+            unit = value.unit
+            value = value.value
+        self._mass_flowrate = prop.MassFlowRate(value, unit)
+        self._update_stream_object(self.index, self)
+
     @classmethod
     def list_objects(cls):
         return cls.items
+    
+    @classmethod
+    def _update_stream_object(cls, index, object):
+        if not isinstance(object, MaterialStream):
+            raise Exception("Object type should be MaterialStream type. Type passed is ", type(object))
+        cls.items[index] = object
+    
+    def _get_stream_index(cls, tag):
+        for index, stream in enumerate(cls.items):
+            if stream.tag == tag:
+                return index
+        return None
+    def _get_stream_object(cls, index):
+        return cls.items[index]
 
     def __repr__(self) -> str:
         return 'Material Stream Tag: ' + self.tag

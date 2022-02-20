@@ -24,6 +24,16 @@ class _Property:
 
     def __repr__(self) -> str:
         return str(self.value) + ' ' + self.unit
+    
+    def __add__(self, x):
+        if self.unit!=x.unit:
+            x.unit = self.unit
+        return _Property(self.value+x.value, self.unit) 
+    
+    def __sub__(self, x):
+        if self.unit!=x.unit:
+            x.unit = self.unit
+        return _Property(self.value-x.value, self.unit)
 
 class Length(_Property):
     def __init__(self, value = 0, unit= 'm'):
@@ -208,7 +218,7 @@ class MassFlowRate(_Property):
                                9. lb/d for pound per day
                                10. ton/d for metric ton per day
                                11. ton/h for metric ton per hour
-                               ''')
+                               Unit you set is: '''+unit)
 
 class MolarFlowRate(_Property):
     def __init__(self, value = 1, unit= 'mol/s'):

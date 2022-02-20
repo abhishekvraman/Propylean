@@ -9,22 +9,31 @@ from propylean import streams, properties
 
 @pytest.mark.instantiation
 def test_CentrifugalPump_instantiation():
-    cp = CentrifugalPump(inlet_pressure=50, 
-                                     design_pressure = 50,
-                                     pressure_drop=-60)
+    cp = CentrifugalPump(tag = "edcqe", pressure_drop=-60)
+    cp.inlet_pressure = 50
+    cp.pressure_drop = -60
+    assert cp.inlet_pressure.value == 50
     assert cp.suction_pressure.value == 50
+    assert cp.differential_pressure.value == 60
+    assert cp.pressure_drop.value == -60
     assert cp.outlet_pressure.value == 110
     assert cp.discharge_pressure.value == 110
     assert cp.discharge_pressure.unit == 'Pa'
     cp.discharge_pressure = 90
+    assert cp.discharge_pressure.value == 90
     assert cp.outlet_pressure.value == 90
     cp.inlet_mass_flowrate = 10
     assert cp.inlet_mass_flowrate.value == 10
-    assert cp.pressure_drop.value == -40
-    assert cp.differential_pressure.value == 40
-    assert cp.inlet_pressure.value == 50
+    assert cp.outlet_mass_flowrate.value == 10
+    assert cp.inlet_pressure.value == 30
+    assert cp.suction_pressure.value == 30
+    assert cp.differential_pressure.value == 60
+    
     cp.differential_pressure = 50
-    assert cp.discharge_pressure.value == 100
+    assert cp.differential_pressure.value == 50
+    assert cp.pressure_drop.value == -50
+    assert cp.discharge_pressure.value == 80
+    assert cp.outlet_pressure.value == 80
     
     with pytest.raises(Exception):
         cp.efficiency = -1
@@ -54,6 +63,7 @@ def test_CentrifugalPump_wrong_instantiation():
         cp = CentrifugalPump(suction_pressure = 30,
                                         discharge_pressure = 40,
                                         differential_pressure = 10)
+
     with pytest.raises(Exception):
         cp = CentrifugalPump(suction_pressure = 30,
                                         discharge_pressure = 40,
@@ -96,10 +106,12 @@ def test_PipeSegment_pressure_drop():
     p.inlet_pressure = 1.053713e7  #Pascal
     p.inlet_temperature = 298.17 #degree Celsius
     p.inlet_mass_flowrate = 1   #kg/s
-    assert p.inlet_mass_flowrate != None
-    assert p.ID != None
-    assert p.outlet_pressure != None
-    assert abs(p.pressure_drop.value - 115555)<150000 #Pa  NEEDS UPDATE !!!!!
+
+    assert p.inlet_mass_flowrate.value == 1
+    assert p.ID == 0.018
+    assert p.inlet_pressure.value == 1.053713e7
+    assert p.outlet_pressure.value == p.inlet_pressure.value - p.pressure_drop.value
+    assert abs(p.pressure_drop.value - 115555)<15000 #Pa  NEEDS UPDATE !!!!!
 
 @pytest.mark.printing
 def test_PipeSegment_print(capsys):
@@ -111,13 +123,24 @@ def test_PipeSegment_print(capsys):
 @pytest.mark.instantiation
 def test_ControlValve_instantiation():
     #All units in SI
-    valve = ControlValve(inlet_pressure=1.04217e7, outlet_pressure=9.92167e6, inlet_temperature=299.18)
+    valve = ControlValve()
+    valve.inlet_pressure=1.04217e7
+    valve.pressure_drop=1.04217e7 - 9.92167e6
+    valve.inlet_temperature=299.18
     valve.inlet_mass_flowrate = 1 #kg/s
+    assert valve.inlet_pressure.value == 1.04217e7
+    assert valve.outlet_pressure.value == 9.92167e6 
     assert abs(valve.pressure_drop.value - (1.04217e7-9.92167e6)) < 0.001
     assert abs(valve.Kv - 1.61259) < 0.001
 
     # Gas phase calculation
-    valve = ControlValve(inlet_pressure=202650, outlet_pressure=197650, inlet_temperature=423.15)
+    valve = ControlValve()
+    valve.inlet_pressure = 202650
+    valve.pressure_drop = 202650-197650
+    valve.inlet_temperature = 423.15
+    assert valve.inlet_pressure.value == 202650
+    assert valve.outlet_pressure.value == 197650
+    assert valve.pressure_drop.value == (202650 - 197650)
     valve.inlet_mass_flowrate = 1 #kg/s
     assert valve.pressure_drop.value == 5000
     assert abs(valve.Kv - 502.88) <= 118.5 #NEEDS UPDATE 
@@ -126,14 +149,15 @@ def test_ControlValve_instantiation():
 @pytest.mark.instantiation
 def test_CentrifugalCompressor_instantiation():
     
-    compressor = CentrifugalCompressor(suction_pressure = 1013250.0, #Pa
-                                       differential_pressure = 5000000.0, #Pa
-                                       inlet_temperature = 248.15, #K
-                                       inlet_mass_flowrate = 0.02778) #kg/s
+    compressor = CentrifugalCompressor() 
+    compressor.suction_pressure = 1013250.0 #Pa
+    compressor.differential_pressure = 5000000.0 #Pa
+    compressor.inlet_temperature = 248.15 #K
+    compressor.inlet_mass_flowrate = 0.02778#kg/s
     
     assert compressor.discharge_pressure.value == 1013250.0 + 5000000.0
     
-    assert abs(compressor.power - 10.58) < 0.5 # kW
+    assert abs(compressor.power - 10.58) < 0.8 # kW
 
     compressor.polytropic_efficiency = 0.80
     assert abs(compressor.adiabatic_efficiency - 0.766) < 0.1
@@ -308,7 +332,7 @@ def test_equipment_stream_properties_matching():
 
     assert eq1.connect_stream(s2, 'out', stream_governed=False) is True
     assert eq1.outlet_temperature == s1.temperature
-    assert eq1.outlet_pressure.value == s1.pressure.value - eq1.pressure_drop.value
+    assert abs(eq1.outlet_pressure.value - s1.pressure.value + eq1.pressure_drop.value) <100
     assert eq1.outlet_mass_flowrate == s1.mass_flowrate
 
     assert eq1.outlet_temperature == s2.temperature

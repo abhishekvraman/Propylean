@@ -73,8 +73,8 @@ def get_equipment_index(tag, equipment_type=None):
         return _get_equipment_index_from_equipment_list(tag, Tank.list_objects())
     elif equipment_type in ['Shell and Tube Heat exchanger', 'S&T HE', 'S&T Heat Exchanger', ShellnTubeExchanger] :
         return _get_equipment_index_from_equipment_list(tag, ShellnTubeExchanger.list_objects())
-    elif equipment_type in ['Air Cooler', 'Air Coolers', 'air coolers', AirCoolers]:
-        return _get_equipment_index_from_equipment_list(tag, AirCoolers.list_objects())
+    elif equipment_type in ['Air Cooler', 'Air Coolers', 'air coolers', AirCooler]:
+        return _get_equipment_index_from_equipment_list(tag, AirCooler.list_objects())
     
     #If user knows the general type of the equipment
     elif equipment_type in ['Pump', 'pump', 'Pumps', 'pumps']:
@@ -97,7 +97,7 @@ def get_equipment_index(tag, equipment_type=None):
     elif equipment_type in ['exchangers', 'Exchanger', 'heat exchanger', 'Heat Exchanger',
                             'Heat Exchangers', 'heat exchangers']:
         return  [(_get_equipment_index_from_equipment_list(tag, ShellnTubeExchanger.list_objects()),'Shell and Tube Exchanger'),
-                (_get_equipment_index_from_equipment_list(tag, AirCoolers.list_objects()),'Air Cooler')]
+                (_get_equipment_index_from_equipment_list(tag, AirCooler.list_objects()),'Air Cooler')]
     
     # If the user does not know the type of equipment at all
     elif equipment_type == None:
@@ -207,7 +207,8 @@ class CentrifugalPump(_PressureChangers):
             >>> print(pump_1)
             Centrifugal Pump with tag: P1
         """
-        super().__init__( **inputs)
+        self._index = len(CentrifugalPump.items)
+        super().__init__(  **inputs)
         self.min_flow = None if 'min_flow' not in inputs else inputs['min_flow']
         self.NPSHr = None if 'NPSHr' not in inputs else inputs['NPSHr']
         self.NPSHa = None if 'NPSHa' not in inputs else inputs['NPSHa']
@@ -285,7 +286,8 @@ class PositiveDisplacementPump(_PressureChangers):
             >>> print(pump_1)
             Positive Displacement Pump with tag: P1
         """
-        super().__init__(**inputs)
+        self._index = len(PositiveDisplacementPump.items)
+        super().__init__( **inputs)
         PositiveDisplacementPump.items.append(self)
     
     def __eq__(self, other):
@@ -358,16 +360,16 @@ class CentrifugalCompressor(_PressureChangers):
             >>> print(CC_1)
             Centrifugal Compressor with tag: P1
         """
-        super().__init__(**inputs)
+        self._index = len(CentrifugalCompressor.items)
+        super().__init__( **inputs)
         # TODO Replace methane wih stream properties
         self.methane = Chemical('methane',
-                         T = self.inlet_temperature.value,
-                         P = self.inlet_pressure.value)
+                         T = self._inlet_temperature.value,
+                         P = self._inlet_pressure.value)
         if 'adiabatic_efficiency' not in inputs and 'polytropic_efficiency' in inputs:
             self.polytropic_efficiency = inputs['polytropic_efficiency']
         else:
             self.adiabatic_efficiency = 0.7 if 'adiabatic_efficiency' not in inputs else inputs['adiabatic_efficiency']
-        
         CentrifugalCompressor.items.append(self)
     
     def __eq__(self, other):
@@ -434,8 +436,8 @@ class CentrifugalCompressor(_PressureChangers):
 class Expander(_PressureChangers):
     items = []
     def __init__(self, **inputs) -> None:
-        self.outlet_energy_tag = None if 'outlet_energy_tag' not in inputs else inputs['outlet_energy_tag']
-        super().__init__(**inputs)
+        self._index = len(Expander.items)
+        super().__init__( **inputs)
         Expander.items.append(self)
         
     def __eq__(self, other):
@@ -475,8 +477,9 @@ class Expander(_PressureChangers):
 class PipeSegment(_EquipmentOneInletOutlet):
     items = []
     def __init__(self, **inputs) -> None:
-        self.outlet_energy_tag = None if 'outlet_energy_tag' not in inputs else inputs['outlet_energy_tag']
-        super().__init__(**inputs)
+        self._index = len(PipeSegment.items)
+        super().__init__( **inputs)
+        self._pressure_drop = prop.Pressure(0)
         self.segment_type = 1 if 'segment_type' not in inputs else inputs['segment_type']
         segments = '''\nSegments can be of following types and in range of numbers below:
                     1. Straight Tube
@@ -534,19 +537,17 @@ class PipeSegment(_EquipmentOneInletOutlet):
         return "Pipe Segment with tag: " + self.tag   #ADD SEGMENT TYPE!!
     def __hash__(self):
         return hash(self.__repr__())
-
-    @_PressureChangers.pressure_drop.setter
+    
+    @property
     def pressure_drop(self):
         from fluids.friction import friction_factor
         from fluids.core import Reynolds, K_from_f, dP_from_K
-        if (self._inlet_pressure.value == None or
-            self._outlet_pressure.value == None or
-            self.inlet_mass_flowrate.value == 0):
-            return 0
+        if self.inlet_mass_flowrate.value == 0:
+            return prop.Pressure(0, self._inlet_pressure.unit)
         roughness = (4.57e-5, 4.5e-5, 0.000259, 1.5e-5, 1.5e-6) #in meters
         water = Chemical('water',
                          T = self.inlet_temperature.value,
-                         P = self._inlet_pressure.value)
+                         P = self.inlet_pressure.value)
         Re = Reynolds(V=(self.inlet_mass_flowrate.value/water.rhol)/(pi* self.ID**2)/4,
                       D=self.ID, 
                       rho=water.rhol, 
@@ -554,7 +555,13 @@ class PipeSegment(_EquipmentOneInletOutlet):
         fd = friction_factor(Re, eD=roughness[self.material-1]/self.ID)
         K = K_from_f(fd=fd, L=self.length, D=self.ID)        
         drop = round(dP_from_K(K, rho=1000, V=3),3)
-        return prop.Pressure(drop, self._inlet_pressure.unit)
+        drop = prop.Pressure(drop, 'Pa')
+        drop.unit = self._inlet_pressure.unit
+        return drop
+    @pressure_drop.setter
+    def pressure_drop(self, value):
+        raise Exception('''Cannot manually set pressure drop for PipeSegment!\n
+                         Pressure drop depends on physical properties PipeSegment and Material flowing.''')
         
     @property
     def thickness(self):
@@ -577,7 +584,8 @@ class PipeSegment(_EquipmentOneInletOutlet):
 class ControlValve(_EquipmentOneInletOutlet):
     items = []
     def __init__(self, **inputs) -> None:
-        super().__init__(**inputs)
+        self._index = len(ControlValve.items)
+        super().__init__( **inputs)
         ControlValve.items.append(self)
     
     def __eq__(self, other):
@@ -619,10 +627,10 @@ class ControlValve(_EquipmentOneInletOutlet):
         
 class PressureSafetyValve(_EquipmentOneInletOutlet):
     items = []
-    def __init__(self, **inputs) -> None:
-        
+    def __init__(self, **inputs) -> None:  
+        self._index = len(PressureSafetyValve.items)     
+        super().__init__( **inputs)
         PressureSafetyValve.items.append(self)
-        super().__init__(**inputs)
     
     def __eq__(self, other):
         if isinstance(other, PressureSafetyValve):
@@ -643,7 +651,8 @@ class PressureSafetyValve(_EquipmentOneInletOutlet):
 class FlowMeter(_EquipmentOneInletOutlet):
     items = []
     def __init__(self, **inputs) -> None:
-        super().__init__(**inputs)
+        self._index = len(FlowMeter.items)
+        super().__init__( **inputs)
         FlowMeter.items.append(self)
     
     def __eq__(self, other):
@@ -666,7 +675,8 @@ class FlowMeter(_EquipmentOneInletOutlet):
 class VerticalSeparator(_Vessels):
     items = []
     def __init__(self, **inputs) -> None:
-        super().__init__(**inputs)
+        self._index = len(VerticalSeparator.items)
+        super().__init__( **inputs)
         VerticalSeparator.items.append(self)
     
     def __eq__(self, other):
@@ -687,7 +697,8 @@ class VerticalSeparator(_Vessels):
 class HorizontalSeparator(_Vessels):
     items = []
     def __init__(self, **inputs) -> None:
-        super().__init__(**inputs)
+        self._index = len(HorizontalSeparator.items)
+        super().__init__( **inputs)
         HorizontalSeparator.items.append(self)
     
     def __eq__(self, other):
@@ -708,7 +719,8 @@ class HorizontalSeparator(_Vessels):
 class Column(_Vessels):
     items = []
     def __init__(self, **inputs) -> None:
-        super().__init__(**inputs)
+        self._index = len(Column.items)
+        super().__init__( **inputs)
         Column.items.append(self)
     
     def __eq__(self, other):
@@ -729,7 +741,8 @@ class Column(_Vessels):
 class Tank(_Vessels):
     items = []
     def __init__(self, **inputs) -> None:
-        super().__init__(**inputs)
+        self._index = len(Tank.items)
+        super().__init__( **inputs)
         Tank.items.append(self)
     
     def __eq__(self, other):
@@ -752,7 +765,8 @@ class Tank(_Vessels):
 class ShellnTubeExchanger(_Exchangers):
     items = []
     def __init__(self, **inputs) -> None:
-        super().__init__(**inputs)
+        self._index = len(ShellnTubeExchanger.items)
+        super().__init__( **inputs)
         ShellnTubeExchanger.items.append(self)
     
     def __eq__(self, other):
@@ -770,20 +784,21 @@ class ShellnTubeExchanger(_Exchangers):
     def list_objects(cls):
         return cls.items
 
-class AirCoolers(_Exchangers):
+class AirCooler(_Exchangers):
     items = []
     def __init__(self, **inputs) -> None:
-        super().__init__(**inputs)
-        AirCoolers.items.append(self)
+        self._index = len(AirCooler.items)
+        super().__init__( **inputs)
+        AirCooler.items.append(self)
     
     def __eq__(self, other):
-        if isinstance(other, AirCoolers):
+        if isinstance(other, AirCooler):
             return self.tag == other.tag
         else:
             return False
     
     def __repr__(self):
-        return "Air Coolers with tag: " + self.tag   
+        return "Air Cooler with tag: " + self.tag   
     def __hash__(self):
         return hash(self.__repr__())
     
