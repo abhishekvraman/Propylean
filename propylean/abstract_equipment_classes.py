@@ -146,34 +146,19 @@ class _EquipmentOneInletOutlet:
         self._outlet_energy_stream_tag = None
         
         #Energy properties
-        self.energy_in = prop.Power() if 'energy_in' not in inputs else prop.Power(inputs['energy_in'])
-        self.energy_out = prop.Power() if 'energy_out' not in inputs else prop.Power(inputs['energy_out'])
+        self.energy_in = prop.Power()
+        self.energy_out = prop.Power()
 
         #Other Porperties
         self._is_disconnection = False
 
-
-        self._inlet_mass_flowrate = prop.MassFlowRate() if 'inlet_mass_flowrate' not in inputs else prop.MassFlowRate(inputs['inlet_mass_flowrate'])
-        self._outlet_mass_flowrate = prop.MassFlowRate() if 'outlet_mass_flowrate' not in inputs else prop.MassFlowRate(inputs['outlet_mass_flowrate'])
-        
-        self._inlet_pressure = prop.Pressure() if 'inlet_pressure' not in inputs else prop.Pressure(inputs['inlet_pressure'])
-        self._outlet_pressure = prop.Pressure() if 'outlet_pressure' not in inputs else prop.Pressure(inputs['outlet_pressure'])
         if 'pressure_drop' in inputs:
             self.pressure_drop = prop.Pressure(inputs['pressure_drop'])
-        elif 'inlet_pressure' in inputs and 'outlet_pressure' in inputs:
-            self._pressure_drop = self._inlet_pressure.value - self._outlet_pressure.value
-        self.design_pressure = prop.Pressure() if 'design_pressure' not in inputs else prop.Pressure(inputs['design_pressure'])
-        self._inlet_temperature = prop.Temperature() if 'inlet_temperature' not in inputs else prop.Temperature(inputs['inlet_temperature'])
-        self._outlet_temperature = prop.Temperature() if 'outlet_temperature' not in inputs else prop.Temperature(inputs['outlet_temperature'])
-        self._design_temperature = prop.Temperature() if 'design_temperature' not in inputs else prop.Temperature(inputs['design_temperature'])
+    
 
     @property
     def index(self):
-        if self._index is None:
-            self._index = self._get_equipment_index(self.tag)
-
-        return self._index
-
+      return self._index
 
     @property
     def inlet_pressure(self):
@@ -190,7 +175,7 @@ class _EquipmentOneInletOutlet:
             unit = value.unit
             value = value.value
         self._inlet_pressure = prop.Pressure(value, unit)
-        self._outlet_pressure = prop.Pressure(value - self.pressure_drop.value, unit)
+        self._outlet_pressure = prop.Pressure(self._inlet_pressure.value - self.pressure_drop.value, unit)
         self._update_equipment_object(self.index, self)
     
     @property
@@ -208,7 +193,7 @@ class _EquipmentOneInletOutlet:
             unit = value.unit
             value = value.value
         self._outlet_pressure = prop.Pressure(value, unit)
-        self._inlet_pressure = prop.Pressure(value + self.pressure_drop.value, unit)
+        self._inlet_pressure = prop.Pressure(self._outlet_pressure.value + self.pressure_drop.value, unit)
         self._update_equipment_object(self.index, self)
     
     @property
@@ -226,6 +211,8 @@ class _EquipmentOneInletOutlet:
             unit = value.unit
             value = value.value
         self._pressure_drop = prop.Pressure(value, unit)
+        self._outlet_pressure =  prop.Pressure(self._inlet_pressure.value - self._pressure_drop.value,
+                                               unit)
         self._update_equipment_object(self.index, self)
         
     

@@ -150,3 +150,31 @@ def test_Power_instantiation_conversion():
     power = properties.Power(25000000, 'cal/s')
     power.unit = 'GWh/d'
     assert abs(power.value - 2.5120) <0.0001
+
+@pytest.mark.addition
+def test_property_addition():
+    p1 = properties.Pressure(1, 'bar')
+    p2 = properties.Pressure(2, 'bar')
+    p3 = p1 + p2
+    assert p3.value == 3
+    assert p3.unit == 'bar'
+
+    p1 = properties.Pressure()
+    p2 = properties.Pressure(2, 'atm')
+    p3 = p1 + p2
+    assert p3.value == 303965.0
+    assert p3.unit == 'Pa'
+
+@pytest.mark.subtraction
+def test_property_subtraction():
+    p1 = properties.Pressure(1, 'bar')
+    p2 = properties.Pressure(2, 'bar')
+    p3 = p2 - p1
+    assert p3.value == 1
+    assert p3.unit == 'bar'
+
+    p1 = properties.Pressure()
+    p2 = properties.Pressure(2, 'atm')
+    p3 = p2 - p1
+    assert (p3.value - 1)<0.01
+    assert p3.unit == 'atm'
