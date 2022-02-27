@@ -218,7 +218,7 @@ def test_equipment_stream_connection_disconnection():
     s1 = streams.MaterialStream(tag='Pump-inlet')
     s2 = streams.MaterialStream(tag='Pump-outlet')
     en1 = streams.EnergyStream(tag='Pump-power')
-    eq1 = CentrifugalPump(tag="P-234")
+    eq1 = CentrifugalPump(tag="P-2364")
     assert eq1.connect_stream(s1,'in') is True
     assert eq1.get_stream_tag('m', 'in') == 'Pump-inlet'
     assert eq1.connect_stream(direction='out', stream_tag='Pump-outlet', stream_type='m') is True

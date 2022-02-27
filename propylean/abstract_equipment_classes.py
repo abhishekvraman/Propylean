@@ -16,11 +16,11 @@ class _EquipmentOneInletOutlet:
     
         PARAMETERS:
             tag:
-                Required: No TODO: Make tag as required or randomly generate a tag.
+                Required: No
                 Type: str
                 Acceptable values: Any string type
                 Default value: None
-                Description: Equipment tag the user wants to provide
+                Description: Equipment tag the user wants to provide. If not provided, then tag is automatically generated
             
             dynamic_state:
                 Required: No
@@ -30,82 +30,13 @@ class _EquipmentOneInletOutlet:
                 Description: If equipment is in dynamic state and inventory is changing.
                              TODO: Provide dynamic simulation capabilities.
             
-            inlet_mass_flowrate:
+            pressure_drop:
                 Required: No
                 Type: int or float (recommended)
-                Acceptable values: Any non-negative values
+                Acceptable values: Any
                 Default value: None
-                Description: Represents material inlet flowrate to the equipment.
+                Description: Represents pressure drop the equipment. Negative value implies pressure increase.
             
-            outlet_mass_flowrate:
-                Required: No
-                Type: int or float (recommended)
-                Acceptable values: Any non-negative values
-                Default value: None
-                Description: Represents material outlet flowrate to the equipment.
-            
-            design_flowrate:
-                Required: No
-                Type: int or float (recommended)
-                Acceptable values: Any non-negative values
-                Default value: None
-                Description: Represents material design flowrate of the equipment.
-
-            inlet_pressure:
-                Required: No
-                Type: int or float (recommended)
-                Acceptable values: Any non-negative values
-                Default value: None
-                Description: Represents material inlet pressure to the equipment.
-            
-            outlet_pressure:
-                Required: No
-                Type: int or float (recommended)
-                Acceptable values: Any non-negative values
-                Default value: None
-                Description: Represents material outlet pressure to the equipment.
-            
-            design_pressure:
-                Required: No
-                Type: int or float (recommended)
-                Acceptable values: Any non-negative values
-                Default value: None
-                Description: Represents material design pressure of the equipment.
-            
-            inlet_temperature:
-                Required: No
-                Type: int or float (recommended)
-                Acceptable values: Any non-negative values
-                Default value: None
-                Description: Represents material inlet temperature to the equipment.
-            
-            outlet_temperature:
-                Required: No
-                Type: int or float (recommended)
-                Acceptable values: Any non-negative values
-                Default value: None
-                Description: Represents material outlet temperature to the equipment.
-            
-            design_temperature:
-                Required: No
-                Type: int or float (recommended)
-                Acceptable values: Any non-negative values
-                Default value: None
-                Description: Represents material design temperature of the equipment.
-            
-            energy_in:
-                Required: No
-                Type: int or float (recommended)
-                Acceptable values: Any non-negative values
-                Default value: None
-                Description: Represents energy rate (Power) going into the equipment.
-            
-            energy_out:
-                Required: No
-                Type: int or float (recommended)
-                Acceptable values: Any non-negative values
-                Default value: None
-                Description: Represents energy rate (Power) going out off the equipment.
 
         RETURN VALUE:
             Type: _EquipmentOneInletOutlet
@@ -119,7 +50,12 @@ class _EquipmentOneInletOutlet:
             >>> class NewEquipment(_EquipmentOneInletOutlet):
                 ......
         """
-        self.tag = None if 'tag' not in inputs else inputs['tag']
+        if 'tag' not in inputs:
+            self.tag = self._create_equipment_tag()  
+        elif self._check_tag_assigned(inputs['tag']):
+            raise Exception("Tag {tag} already assigned".format(tag=inputs['tag']))
+        else:
+            self.tag = inputs['tag']
         self.dynamic_state = False if 'dynamic_state' not in inputs else inputs['dynamic_state']
         # TODO: Design pressure calcs
 
@@ -736,7 +672,21 @@ class _EquipmentOneInletOutlet:
                                                     stream_governed)
             if not stream_governed:
                 streams.EnergyStream.update_object(stream_index, stream_object)
-        
+
+    def _create_equipment_tag(cls):
+        i =0
+        class_name = type(cls).__name__
+        tag = class_name+ "_" + str(i)
+        while cls._check_tag_assigned(tag):
+            tag = class_name+ "_" + str(i)
+            i += 1
+        return tag
+    @classmethod
+    def _check_tag_assigned(cls, tag):
+        for equipment in cls.items:
+            if tag == equipment.tag:
+                return True
+        return False
         
 #Defining generic base class for all equipments with multiple inlet and outlet. TODO !!!!!!       
 class _EquipmentMultipleInletOutlet:

@@ -9,21 +9,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
                 Parent class for all equipment which has primary task to change
                 pressure of a stream. For e.g. Pumps and compressors.
             
-            PARAMETERS:
-                inlet_pressure or suction_pressure:
-                    Required: No
-                    Type: int or float (recommended)
-                    Acceptable values: Non-negative integer
-                    Default value: based on unit    
-                    Description: Inlet or suction pressure of the equipment.
-                
-                outlet_pressure or discharge_pressure:
-                    Required: No
-                    Type: int or float (recommended)
-                    Acceptable values: Non-negative integer
-                    Default value: based on unit    
-                    Description: Outlet or discharge pressure of the equipment.
-                
+            PARAMETERS:                
                 pressure_drop or differential_pressure:
                     Required: No
                     Type: int or float (recommended)
@@ -56,26 +42,8 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         if 'pressure_drop' in inputs:
             inputs['differential_pressure'] = -1 * inputs['pressure_drop']
             del inputs['pressure_drop']
-        if 'inlet_pressure' in inputs:
-            inputs['suction_pressure'] = inputs['inlet_pressure']
-            del inputs['inlet_pressure']
-        if 'outlet_pressure' in inputs:
-            inputs['discharge_pressure'] = inputs['outlet_pressure']
-            del inputs['outlet_pressure']
         
         super().__init__(**inputs)
-        if 'suction_pressure' in inputs:
-            self._inlet_pressure.value = inputs['suction_pressure']
-            if ('differential_pressure' in inputs and 'performance_curve' in inputs or
-                'differential_pressure' in inputs and 'discharge_pressure' in inputs or
-                'performance_curve' in inputs and 'discharge_pressure' in inputs):
-                raise Exception('Please input only one of discharge_pressure, differential_pressure or performance_curve \
-                                 with suction pressure')
-        if 'discharge_pressure' in inputs:
-            if (self._inlet_pressure != None and 
-                'differential_pressure' in inputs):
-                raise Exception("Please enter ethier one of discharge_pressure or differential_pressure")
-            self._outlet_pressure.value = inputs['discharge_pressure']
         
         if 'differential_pressure' in inputs:
             if ((self._inlet_pressure != None or self._outlet_pressure != None) and
