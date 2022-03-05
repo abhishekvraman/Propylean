@@ -16,13 +16,21 @@ class _PressureChangers(_EquipmentOneInletOutlet):
                     Acceptable values: Non-negative integer
                     Default value: based on unit    
                     Description: Pressure drop or differential pressure of the equipment.
-
-                performance_curve:
-                    Required: No
+                
+                efficiency:
+                     Required: No
                     Type: int or float (recommended)
                     Acceptable values: Non-negative integer
                     Default value: based on unit    
-                    Description: Pressure drop or differential pressure of the equipment.
+                    Description: Efficiency of the equipment.
+
+                performance_curve:
+                    Required: No
+                    Type: pandas dataframe
+                    Acceptable values: Non-negative integer in dataframe with flow and head values.
+                    Default value: pandas.DataFrame()    
+                    Description: Performance curve of the pump. 
+                                 E.g. pd.DataFrame([{'flow':[2, 10, 30, 67], 'head':[45, 20, 10, 2]}]) 
 
             RETURN VALUE:
                 Type: _PressureChangers
@@ -49,7 +57,13 @@ class _PressureChangers(_EquipmentOneInletOutlet):
             if ((self._inlet_pressure != None or self._outlet_pressure != None) and
                  'performance_curve' in inputs):
                  raise Exception('Please input only one of differential pressure or performance_curve')
-            self._pressure_drop.value = -1 * inputs['differential_pressure'] 
+            diff_presure = inputs['differential_pressure'] 
+            if isinstance(diff_presure, prop.Pressure):
+                self._pressure_drop = prop.Pressure(-1 * diff_presure.value,
+                                                    diff_presure.unit)
+            elif isinstance(diff_presure, tuple):
+                self._pressure_drop = prop.Pressure(-1 * diff_presure[0],
+                                                     diff_presure[1])
                  
         self._performance_curve = pd.DataFrame()
         if 'performance_curve' in inputs:
@@ -100,7 +114,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         if isinstance(value,pd.DataFrame) and value.shape[1] == 2:
                 self._performance_curve = value
         else:
-            raise Exception("Please enter performance_curve as pandas dataframe of 2 columns")
+            raise Exception("Please enter performance_curve as pandas dataframe of 2 columns.\nOne for Flow and other for head.")
         self._update_equipment_object(self.index, self)
     
     @property

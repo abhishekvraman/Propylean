@@ -25,15 +25,24 @@ class _Property:
     def __repr__(self) -> str:
         return str(self.value) + ' ' + self.unit
     
-    def __add__(self, x):
-        if self.unit!=x.unit:
-            x.unit = self.unit
-        return _Property(self.value+x.value, self.unit) 
+    def __add__(self, other):
+        if self.unit != other.unit:
+            other.unit = self.unit
+        return type(self)(self.value + other.value, self.unit) 
     
-    def __sub__(self, x):
-        if self.unit!=x.unit:
-            x.unit = self.unit
-        return _Property(self.value-x.value, self.unit)
+    def __sub__(self, other):
+        if self.unit!=other.unit:
+            other.unit = self.unit
+        return type(self)(self.value - other.value, self.unit)
+    
+    def __eq__(self, other):
+        if isinstance(other, type(self)):
+            if self.unit != other.unit:
+                other.unit = self.unit
+            return self.value == other.value
+        else:
+            return False
+
 
 class Length(_Property):
     def __init__(self, value = 0, unit= 'm'):
@@ -56,9 +65,8 @@ class Length(_Property):
             self._value =  conversion_factors[self._unit] * self._value / conversion_factors[unit]
             self._unit = unit
         except:
-            self._unit = 'm'
             raise Exception('''Selected unit is not supported or a correct unit of Length.
-                               Unit set as meter (m). Supported units are:
+                               Supported units are:
                                1. m for meters
                                2. mm for millimeters
                                3. km for Kilometers
@@ -67,7 +75,8 @@ class Length(_Property):
                                6. mile
                                7. yard
                                8. foot
-                               ''')
+                               You selected '{}'.
+                               '''.format(unit))
 
 class Time(_Property):
     def __init__(self, value = 0, unit= 'sec'):
@@ -89,9 +98,8 @@ class Time(_Property):
             self._value =  conversion_factors[self._unit] * self._value / conversion_factors[unit]
             self._unit = unit
         except:
-            self._unit = 's'
             raise Exception('''Selected unit is not supported or a correct unit of Time.
-                               Unit set as second (s). Supported units are:
+                               Supported units are:
                                1. s for seconds
                                2. min for minutes
                                3. hour
@@ -99,7 +107,8 @@ class Time(_Property):
                                5. week
                                6. month
                                7. year
-                               ''')
+                               You selected '{}'.
+                               '''.format(unit))
     
 class Pressure(_Property):
     def __init__(self, value = 101325, unit= 'Pa'):
@@ -125,9 +134,8 @@ class Pressure(_Property):
             self._value =  conversion_factors[self._unit] * self._value / conversion_factors[unit]
             self._unit = unit
         except:
-            self._unit = 'Pa'
             raise Exception('''Selected unit is not supported or a correct unit of Length.
-                               Unit set as Pascal (Pa). Supported units are:
+                               Supported units are:
                                1. Pa for Pascals
                                2. m water for meters of water column
                                3. in water for inches of water column
@@ -140,7 +148,8 @@ class Pressure(_Property):
                                10. psi for Pound per square inch
                                11. bar
                                12. atm for Atmospheres
-                               ''')
+                               You selected '{}'.
+                               '''.format(unit))
 
 class Temperature(_Property):
     def __init__(self, value = 298, unit= 'K'):
@@ -149,7 +158,6 @@ class Temperature(_Property):
     
     @_Property.unit.setter
     def unit(self, unit):
-
         if unit in ['K', 'C', 'F', 'R']:
             while unit != self._unit:
                 if self._unit == 'K':
@@ -173,17 +181,18 @@ class Temperature(_Property):
                     if unit == self._unit:
                         break
         else:
-            self._unit = 'K'
             raise Exception('''Selected unit is not supported or a correct unit of Temperature.
-                               Unit set as Kelvin (K). Supported units are:
+                               Supported units are:
                                1. K for Kelvin
                                2. C for Degrees Celsius
                                3. F for Degree Fahrenheit
-                               4. R for Degree Rankine''')
+                               4. R for Degree Rankine
+                               You selected '{}'.
+                               '''.format(unit))
 
 class MassFlowRate(_Property):
     def __init__(self, value = 0, unit= 'kg/s'):
-        super().__init__(value,unit)
+        super().__init__(value, unit)
         self.unit = unit
     
     @_Property.unit.setter
@@ -204,9 +213,8 @@ class MassFlowRate(_Property):
             self._value =  conversion_factors[unit] * self._value / conversion_factors[self._unit]
             self._unit = unit
         except:
-            self._unit = 'kg/s'
             raise Exception('''Selected unit is not supported or a correct unit of Mass Flow Rate.
-                               Unit set as kilogram per second (kg/s). Supported units are:
+                               Supported units are:
                                1. kg/s for kilogram per seconds
                                2. kg/min for kilogram per minutes
                                3. kg/h for kilogram per hour
@@ -218,7 +226,11 @@ class MassFlowRate(_Property):
                                9. lb/d for pound per day
                                10. ton/d for metric ton per day
                                11. ton/h for metric ton per hour
-                               Unit you set is: '''+unit)
+                               You selected '{}'.
+                               '''.format(unit))
+    
+    def __add__(self, other):
+        return super().__add__(other)
 
 class MolarFlowRate(_Property):
     def __init__(self, value = 1, unit= 'mol/s'):
@@ -242,9 +254,8 @@ class MolarFlowRate(_Property):
             self._value =  conversion_factors[unit] * self._value / conversion_factors[self._unit]
             self._unit = unit
         except:
-            self._unit = 'mol/s'
             raise Exception('''Selected unit is not supported or a correct unit of Molar Flow Rate.
-                               Unit set as moles per second (mol/s). Supported units are:
+                               Supported units are:
                                1. mol/s for moles per seconds
                                2. mol/min for moles per minutes
                                3. mol/h for moles per hour
@@ -254,7 +265,8 @@ class MolarFlowRate(_Property):
                                7. lbmol/d for poundmole per day
                                8. kmol/h for kilomole per hour
                                9. kmol/d for kilomole per day
-                               ''')
+                               You selected '{}'.
+                               '''.format(unit))
 
 class VolumetricFlowRate(_Property):
     def __init__(self, value = 1, unit= 'm^3/s'):
@@ -284,7 +296,6 @@ class VolumetricFlowRate(_Property):
             self._value =  conversion_factors[unit] * self._value / conversion_factors[self._unit]
             self._unit = unit
         except:
-            self._unit = 'm^3/s'
             raise Exception('''Selected unit is not supported or a correct unit of Volume Flow Rate.
                                Unit selected in cubic meter per second (m^3/s). Following are the supported units:
                                1. m^3/s for cubic meter per second
@@ -303,7 +314,9 @@ class VolumetricFlowRate(_Property):
                                14. lit/s for Liters per second
                                15. lit/min for Liters per minute
                                16. lit/h for Liters per hour
-                               17. lit/d  for Liters per day''')
+                               17. lit/d  for Liters per day
+                               You selected '{}'.
+                               '''.format(unit))
 
 class Power(_Property):
     def __init__(self, value = 0, unit= 'W'):
@@ -338,9 +351,8 @@ class Power(_Property):
             self._value = conversion_factors[self._unit] * self._value / conversion_factors[unit]
             self._unit = unit
         except:
-            self._unit = 'W'
             raise Exception('''Selected unit is not supported or a correct unit of Power. 
-                               Using Watts (W) instead. Following units are supported:
+                               Following units are supported:
                                1. W for Watts
                                2. BTU/h for British Termal Units per hour
                                3. BTU/min for Brititsh Termal Units per minutes
@@ -362,4 +374,5 @@ class Power(_Property):
                                19. MWh/d for Mega watt hours per day
                                20. GWh/d for Giga watt hour per day
                                21. TWh/d for Tera watt hour per day
-                               ''')
+                               You selected '{}'.
+                               '''.format(unit))

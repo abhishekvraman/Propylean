@@ -52,8 +52,6 @@ class _EquipmentOneInletOutlet:
         """
         if 'tag' not in inputs:
             self.tag = self._create_equipment_tag()  
-        elif self._check_tag_assigned(inputs['tag']):
-            raise Exception("Tag {tag} already assigned".format(tag=inputs['tag']))
         else:
             self.tag = inputs['tag']
         self.dynamic_state = False if 'dynamic_state' not in inputs else inputs['dynamic_state']
@@ -97,6 +95,16 @@ class _EquipmentOneInletOutlet:
       return self._index
 
     @property
+    def tag(self):
+        return self._tag
+    @tag.setter
+    def tag(self, value):
+        if self._check_tag_assigned(value):
+            msg = "Tag '{}' already assigned!".format(value)
+            raise Exception(msg)
+        else:
+            self._tag = value
+    @property
     def inlet_pressure(self):
         self = self._get_equipment_object(self.index)
         return self._inlet_pressure
@@ -111,7 +119,7 @@ class _EquipmentOneInletOutlet:
             unit = value.unit
             value = value.value
         self._inlet_pressure = prop.Pressure(value, unit)
-        self._outlet_pressure = prop.Pressure(self._inlet_pressure.value - self.pressure_drop.value, unit)
+        self._outlet_pressure = self._inlet_pressure - self.pressure_drop
         self._update_equipment_object(self.index, self)
     
     @property
@@ -129,7 +137,7 @@ class _EquipmentOneInletOutlet:
             unit = value.unit
             value = value.value
         self._outlet_pressure = prop.Pressure(value, unit)
-        self._inlet_pressure = prop.Pressure(self._outlet_pressure.value + self.pressure_drop.value, unit)
+        self._inlet_pressure = self._outlet_pressure + self.pressure_drop
         self._update_equipment_object(self.index, self)
     
     @property
@@ -147,11 +155,9 @@ class _EquipmentOneInletOutlet:
             unit = value.unit
             value = value.value
         self._pressure_drop = prop.Pressure(value, unit)
-        self._outlet_pressure =  prop.Pressure(self._inlet_pressure.value - self._pressure_drop.value,
-                                               unit)
+        self._outlet_pressure =  self._inlet_pressure - self._pressure_drop
         self._update_equipment_object(self.index, self)
         
-    
     @property
     def inlet_temperature(self):
         self = self._get_equipment_object(self.index)
@@ -167,7 +173,7 @@ class _EquipmentOneInletOutlet:
             unit = value.unit
             value = value.value
         self._inlet_temperature = prop.Temperature(value, unit)
-        self._outlet_temperature.value = self._inlet_temperature.value + self.temperature_change.value
+        self._outlet_temperature = self._inlet_temperature + self.temperature_change
         self._update_equipment_object(self.index, self)
     @property
     def outlet_temperature(self):
@@ -176,21 +182,21 @@ class _EquipmentOneInletOutlet:
     @outlet_temperature.setter
     def outlet_temperature(self,value):
         self = self._get_equipment_object(self.index)
+        unit = self._outlet_temperature.unit
         if isinstance(value, tuple):
-            self._outlet_temperature.unit = value[1]
+            unit = value[1]
             value = value[0]
         elif isinstance(value, prop.Temperature):
-            self._outlet_temperature.unit = value.unit
+            unit = value.unit
             value = value.value
-        self._outlet_temperature.value = value
-        self._inlet_temperature.value = self._outlet_temperature.value - self.temperature_change.value
+        self._outlet_temperature = prop.Temperature(value, unit)
+        self._inlet_temperature = self._outlet_temperature - self.temperature_change
         self._update_equipment_object(self.index, self)
     @property
     def temperature_change(self):
         self = self._get_equipment_object(self.index)
         value = prop.Temperature(0, self._outlet_temperature.unit) # Change as per inlet outlet power
         return value
-
 
     @property
     def inlet_mass_flowrate(self):
@@ -207,8 +213,9 @@ class _EquipmentOneInletOutlet:
             unit = value.unit
             value = value.value
         self._inlet_mass_flowrate = prop.MassFlowRate(value, unit)
-        self._outlet_mass_flowrate.value = self._inlet_mass_flowrate.value + self.inventory_change_rate.value
+        self._outlet_mass_flowrate = self._inlet_mass_flowrate + self.inventory_change_rate
         self._update_equipment_object(self.index, self)
+    
     @property
     def outlet_mass_flowrate(self):
         self = self._get_equipment_object(self.index)
@@ -223,20 +230,16 @@ class _EquipmentOneInletOutlet:
         if isinstance(value, prop.MassFlowRate):
             unit = value.unit
             value = value.value
-        self._outlet_mass_flowrate.value = value
-        self._outlet_mass_flowrate.unit = unit
-        self._inlet_mass_flowrate.value = self._outlet_mass_flowrate.value - self.inventory_change_rate.value
+        self._outlet_mass_flowrate = prop.MassFlowRate(value, unit)
+        self._inlet_mass_flowrate = self._outlet_mass_flowrate - self.inventory_change_rate
         self._update_equipment_object(self.index, self)
+    
     @property
     def inventory_change_rate(self):
         self = self._get_equipment_object(self.index)
         if not self.dynamic_state:
-            return prop.MassFlowRate(0, self.inlet_mass_flowrate.unit)
-        if (self._inlet_mass_flowrate.value == None or
-            self._outlet_mass_flowrate.value == None):
-            return None            
-        return prop.MassFlowRate(self._inlet_mass_flowrate.value - self._outlet_mass_flowrate.value,
-                                 self.outlet_mass_flowrate.unit)
+            return prop.MassFlowRate(0, self.inlet_mass_flowrate.unit)            
+        return self._inlet_mass_flowrate - self._outlet_mass_flowrate                             
     @inventory_change_rate.setter
     def inventory_change_rate(self, value):
         self = self._get_equipment_object(self.index)
@@ -259,6 +262,12 @@ class _EquipmentOneInletOutlet:
     
     def _update_equipment_object(cls, index, obj):
         cls.items[index] = obj
+    
+    def __eq__(self, other):
+        if isinstance(other, type(self)):
+            return self.tag == other.tag
+        else:
+            return False
 
 
     def get_stream_tag(self, stream_type, direction):
@@ -621,10 +630,9 @@ class _EquipmentOneInletOutlet:
         """
         def property_matcher(stream_property, equipment_property, stream_governed):
             if stream_governed:
-                equipment_property = stream_property
-            else:
-                stream_property = equipment_property
-            return stream_property, equipment_property
+                return stream_property, stream_property
+            return equipment_property, equipment_property
+
         if stream_type.lower() in ['m', 'material', 'mass']:
             stream_object = streams.MaterialStream.list_objects()[stream_index]
             if is_inlet:

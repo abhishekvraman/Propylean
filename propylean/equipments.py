@@ -1,3 +1,4 @@
+from pyrsistent import v
 from propylean.generic_equipment_classes import _PressureChangers, _EquipmentOneInletOutlet, _Vessels, _Exchangers
 from thermo.chemical import Chemical
 from fluids import control_valve as cv_calculations
@@ -178,13 +179,6 @@ class CentrifugalPump(_PressureChangers):
                 Acceptable values: Non-negative values
                 Default value: None
                 Description: Minimum flow requirement of the pump
-            
-            NPSHa:
-                Required: No
-                Type: int or float (recommended)
-                Acceptable values: Non-negative values
-                Default value: None
-                Description: NPSHa of the pump
 
             NPSHr:
                 Required: No
@@ -209,21 +203,32 @@ class CentrifugalPump(_PressureChangers):
         """
         self._index = len(CentrifugalPump.items)
         super().__init__(  **inputs)
-        self.min_flow = None if 'min_flow' not in inputs else inputs['min_flow']
-        self.NPSHr = None if 'NPSHr' not in inputs else inputs['NPSHr']
-        self.NPSHa = None if 'NPSHa' not in inputs else inputs['NPSHa']
+        self._min_flow = prop.VolumetricFlowRate() if 'min_flow' not in inputs else inputs['min_flow']
+        self._NPSHr = None if 'NPSHr' not in inputs else inputs['NPSHr']
+        self._NPSHa = None # TODO: Calculate automatically.
         CentrifugalPump.items.append(self)
-    
-    def __eq__(self, other):
-        if isinstance(other, CentrifugalPump):
-            return self.tag == other.tag
-        else:
-            return False
     
     def __repr__(self):
         return "Centrifugal Pump with tag: " + self.tag
     def __hash__(self):
         return hash(self.__repr__())
+
+    @property
+    def min_flow(self):
+        return self._min_flow
+    @min_flow.setter
+    def min_flow(self, value):
+        self = self._get_equipment_object(self.index)
+        unit = self._min_flow.unit
+        if isinstance(value, prop.VolumetricFlowRate):
+            unit = value.unit
+            value = value.value
+        elif isinstance(value, tuple):
+            unit = value[1]
+            value = value[0]
+        self._min_flow = prop.VolumetricFlowRate(value, unit)
+        self._update_equipment_object(self.index, self)
+
 
     @property
     def head(self):
@@ -289,12 +294,6 @@ class PositiveDisplacementPump(_PressureChangers):
         self._index = len(PositiveDisplacementPump.items)
         super().__init__( **inputs)
         PositiveDisplacementPump.items.append(self)
-    
-    def __eq__(self, other):
-        if isinstance(other, PositiveDisplacementPump):
-            return self.tag == other.tag
-        else:
-            return False
     
     def __repr__(self):
         return "Positive Displacement Pump with tag: " + self.tag
@@ -372,12 +371,6 @@ class CentrifugalCompressor(_PressureChangers):
             self.adiabatic_efficiency = 0.7 if 'adiabatic_efficiency' not in inputs else inputs['adiabatic_efficiency']
         CentrifugalCompressor.items.append(self)
     
-    def __eq__(self, other):
-        if isinstance(other, CentrifugalCompressor):
-            return self.tag == other.tag
-        else:
-            return False
-    
     def __repr__(self):
         return "Centrifugal Compressor with tag: " + self.tag
     def __hash__(self):
@@ -439,12 +432,6 @@ class Expander(_PressureChangers):
         self._index = len(Expander.items)
         super().__init__( **inputs)
         Expander.items.append(self)
-        
-    def __eq__(self, other):
-        if isinstance(other, Expander):
-            return self.tag == other.tag
-        else:
-            return False
     
     def __repr__(self):
         return "Expander with tag: " + self.tag
@@ -526,12 +513,6 @@ class PipeSegment(_EquipmentOneInletOutlet):
         else:
             raise Exception('Define atleast ID or OD with thickness to define a pipe segment object') 
         PipeSegment.items.append(self)
-        
-    def __eq__(self, other):
-        if isinstance(other, PipeSegment):
-            return self.tag == other.tag
-        else:
-            return False
     
     def __repr__(self):
         return "Pipe Segment with tag: " + self.tag   #ADD SEGMENT TYPE!!
@@ -588,12 +569,6 @@ class ControlValve(_EquipmentOneInletOutlet):
         super().__init__( **inputs)
         ControlValve.items.append(self)
     
-    def __eq__(self, other):
-        if isinstance(other, ControlValve):
-            return self.tag == other.tag
-        else:
-            return False
-    
     def __repr__(self):
         return "Control Valve with tag: " + self.tag   
     def __hash__(self):
@@ -632,13 +607,6 @@ class PressureSafetyValve(_EquipmentOneInletOutlet):
         super().__init__( **inputs)
         PressureSafetyValve.items.append(self)
     
-    def __eq__(self, other):
-        if isinstance(other, PressureSafetyValve):
-            return self.tag == other.tag
-        else:
-            return False
-
-    
     def __repr__(self):
         return "Pressure Safety Valve with tag: " + self.tag   
     def __hash__(self):
@@ -654,13 +622,7 @@ class FlowMeter(_EquipmentOneInletOutlet):
         self._index = len(FlowMeter.items)
         super().__init__( **inputs)
         FlowMeter.items.append(self)
-    
-    def __eq__(self, other):
-        if isinstance(other, FlowMeter):
-            return self.tag == other.tag
-        else:
-            return False
-    
+
     def __repr__(self):
         return "Flow Meter with tag: " + self.tag   
     def __hash__(self):
@@ -679,12 +641,6 @@ class VerticalSeparator(_Vessels):
         super().__init__( **inputs)
         VerticalSeparator.items.append(self)
     
-    def __eq__(self, other):
-        if isinstance(other, VerticalSeparator):
-            return self.tag == other.tag
-        else:
-            return False
-    
     def __repr__(self):
         return "Vertical Separator with tag: " + self.tag   
     def __hash__(self):
@@ -700,12 +656,6 @@ class HorizontalSeparator(_Vessels):
         self._index = len(HorizontalSeparator.items)
         super().__init__( **inputs)
         HorizontalSeparator.items.append(self)
-    
-    def __eq__(self, other):
-        if isinstance(other, HorizontalSeparator):
-            return self.tag == other.tag
-        else:
-            return False
     
     def __repr__(self):
         return "Horizontal Separator with tag: " + self.tag   
@@ -723,12 +673,6 @@ class Column(_Vessels):
         super().__init__( **inputs)
         Column.items.append(self)
     
-    def __eq__(self, other):
-        if isinstance(other, Column):
-            return self.tag == other.tag
-        else:
-            return False
-    
     def __repr__(self):
         return "Column with tag: " + self.tag   
     def __hash__(self):
@@ -744,12 +688,6 @@ class Tank(_Vessels):
         self._index = len(Tank.items)
         super().__init__( **inputs)
         Tank.items.append(self)
-    
-    def __eq__(self, other):
-        if isinstance(other, Tank):
-            return self.tag == other.tag
-        else:
-            return False
     
     def __repr__(self):
         return "Tank with tag: " + self.tag   
@@ -769,12 +707,6 @@ class ShellnTubeExchanger(_Exchangers):
         super().__init__( **inputs)
         ShellnTubeExchanger.items.append(self)
     
-    def __eq__(self, other):
-        if isinstance(other, ShellnTubeExchanger):
-            return self.tag == other.tag
-        else:
-            return False
-    
     def __repr__(self):
         return "Shell & Tube Exchanger with tag: " + self.tag   
     def __hash__(self):
@@ -790,12 +722,6 @@ class AirCooler(_Exchangers):
         self._index = len(AirCooler.items)
         super().__init__( **inputs)
         AirCooler.items.append(self)
-    
-    def __eq__(self, other):
-        if isinstance(other, AirCooler):
-            return self.tag == other.tag
-        else:
-            return False
     
     def __repr__(self):
         return "Air Cooler with tag: " + self.tag   

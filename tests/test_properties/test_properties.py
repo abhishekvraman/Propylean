@@ -165,6 +165,12 @@ def test_property_addition():
     assert p3.value == 303965.0
     assert p3.unit == 'Pa'
 
+    m1 = properties.MassFlowRate(2)
+    m2 = properties.MassFlowRate(3)
+    m3 = m1 + m2
+    assert isinstance(m1, properties.MassFlowRate)
+    assert isinstance(m3, properties.MassFlowRate)
+
 @pytest.mark.subtraction
 def test_property_subtraction():
     p1 = properties.Pressure(1, 'bar')
@@ -178,3 +184,20 @@ def test_property_subtraction():
     p3 = p2 - p1
     assert (p3.value - 1)<0.01
     assert p3.unit == 'atm'
+    assert p3 == p2 - p1
+
+@pytest.mark.positive
+def test_property_equality():
+    l1 = properties.Length(2,'m')
+    l2 = properties.Length(2000, 'mm')
+    assert l1==l2
+
+def test_property_same_not_equal():
+    l1 = properties.Length(2,'m')
+    l2 = properties.Length(200, 'mm')
+    assert not l1==l2
+
+def test_property_different_not_equal():
+    t = properties.Temperature()
+    m = properties.MassFlowRate()
+    assert not t==m
