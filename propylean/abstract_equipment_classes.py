@@ -668,7 +668,7 @@ class _EquipmentOneInletOutlet:
                                                            self._outlet_temperature,
                                                            stream_governed)
             if not stream_governed:
-                streams.MaterialStream._update_stream_object(stream_index, stream_object)
+                streams.MaterialStream._update_stream_object(stream_object)
             else:
                 self._update_equipment_object(self)
         else:

@@ -91,7 +91,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
                              self.pressure_drop.unit)
     @differential_pressure.setter
     def differential_pressure(self, value):
-        self = self._get_equipment_object(self.index)
+        self = self._get_equipment_object(self)
         unit = self.pressure_drop.unit
         if isinstance(value, tuple):
             unit = value[1]
@@ -101,36 +101,36 @@ class _PressureChangers(_EquipmentOneInletOutlet):
             value = value.value         
         self.pressure_drop = prop.Pressure(-1 * value,
                                            unit)   
-        self._update_equipment_object(self.index, self)   
+        self._update_equipment_object(self)   
     
 
     @property
     def performance_curve(self):
-        self = self._get_equipment_object(self.index)
+        self = self._get_equipment_object(self)
         return self._perfomace_curve
     @performance_curve.setter
     def pump_curve(self,value):
-        self = self._get_equipment_object(self.index)
+        self = self._get_equipment_object(self)
         if isinstance(value,pd.DataFrame) and value.shape[1] == 2:
                 self._performance_curve = value
         else:
             raise Exception("Please enter performance_curve as pandas dataframe of 2 columns.\nOne for Flow and other for head.")
-        self._update_equipment_object(self.index, self)
+        self._update_equipment_object(self)
     
     @property
     def efficiency(self):
-        self = self._get_equipment_object(self.index)
+        self = self._get_equipment_object(self)
         return self._efficiency
     @efficiency.setter
     def efficiency(self, value):
-        self = self._get_equipment_object(self.index)
+        self = self._get_equipment_object(self)
         if value < 0:
             raise Exception("Please enter a positive value for efficiency")
         elif value <= 1:
             self._efficiency = value
         else:
             self._efficiency = value/100
-        self._update_equipment_object(self.index, self)
+        self._update_equipment_object(self)
 
 #Defining generic class for all types of vessels.  NEEDS SUPER CLASS WITH MULTI INPUT AND OUTPUT 
 class _Vessels(_EquipmentMultipleInletOutlet):

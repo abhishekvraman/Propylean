@@ -218,7 +218,7 @@ class CentrifugalPump(_PressureChangers):
         return self._min_flow
     @min_flow.setter
     def min_flow(self, value):
-        self = self._get_equipment_object(self.index)
+        self = self._get_equipment_object(self)
         unit = self._min_flow.unit
         if isinstance(value, prop.VolumetricFlowRate):
             unit = value.unit
@@ -227,7 +227,7 @@ class CentrifugalPump(_PressureChangers):
             unit = value[1]
             value = value[0]
         self._min_flow = prop.VolumetricFlowRate(value, unit)
-        self._update_equipment_object(self.index, self)
+        self._update_equipment_object(self)
 
 
     @property
