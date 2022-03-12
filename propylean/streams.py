@@ -1,8 +1,71 @@
 from ast import expr_context
 from thermo.chemical import Chemical
 import propylean.properties as prop
+class Stream:
+    def __init__(self, tag=None,
+                 to_equipment=None,
+                 from_equipment=None) -> None:
+        self._tag = None
+        self._to_equipment = None
+        self._from_equipment = None
+        self.tag = tag if tag is not None else self._create_stream_tag()
+        self.to_equipment = to_equipment
+        self.from_equipment = from_equipment
 
-class EnergyStream (prop.Power):
+    @property
+    def tag(self):
+        return self._tag
+    @tag.setter
+    def tag(self, value):
+        self = self._get_stream_object(self)
+        if value is None:
+            value = self._create_stream_tag()
+        if self._check_tag_assigned(value):
+            raise Exception("Tag already assinged!")
+        self._tag = value
+        self._update_stream_object(self)
+    
+    @property
+    def index(self):
+        return self._index
+    
+    @classmethod
+    def _update_stream_object(cls, object):
+        # if cls.__name__ != type(object).__name__:
+        #     raise Exception("Object type should be {} type. Type passed is {}".format(cls.__name__, type(object).__name__))
+        try:
+            cls.items[object.index] = object
+        except:
+            pass
+    
+    def _get_stream_index(cls, tag):
+        for index, stream in enumerate(cls.items):
+            if stream.tag == tag:
+                return index
+        return None
+
+    def _get_stream_object(cls, obj):
+        try:
+            return cls.items[obj.index]
+        except:
+            return obj
+
+    def _create_stream_tag(cls):
+        i = 1
+        class_name = type(cls).__name__
+        tag = class_name+ "_" + str(i)
+        while cls._check_tag_assigned(tag):
+            tag = class_name+ "_" + str(i)
+            i += 1
+        return tag
+    
+    def _check_tag_assigned(cls, tag):
+        for equipment in cls.items:
+            if tag == equipment.tag:
+                return True
+        return False
+        
+class EnergyStream (Stream, prop.Power):
     items = [] 
     def __init__(self, value=0, unit='W', tag=None, 
                  to_equipment_tag=None, to_equipment_type=None,
@@ -33,16 +96,12 @@ class EnergyStream (prop.Power):
     @classmethod
     def list_objects(cls):
         return cls.items
-
-    @classmethod
-    def _update_stream_object(cls, index, object):
-        if not isinstance(object, EnergyStream):
-            raise Exception("Object type should be EnergyStream type. Type passed is ", type(object))
-        cls.items[index] = object
       
-class MaterialStream:
+class MaterialStream(Stream):
     items = [] 
     def __init__(self,tag = None,
+                 to_equipment=None,
+                 from_equipment=None,
                  mass_flowrate = 0,
                  pressure = 101325,
                  temperature = 298):
@@ -61,27 +120,6 @@ class MaterialStream:
                  self.pressure = pressure
 
                  MaterialStream.items.append(self)
-
-    @property
-    def tag(self):
-        try:
-            self = self._get_stream_object(self)
-        except:
-            pass
-        return self._tag
-    @tag.setter
-    def tag(self, value):
-        self = self._get_stream_object(self)
-        if value is None:
-            value = self._create_stream_tag()
-        if self._check_tag_assigned(value):
-            raise Exception("Tag already assinged!")
-        self._tag = value
-        self._update_stream_object(self)
-    
-    @property
-    def index(self):
-        return self._index
         
     @property
     def pressure(self):
@@ -138,43 +176,9 @@ class MaterialStream:
     def list_objects(cls):
         return cls.items
     
-    @classmethod
-    def _update_stream_object(cls, object):
-        if not isinstance(object, MaterialStream):
-            raise Exception("Object type should be MaterialStream type. Type passed is ", type(object))
-        try:
-            cls.items[object.index] = object
-        except:
-            pass
     
-    def _get_stream_index(cls, tag):
-        for index, stream in enumerate(cls.items):
-            if stream.tag == tag:
-                return index
-        return None
-    def _get_stream_object(cls, obj):
-        try:
-            return cls.items[obj.index]
-        except:
-            return obj
-
     def __repr__(self) -> str:
         return 'Material Stream Tag: ' + self.tag
-    
-    def _create_stream_tag(cls):
-        i = 1
-        class_name = type(cls).__name__
-        tag = class_name+ "_" + str(i)
-        while cls._check_tag_assigned(tag):
-            tag = class_name+ "_" + str(i)
-            i += 1
-        return tag
-    @classmethod
-    def _check_tag_assigned(cls, tag):
-        for equipment in cls.items:
-            if tag == equipment.tag:
-                return True
-        return False
 
 #Get stream index function
 def get_stream_index(tag, stream_type=None):

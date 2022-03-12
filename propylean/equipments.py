@@ -203,9 +203,15 @@ class CentrifugalPump(_PressureChangers):
         """
         self._index = len(CentrifugalPump.items)
         super().__init__(  **inputs)
-        self._min_flow = prop.VolumetricFlowRate() if 'min_flow' not in inputs else inputs['min_flow']
-        self._NPSHr = None if 'NPSHr' not in inputs else inputs['NPSHr']
-        self._NPSHa = None # TODO: Calculate automatically.
+        self._NPSHr = prop.Length()
+        self._NPSHa = prop.Length()
+        self._min_flow = prop.VolumetricFlowRate() 
+        
+        if 'min_flow' in inputs:
+            self.min_flow = inputs['min_flow']
+        if "NPSHr" in inputs:
+            self.NPSHr = inputs['NPSHr']
+    
         CentrifugalPump.items.append(self)
     
     def __repr__(self):
@@ -215,6 +221,7 @@ class CentrifugalPump(_PressureChangers):
 
     @property
     def min_flow(self):
+        self = self._get_equipment_object(self)
         return self._min_flow
     @min_flow.setter
     def min_flow(self, value):
@@ -229,6 +236,29 @@ class CentrifugalPump(_PressureChangers):
         self._min_flow = prop.VolumetricFlowRate(value, unit)
         self._update_equipment_object(self)
 
+    @property
+    def NPSHr(self):
+        self = self._get_equipment_object(self)
+        return self._NPSHr
+    @NPSHr.setter
+    def NPSHr(self, value):
+        self = self._get_equipment_object(self)
+        unit = self._NPSHr.unit
+        if isinstance(value, prop.Length):
+            unit = value.unit
+            value = value.value
+        elif isinstance(value, tuple):
+            unit = value[1]
+            value = value[0]
+        self._NPSHr = prop.Length(value, unit)
+        self._update_equipment_object(self)
+    
+    @property
+    def NPSHa(self):
+        self = self._get_equipment_object(self)
+        # TODO: Update
+        density = 1000
+        return self.inlet_pressure/(9.8 * density)
 
     @property
     def head(self):

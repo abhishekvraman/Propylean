@@ -1,3 +1,4 @@
+from chemicals import mass_fractions
 import propylean.properties as prop
 from propylean import streams
 
@@ -54,7 +55,7 @@ class _EquipmentOneInletOutlet:
             self.tag = self._create_equipment_tag()  
         else:
             self.tag = inputs['tag']
-        self.dynamic_state = False if 'dynamic_state' not in inputs else inputs['dynamic_state']
+        self.dynamic_state = False if 'dynamic_state' not in inputs else False
         # TODO: Design pressure calcs
 
         #Flow properties
@@ -111,13 +112,9 @@ class _EquipmentOneInletOutlet:
     @inlet_pressure.setter
     def inlet_pressure(self, value):
         self = self._get_equipment_object(self)
-        unit = self._inlet_pressure.unit
-        if isinstance(value, tuple):
-            unit = value[1]
-            value = value[0]
-        elif isinstance(value, prop.Pressure):
-            unit = value.unit
-            value = value.value
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Pressure)
+        if unit is None:
+            unit = self._inlet_pressure.unit
         self._inlet_pressure = prop.Pressure(value, unit)
         self._outlet_pressure = self._inlet_pressure - self.pressure_drop
         self._update_equipment_object(self)
@@ -129,13 +126,9 @@ class _EquipmentOneInletOutlet:
     @outlet_pressure.setter
     def outlet_pressure(self, value):
         self = self._get_equipment_object(self)
-        unit = self._outlet_pressure.unit
-        if isinstance(value, tuple):
-            unit = value[1]
-            value = value[0]
-        elif isinstance(value, prop.Pressure):
-            unit = value.unit
-            value = value.value
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Pressure)
+        if unit is None:
+            unit = self._outlet_pressure.unit
         self._outlet_pressure = prop.Pressure(value, unit)
         self._inlet_pressure = self._outlet_pressure + self.pressure_drop
         self._update_equipment_object(self)
@@ -147,13 +140,9 @@ class _EquipmentOneInletOutlet:
     @pressure_drop.setter
     def pressure_drop(self, value):
         self = self._get_equipment_object(self)
-        unit = self._pressure_drop.unit
-        if isinstance(value, tuple):
-            unit = value[1]
-            value = value[0]
-        elif isinstance(value, prop.Pressure):
-            unit = value.unit
-            value = value.value
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Pressure)
+        if unit is None:
+            unit = self._pressure_drop.unit
         self._pressure_drop = prop.Pressure(value, unit)
         self._outlet_pressure =  self._inlet_pressure - self._pressure_drop
         self._update_equipment_object(self)
@@ -165,13 +154,9 @@ class _EquipmentOneInletOutlet:
     @inlet_temperature.setter
     def inlet_temperature(self, value):
         self = self._get_equipment_object(self)
-        unit = self._inlet_temperature.unit
-        if isinstance(value, tuple):
-            unit = value[1]
-            value = value[0]
-        elif isinstance(value, prop.Temperature):
-            unit = value.unit
-            value = value.value
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Temperature)
+        if unit is None:
+            unit = self._inlet_temperature.unit
         self._inlet_temperature = prop.Temperature(value, unit)
         self._outlet_temperature = self._inlet_temperature + self.temperature_change
         self._update_equipment_object(self)
@@ -182,20 +167,16 @@ class _EquipmentOneInletOutlet:
     @outlet_temperature.setter
     def outlet_temperature(self,value):
         self = self._get_equipment_object(self)
-        unit = self._outlet_temperature.unit
-        if isinstance(value, tuple):
-            unit = value[1]
-            value = value[0]
-        elif isinstance(value, prop.Temperature):
-            unit = value.unit
-            value = value.value
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Temperature)
+        if unit is None:
+            unit = self._outlet_temperature.unit
         self._outlet_temperature = prop.Temperature(value, unit)
         self._inlet_temperature = self._outlet_temperature - self.temperature_change
         self._update_equipment_object(self)
     @property
     def temperature_change(self):
         self = self._get_equipment_object(self)
-        value = prop.Temperature(0, self._outlet_temperature.unit) # Change as per inlet outlet power
+        value = prop.Temperature(0, 'K') # Change as per inlet outlet power
         return value
 
     @property
@@ -205,13 +186,9 @@ class _EquipmentOneInletOutlet:
     @inlet_mass_flowrate.setter
     def inlet_mass_flowrate(self, value):
         self = self._get_equipment_object(self)
-        unit = self._inlet_mass_flowrate.unit
-        if isinstance(value, tuple):
-            unit = value[1]
-            value = value[0]
-        if isinstance(value, prop.MassFlowRate):
-            unit = value.unit
-            value = value.value
+        value, unit = self._tuple_property_value_unit_returner(value, prop.MassFlowRate)
+        if unit is None:
+            unit = self._inlet_mass_flowrate.unit
         self._inlet_mass_flowrate = prop.MassFlowRate(value, unit)
         self._outlet_mass_flowrate = self._inlet_mass_flowrate + self.inventory_change_rate
         self._update_equipment_object(self)
@@ -223,13 +200,9 @@ class _EquipmentOneInletOutlet:
     @outlet_mass_flowrate.setter
     def outlet_mass_flowrate(self, value):
         self = self._get_equipment_object(self)
-        unit = self._outlet_mass_flowrate.unit
-        if isinstance(value, tuple):
-            unit = value[1]
-            value = value[0]
-        if isinstance(value, prop.MassFlowRate):
-            unit = value.unit
-            value = value.value
+        value, unit = self._tuple_property_value_unit_returner(value, prop.MassFlowRate)
+        if unit is None:
+            unit = self._outlet_mass_flowrate.unit
         self._outlet_mass_flowrate = prop.MassFlowRate(value, unit)
         self._inlet_mass_flowrate = self._outlet_mass_flowrate - self.inventory_change_rate
         self._update_equipment_object(self)
@@ -243,12 +216,11 @@ class _EquipmentOneInletOutlet:
     @inventory_change_rate.setter
     def inventory_change_rate(self, value):
         self = self._get_equipment_object(self)
-        if self._inlet_mass_flowrate.value != None:
-            self._outlet_mass_flowrate.value = self._inlet_mass_flowrate.value - value
-        elif self._outlet_mass_flowrate != None:
-            self._inlet_mass_flowrate.value = self._outlet_mass_flowrate.value + value
-        else:
-            raise Exception("Error! Assign inlet value or outlet outlet before assigning differential")
+        value, unit = self._tuple_property_value_unit_returner(value, prop.MassFlowRate)
+        if unit is None:
+            unit = self.inventory_change_rate.unit
+        
+        raise Exception("Dynamic simulation is not yet supported.")
         self._update_equipment_object(self)
     
     def _get_equipment_index(cls, tag):
@@ -264,6 +236,8 @@ class _EquipmentOneInletOutlet:
             return obj
     
     def _update_equipment_object(cls, obj):
+        # if cls.__name__ != type(object).__name__:
+        #     raise Exception("Object type should be {} type. Type passed is {}".format(cls.__name__, type(object).__name__))
         try:
             cls.items[obj.index] = obj
         except:
@@ -274,7 +248,6 @@ class _EquipmentOneInletOutlet:
             return self.tag == other.tag
         else:
             return False
-
 
     def get_stream_tag(self, stream_type, direction):
         """ 
@@ -695,13 +668,21 @@ class _EquipmentOneInletOutlet:
             tag = class_name+ "_" + str(i)
             i += 1
         return tag
-    @classmethod
+    
     def _check_tag_assigned(cls, tag):
         for equipment in cls.items:
             if tag == equipment.tag:
                 return True
         return False
-        
+    
+    def _tuple_property_value_unit_returner(self, value, property_type):
+        if isinstance(value, tuple):
+            return value[0], value[1]
+        elif isinstance(value, property_type):
+            return value.value, value.unit
+        elif any[isinstance(value, float), isinstance(value, int)]:
+            return value, None
+
 #Defining generic base class for all equipments with multiple inlet and outlet. TODO !!!!!!       
 class _EquipmentMultipleInletOutlet:
     def __init__(self) -> None:

@@ -43,7 +43,6 @@ class _Property:
         else:
             return False
 
-
 class Length(_Property):
     def __init__(self, value = 0, unit= 'm'):
         super().__init__(value,unit)
@@ -190,6 +189,20 @@ class Temperature(_Property):
                                You selected '{}'.
                                '''.format(unit))
 
+    def __add__(self, other):
+        kelvin_self = self
+        kelvin_self.unit = other.unit = 'K'
+        sum = Temperature(kelvin_self.value + other.value, 'K')
+        sum.unit = self.unit # Converting back to original unit of first.
+        return sum 
+    
+    def __sub__(self, other):
+        kelvin_self = self
+        kelvin_self.unit = other.unit = 'K'
+        subtraction = Temperature(kelvin_self.value - other.value, 'K')
+        subtraction.unit = self.unit # Converting back to original unit of first.
+        return subtraction 
+        
 class MassFlowRate(_Property):
     def __init__(self, value = 0, unit= 'kg/s'):
         super().__init__(value, unit)
