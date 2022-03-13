@@ -234,10 +234,10 @@ class _EquipmentOneInletOutlet:
             return cls.items[obj.index]
         except:
             return obj
-    
+    @classmethod
     def _update_equipment_object(cls, obj):
-        # if cls.__name__ != type(object).__name__:
-        #     raise Exception("Object type should be {} type. Type passed is {}".format(cls.__name__, type(object).__name__))
+        if cls.__name__ != type(obj).__name__:
+            raise Exception("Object type should be {} type. Type passed is {}".format(cls.__name__, type(obj).__name__))
         try:
             cls.items[obj.index] = obj
         except:
@@ -680,7 +680,7 @@ class _EquipmentOneInletOutlet:
             return value[0], value[1]
         elif isinstance(value, property_type):
             return value.value, value.unit
-        elif any[isinstance(value, float), isinstance(value, int)]:
+        elif any([isinstance(value, float), isinstance(value, int)]):
             return value, None
 
 #Defining generic base class for all equipments with multiple inlet and outlet. TODO !!!!!!       

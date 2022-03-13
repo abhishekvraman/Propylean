@@ -30,11 +30,11 @@ class Stream:
         return self._index
     
     @classmethod
-    def _update_stream_object(cls, object):
-        # if cls.__name__ != type(object).__name__:
-        #     raise Exception("Object type should be {} type. Type passed is {}".format(cls.__name__, type(object).__name__))
+    def _update_stream_object(cls, obj):
+        if cls.__name__ != type(obj).__name__:
+            raise Exception("Object type should be {} type. Type passed is {}".format(cls.__name__, type(obj).__name__))
         try:
-            cls.items[object.index] = object
+            cls.items[obj.index] = obj
         except:
             pass
     

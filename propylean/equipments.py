@@ -226,13 +226,9 @@ class CentrifugalPump(_PressureChangers):
     @min_flow.setter
     def min_flow(self, value):
         self = self._get_equipment_object(self)
-        unit = self._min_flow.unit
-        if isinstance(value, prop.VolumetricFlowRate):
-            unit = value.unit
-            value = value.value
-        elif isinstance(value, tuple):
-            unit = value[1]
-            value = value[0]
+        value, unit = self._tuple_property_value_unit_returner(value, prop.VolumetricFlowRate)
+        if unit is None:
+            unit = self._min_flow.unit
         self._min_flow = prop.VolumetricFlowRate(value, unit)
         self._update_equipment_object(self)
 
@@ -243,13 +239,9 @@ class CentrifugalPump(_PressureChangers):
     @NPSHr.setter
     def NPSHr(self, value):
         self = self._get_equipment_object(self)
-        unit = self._NPSHr.unit
-        if isinstance(value, prop.Length):
-            unit = value.unit
-            value = value.value
-        elif isinstance(value, tuple):
-            unit = value[1]
-            value = value[0]
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Pressure)
+        if unit is None:
+            unit = self._NPSHr.unit
         self._NPSHr = prop.Length(value, unit)
         self._update_equipment_object(self)
     
@@ -408,27 +400,36 @@ class CentrifugalCompressor(_PressureChangers):
 
     @property
     def adiabatic_efficiency(self):
+        self = self._get_equipment_object(self)
         return self._adiabatic_efficiency
     @adiabatic_efficiency.setter
     def adiabatic_efficiency(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.VolumetricFlowRate)
         if value ==  None:
             value = 0.7
         self._adiabatic_efficiency = value
+        self._update_equipment_object(self)
     
     @property
     def polytropic_efficiency(self):
+        self = self._get_equipment_object(self)
         return compressible_fluid.isentropic_efficiency(P1 = self._inlet_pressure.value,
                                                         P2 = self._outlet_pressure.value,
                                                         k = self.methane.isentropic_exponent,
                                                         eta_s = self.adiabatic_efficiency)
     @polytropic_efficiency.setter
     def polytropic_efficiency(self, value):
+        self = self._get_equipment_object(self)
         self.adiabatic_efficiency = compressible_fluid.isentropic_efficiency(P1 = self._inlet_pressure.value,
                                                                              P2 = self._outlet_pressure.value,
                                                                              k = self.methane.isentropic_exponent,
                                                                              eta_p = value)
+        self._update_equipment_object(self)
+
     @property
     def power(self):
+        self = self._get_equipment_object(self)
         work = compressible_fluid.isentropic_work_compression(T1 = self.inlet_temperature.value,
                                                               k = self.methane.isentropic_exponent,
                                                               Z = self.methane.Z,
@@ -494,10 +495,154 @@ class Expander(_PressureChangers):
 class PipeSegment(_EquipmentOneInletOutlet):
     items = []
     def __init__(self, **inputs) -> None:
+        """ 
+        DESCRIPTION:
+            Final class for creating objects to represent a Pipe Segmenet.
+        
+        PARAMETERS:
+            Read _EquipmentOneInletOutlet class for more arguments for this class
+            ID:
+                Required: Yes
+                Type: int or float or property.Lenght(recommended)
+                Acceptable values: Non-negative values
+                Default value: None
+                Description: Internal Diameter of the pipe segment.
+
+            OD:
+                Required: Yes
+                Type: int or float or property.Lenght(recommended)
+                Acceptable values: Non-negative values
+                Default value: None
+                Description: Outer Diameter of the pipe segment.
+            
+            Length:
+                Required: Yes
+                Type: int or float or property.Lenght(recommended)
+                Acceptable values: Non-negative values
+                Default value: None
+                Description: Outer Diameter of the pipe segment.
+
+            segment_type:
+                Required: No
+                Type: int
+                Acceptable values: 1 to 13.
+                Default value: 1
+                Description: Segment type/fitting type of the pipe segment.
+            
+            material:
+                Required: No
+                Type: int
+                Acceptable values: 1 to 5.
+                Default value: 1
+                Description: Material type of the pipe segment.
+        
+        RETURN VALUE:
+            Type: PipeSegment
+            Description: Returns an object of type PipeSegment with all properties of
+                         a pipe segments and fittings used in process industry piping.
+        
+        ERROR RAISED:
+            Type:
+            Description:
+        
+        SAMPLE USE CASES:
+            >>> PS_1 = PipeSegment(tag="P1")
+            >>> print(PS_1)
+            Pipe Segment with tag: P1
+        """
         self._index = len(PipeSegment.items)
         super().__init__( **inputs)
         self._pressure_drop = prop.Pressure(0)
+        self._ID = prop.Length()
+        self._OD = prop.Length()
+        self._length = prop.Length()
+        self._segment_type = 1
+        self._material = 1
+
         self.segment_type = 1 if 'segment_type' not in inputs else inputs['segment_type']
+        
+        if self.segment_type == 1:
+            if 'length' in inputs:
+                self.length = inputs['length']                
+            else:
+                raise Exception('Straight Tube segment requires length value')  
+        
+        if 'material' in inputs:
+            self.material = inputs['material']
+        
+        if ('ID' in inputs):
+            self.ID = inputs['ID']
+        elif ('OD' in inputs and 'thickness' in inputs):
+            self.OD = inputs['OD']
+            self.thickness = inputs['thickness']
+        else:
+            raise Exception('Define atleast ID or OD with thickness to define a pipe segment object') 
+        PipeSegment.items.append(self)
+    
+    def __repr__(self):
+        return "Pipe Segment with tag: " + self.tag   #ADD SEGMENT TYPE!!
+    def __hash__(self):
+        return hash(self.__repr__())
+    
+    @property
+    def length(self):
+        self = self._get_equipment_object(self)
+        return self._length
+    @length.setter
+    def length(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
+        if unit is None:
+            unit = self._length.unit
+        self._length = prop.Length(value, unit)
+        self._update_equipment_object(self)
+
+    @property
+    def ID(self):
+        self = self._get_equipment_object(self)
+        return self._ID
+    @ID.setter
+    def ID(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
+        if unit is None:
+            unit = self._ID.unit
+        self._ID = prop.Length(value, unit)
+        self._update_equipment_object(self)
+    
+    @property
+    def OD(self):
+        self = self._get_equipment_object(self)
+        return self._OD
+    @OD.setter
+    def OD(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
+        if unit is None:
+            unit = self._OD.unit
+        self._OD =prop.Length(value, unit)
+        self._update_equipment_object(self)
+    
+    @property
+    def thickness(self):
+        self = self._get_equipment_object(self)
+        return self._OD - self._ID
+    @thickness.setter
+    def thickness(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value)
+        if unit is None:
+            unit = self.thickness
+        self._OD = self._ID + prop.Length(value, unit)
+        self._update_equipment_object(self)
+
+    @property
+    def segment_type(self):
+        self = self._get_equipment_object(self)
+        return self._segment_type
+    @segment_type.setter
+    def segment_type(self, value):
+        self = self._get_equipment_object(self)
         segments = '''\nSegments can be of following types and in range of numbers below:
                     1. Straight Tube
                     2. Elbow
@@ -512,60 +657,59 @@ class PipeSegment(_EquipmentOneInletOutlet):
                     11. Lift check valve
                     12. Reducer
                     13. Expander'''
-        if self.segment_type == 1:
-            if 'length' in inputs:
-                self.length = inputs['length']                
-            else:
-                raise Exception('Straight Tube segment requires length value')
-        elif self.segment_type not in range(1,14):
+        if value not in range(1,14):
             raise Exception(segments)
-
+        self._segment_type = value
+        self._update_equipment_object(self)
+    
+    @property
+    def material(self):
+        self = self._get_equipment_object(self)
+        return self._material
+    @material.setter
+    def material(self, value):
+        self = self._get_equipment_object(self)
         materials = '''\nSegment material can be of following types and in range of numbers below:
                     1. Raw Steel
                     2. Carbon Steel
                     3. Cast Iron
                     4. Stainless Steel
-                    5. PVC'''   
-        self.material = 1
-        
-        if 'material' in inputs:
-            if inputs['material'] in range(1,6):
-                self.material = inputs['material']
-            else:
-                raise Exception(materials)
-        
-        self.OD = None
-        if ('ID' in inputs):
-            self.ID = inputs['ID']
-        elif ('OD' in inputs and 'thickness' in inputs):
-            self.OD = inputs['OD']
-            self.ID = self.OD - inputs['thickness']
-        else:
-            raise Exception('Define atleast ID or OD with thickness to define a pipe segment object') 
-        PipeSegment.items.append(self)
-    
-    def __repr__(self):
-        return "Pipe Segment with tag: " + self.tag   #ADD SEGMENT TYPE!!
-    def __hash__(self):
-        return hash(self.__repr__())
-    
+                    5. PVC''' 
+        if value not in range(1, 6):
+            raise Exception(materials)
+        self._material = value
+        self._update_equipment_object(self)
+
     @property
     def pressure_drop(self):
+        self = self._get_equipment_object(self)
         from fluids.friction import friction_factor
         from fluids.core import Reynolds, K_from_f, dP_from_K
         if self.inlet_mass_flowrate.value == 0:
             return prop.Pressure(0, self._inlet_pressure.unit)
         roughness = (4.57e-5, 4.5e-5, 0.000259, 1.5e-5, 1.5e-6) #in meters
+        # TODO
+        T = prop.Temperature(self.inlet_temperature.value,
+                             self.inlet_temperature.unit)
+        T.unit = 'K'
+        P = prop.Pressure(self.inlet_pressure.value,
+                          self.inlet_pressure.unit)
+        P.unit = 'Pa'
         water = Chemical('water',
-                         T = self.inlet_temperature.value,
-                         P = self.inlet_pressure.value)
-        Re = Reynolds(V=(self.inlet_mass_flowrate.value/water.rhol)/(pi* self.ID**2)/4,
-                      D=self.ID, 
+                         T = T.value,
+                         P = P.value)
+        ID = self.ID
+        ID.unit = 'm'
+        length = self.length
+        length.unit = 'm'
+        V=(self.inlet_mass_flowrate.value/water.rhol)/(pi* ID.value**2)/4
+        Re = Reynolds(V=V,
+                      D=ID.value, 
                       rho=water.rhol, 
                       mu=water.mul)
-        fd = friction_factor(Re, eD=roughness[self.material-1]/self.ID)
-        K = K_from_f(fd=fd, L=self.length, D=self.ID)        
-        drop = round(dP_from_K(K, rho=1000, V=3),3)
+        fd = friction_factor(Re, eD=roughness[self.material-1]/ID.value)
+        K = K_from_f(fd=fd, L=length.value, D=ID.value)        
+        drop = round(dP_from_K(K, rho=1000, V=V),3)
         drop = prop.Pressure(drop, 'Pa')
         drop.unit = self._inlet_pressure.unit
         return drop
@@ -573,20 +717,6 @@ class PipeSegment(_EquipmentOneInletOutlet):
     def pressure_drop(self, value):
         raise Exception('''Cannot manually set pressure drop for PipeSegment!\n
                          Pressure drop depends on physical properties PipeSegment and Material flowing.''')
-        
-    @property
-    def thickness(self):
-        if self.ID == None or self.OD == None:
-            return None
-        return self.OD - self.ID
-    @thickness.setter
-    def thickness(self, value):
-        if self.ID != None:
-            self.OD = self.ID + value
-        elif self.OD !=None:
-            self.ID = self.OD - value
-        else:
-            raise Exception("Atleast define ID or OD of pipe before defining thickness")
     
     @classmethod
     def list_objects(cls):
@@ -595,6 +725,27 @@ class PipeSegment(_EquipmentOneInletOutlet):
 class ControlValve(_EquipmentOneInletOutlet):
     items = []
     def __init__(self, **inputs) -> None:
+        """ 
+        DESCRIPTION:
+            Final class for creating objects to represent a Control Valve.
+        
+        PARAMETERS:
+            Read _EquipmentOneInletOutlet class for more arguments for this class
+        
+        RETURN VALUE:
+            Type: ControlValve
+            Description: Returns an object of type ControlValve with all properties of
+                         a control valve used in process industry.
+        
+        ERROR RAISED:
+            Type:
+            Description:
+        
+        SAMPLE USE CASES:
+            >>> CV_1 = ControlValve(tag="CV1")
+            >>> print(CV_1)
+            Contrl Valve with tag: CV1
+        """
         self._index = len(ControlValve.items)
         super().__init__( **inputs)
         ControlValve.items.append(self)
@@ -606,7 +757,8 @@ class ControlValve(_EquipmentOneInletOutlet):
 
     @property
     def Kv(self):
-        # UPDATE BELOW BASED ON STREAMS
+        self = self._get_equipment_object(self)
+        # TODO UPDATE BELOW BASED ON STREAMS
         water = Chemical('water',
                          T = self.inlet_temperature.value,
                          P = self._inlet_pressure.value)
@@ -624,7 +776,7 @@ class ControlValve(_EquipmentOneInletOutlet):
                                                         P2 = self._outlet_pressure.value, 
                                                         Q = self.inlet_mass_flowrate.value/water.rhog)
         else:
-            raise Exception('Possibility of fluid solification at control valve')
+            raise Exception('Possibility of fluid solification inside the control valve')
 
     @classmethod
     def list_objects(cls):

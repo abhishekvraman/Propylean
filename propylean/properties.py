@@ -179,6 +179,7 @@ class Temperature(_Property):
                     self._unit = 'K'
                     if unit == self._unit:
                         break
+            self._value = round(self.value,5)
         else:
             raise Exception('''Selected unit is not supported or a correct unit of Temperature.
                                Supported units are:
@@ -190,14 +191,14 @@ class Temperature(_Property):
                                '''.format(unit))
 
     def __add__(self, other):
-        kelvin_self = self
+        kelvin_self = Temperature(self.value, self.unit)
         kelvin_self.unit = other.unit = 'K'
         sum = Temperature(kelvin_self.value + other.value, 'K')
         sum.unit = self.unit # Converting back to original unit of first.
         return sum 
     
     def __sub__(self, other):
-        kelvin_self = self
+        kelvin_self = Temperature(self.value, self.unit)
         kelvin_self.unit = other.unit = 'K'
         subtraction = Temperature(kelvin_self.value - other.value, 'K')
         subtraction.unit = self.unit # Converting back to original unit of first.

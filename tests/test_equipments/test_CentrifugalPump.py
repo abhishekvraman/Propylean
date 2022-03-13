@@ -88,8 +88,10 @@ class test_CentrifugalPump(unittest.TestCase):
         pump = CentrifugalPump(tag="Pump_9",
                                differential_pressure=(100, 'bar'))
         pump.outlet_temperature = (130, 'F')
-        self.assertEqual(pump.inlet_temperature, prop.Temperature(130, 'F'))
-        self.assertEqual(pump.outlet_temperature, prop.Temperature(130, 'F'))
+        self.assertLess(abs(pump.inlet_temperature.value-130), 0.0001)
+        self.assertEqual(pump.inlet_temperature.unit, 'F')
+        self.assertLess(abs(pump.outlet_temperature.value-130), 0.0001)
+        self.assertEqual(pump.outlet_temperature.unit, 'F')
     
     @pytest.mark.positive
     def test_CentrifugalPump_setting_inlet_mass_flowrate(self):
@@ -123,7 +125,8 @@ class test_CentrifugalPump(unittest.TestCase):
         self.assertEqual(pump.inlet_mass_flowrate, inlet_stream.mass_flowrate)
         # Test outlet properties are calulcated accordingly.
         self.assertEqual(pump.outlet_pressure, pump.inlet_pressure+pump.differential_pressure)
-        self.assertEqual(pump.inlet_temperature, pump.outlet_temperature)
+        self.assertLess(abs(pump.inlet_temperature.value - pump.outlet_temperature.value), 0.001)
+        self.assertEqual(pump.inlet_temperature.unit, pump.outlet_temperature.unit)
         self.assertEqual(pump.inlet_mass_flowrate, pump.outlet_mass_flowrate)
 
     @pytest.mark.positive
@@ -142,7 +145,7 @@ class test_CentrifugalPump(unittest.TestCase):
         self.assertEqual(pump.outlet_mass_flowrate, outlet_stream.mass_flowrate)
         # Test intlet properties are calulcated accordingly.
         self.assertEqual(pump.inlet_pressure, pump.outlet_pressure-pump.differential_pressure)
-        self.assertEqual(pump.inlet_temperature, pump.outlet_temperature)
+        self.assertLess(abs(pump.inlet_temperature.value-pump.outlet_temperature.value),0.0001)
         self.assertEqual(pump.inlet_mass_flowrate, pump.outlet_mass_flowrate)
 
     @pytest.mark.positive

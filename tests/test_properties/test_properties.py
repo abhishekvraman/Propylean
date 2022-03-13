@@ -57,7 +57,7 @@ def test_Temperature_instantiation_conversion():
 
     temp = properties.Temperature(value=300, unit='F')
     temp.unit = 'K'
-    assert abs(temp.value -422.039) < 0.001
+    assert abs(temp.value -422.039) < 0.01
 
     temp = properties.Temperature(value=2000, unit='R')
     temp.unit = 'C'

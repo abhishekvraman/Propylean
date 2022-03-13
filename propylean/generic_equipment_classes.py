@@ -83,7 +83,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         return super(_PressureChangers, self).outlet_pressure
     @discharge_pressure.setter
     def discharge_pressure(self, value):
-        super(_PressureChangers,self. __class__).outlet_pressure.fset(self, value)
+        super(_PressureChangers,self.__class__).outlet_pressure.fset(self, value)
     
     @property
     def differential_pressure(self):
@@ -92,18 +92,13 @@ class _PressureChangers(_EquipmentOneInletOutlet):
     @differential_pressure.setter
     def differential_pressure(self, value):
         self = self._get_equipment_object(self)
-        unit = self.pressure_drop.unit
-        if isinstance(value, tuple):
-            unit = value[1]
-            value = value[0]
-        elif isinstance(value, prop.Pressure):
-            unit = value.unit
-            value = value.value         
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Pressure)
+        if unit is None:
+            unit = self.pressure_drop.unit         
         self.pressure_drop = prop.Pressure(-1 * value,
                                            unit)   
         self._update_equipment_object(self)   
     
-
     @property
     def performance_curve(self):
         self = self._get_equipment_object(self)
@@ -111,7 +106,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
     @performance_curve.setter
     def pump_curve(self,value):
         self = self._get_equipment_object(self)
-        if isinstance(value,pd.DataFrame) and value.shape[1] == 2:
+        if isinstance(value, pd.DataFrame) and value.shape[1] == 2:
                 self._performance_curve = value
         else:
             raise Exception("Please enter performance_curve as pandas dataframe of 2 columns.\nOne for Flow and other for head.")
