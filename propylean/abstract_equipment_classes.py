@@ -6,7 +6,7 @@ _material_stream_equipment_map = dict()
 _energy_stream_equipment_map = dict()
 
 #Defining generic base class for all equipments with one inlet and outlet
-class _EquipmentOneInletOutlet:
+class _EquipmentOneInletOutlet(object):
     items = []
     def __init__(self, **inputs) -> None:
         """ 
@@ -90,7 +90,6 @@ class _EquipmentOneInletOutlet:
         if 'pressure_drop' in inputs:
             self.pressure_drop = prop.Pressure(inputs['pressure_drop'])
     
-
     @property
     def index(self):
       return self._index
@@ -404,7 +403,7 @@ class _EquipmentOneInletOutlet:
                 Description: Stream object user wants to disconnect the equipment with.
             
             direction:
-                Required: Yes is stream_object or stream_tag not provided
+                Required: Yes if stream_object or stream_tag not provided
                 Type: str
                 Acceptable values: 'in', 'out', 'inlet' or 'outlet'
                 Default value: None
@@ -425,7 +424,7 @@ class _EquipmentOneInletOutlet:
 
         RETURN VALUE:
             Type: bool
-            Description: True is returned if connection is successful else False
+            Description: True is returned if disconnection is successful else False
         
         ERROR RAISED:
             Type: General
@@ -479,9 +478,9 @@ class _EquipmentOneInletOutlet:
                 to equipment and type of equipment. Structured like 
                 {12: [10, CentrifugalPump, 21, PipeSegment], 
                  23: [21, PipeSegment, 36, FlowMeter]]} 
-                were 12th index stream will have data in key no. 12 
-                stream is coming from equipment index is 10 of type CentrifugalPump and  
-                going into equipment index is 21 of type PipeSegment.
+                were 12th index stream will have data in key no. 12. 
+                Stream is coming from equipment with index 10 and is of type CentrifugalPump.  
+                Stream is going into equipment with index 21 of type PipeSegment.
             
             PARAMETERS:
                 stream_index:

@@ -1,7 +1,7 @@
 import pytest
 import unittest
 from propylean.equipments import CentrifugalPump
-from propylean.streams import MaterialStream
+from propylean.streams import MaterialStream, EnergyStream
 import propylean.properties as prop
 import pandas as pd
 from unittest.mock import patch
@@ -110,7 +110,7 @@ class test_CentrifugalPump(unittest.TestCase):
         self.assertEqual(pump.outlet_mass_flowrate, prop.MassFlowRate(1000, 'kg/h'))
     
     @pytest.mark.positive
-    def test_CentrifugalPump_connection_with_stream_inlet_stream_governed(self):
+    def test_CentrifugalPump_connection_with_material_stream_inlet_stream_governed(self):
         pump = CentrifugalPump(tag="Pump_12",
                                differential_pressure=(100, 'bar'))
         inlet_stream = MaterialStream(tag="Inlet_Pump_12",
@@ -123,14 +123,14 @@ class test_CentrifugalPump(unittest.TestCase):
         self.assertEqual(pump.inlet_pressure, inlet_stream.pressure)
         self.assertEqual(pump.inlet_temperature, inlet_stream.temperature)
         self.assertEqual(pump.inlet_mass_flowrate, inlet_stream.mass_flowrate)
-        # Test outlet properties are calulcated accordingly.
+        # Test outlet properties are calculated accordingly.
         self.assertEqual(pump.outlet_pressure, pump.inlet_pressure+pump.differential_pressure)
         self.assertLess(abs(pump.inlet_temperature.value - pump.outlet_temperature.value), 0.001)
         self.assertEqual(pump.inlet_temperature.unit, pump.outlet_temperature.unit)
         self.assertEqual(pump.inlet_mass_flowrate, pump.outlet_mass_flowrate)
 
     @pytest.mark.positive
-    def test_CentrifugalPump_connection_with_stream_outlet_stream_governed(self):
+    def test_CentrifugalPump_connection_with_material_stream_outlet_stream_governed(self):
         pump = CentrifugalPump(tag="Pump_13",
                                differential_pressure=(100, 'bar'))
         outlet_stream = MaterialStream(tag="Outlet_Pump_13",
@@ -143,13 +143,13 @@ class test_CentrifugalPump(unittest.TestCase):
         self.assertEqual(pump.outlet_pressure, outlet_stream.pressure)
         self.assertEqual(pump.outlet_temperature, outlet_stream.temperature)
         self.assertEqual(pump.outlet_mass_flowrate, outlet_stream.mass_flowrate)
-        # Test intlet properties are calulcated accordingly.
+        # Test intlet properties are calculated accordingly.
         self.assertEqual(pump.inlet_pressure, pump.outlet_pressure-pump.differential_pressure)
         self.assertLess(abs(pump.inlet_temperature.value-pump.outlet_temperature.value),0.0001)
         self.assertEqual(pump.inlet_mass_flowrate, pump.outlet_mass_flowrate)
 
     @pytest.mark.positive
-    def test_CentrifugalPump_connection_with_stream_inlet_equipment_governed(self):
+    def test_CentrifugalPump_connection_with_material_stream_inlet_equipment_governed(self):
         pump = CentrifugalPump(tag="Pump_14",
                                differential_pressure=(100, 'bar'))
 
@@ -163,13 +163,13 @@ class test_CentrifugalPump(unittest.TestCase):
         self.assertEqual(pump.inlet_pressure, inlet_stream.pressure)
         self.assertEqual(pump.inlet_temperature, inlet_stream.temperature)
         self.assertEqual(pump.inlet_mass_flowrate, inlet_stream.mass_flowrate)
-        # Test outlet properties are calulcated accordingly.
+        # Test outlet properties are calculated accordingly.
         self.assertEqual(pump.outlet_pressure, pump.inlet_pressure+pump.differential_pressure)
         self.assertEqual(pump.inlet_temperature, pump.outlet_temperature)
         self.assertEqual(pump.inlet_mass_flowrate, pump.outlet_mass_flowrate)
 
     @pytest.mark.positive
-    def test_CentrifugalPump_connection_with_stream_outlet_equipment_governed(self):
+    def test_CentrifugalPump_connection_with_material_stream_outlet_equipment_governed(self):
         pump = CentrifugalPump(tag="Pump_15",
                                differential_pressure=(100, 'bar'))
         pump.outlet_pressure = (130, 'bar')
@@ -182,16 +182,86 @@ class test_CentrifugalPump(unittest.TestCase):
         self.assertEqual(pump.outlet_pressure, outlet_stream.pressure)
         self.assertEqual(pump.outlet_temperature, outlet_stream.temperature)
         self.assertEqual(pump.outlet_mass_flowrate, outlet_stream.mass_flowrate)
-        # Test intlet properties are calulcated accordingly.
+        # Test intlet properties are calculated accordingly.
         self.assertEqual(pump.inlet_pressure, pump.outlet_pressure-pump.differential_pressure)
         self.assertEqual(pump.inlet_temperature, pump.outlet_temperature)
         self.assertEqual(pump.inlet_mass_flowrate, pump.outlet_mass_flowrate)
+    
+    @pytest.mark.positive
+    def test_CentrifugalPump_connection_with_energy_stream_inlet_stream_governed(self):
+        pump = CentrifugalPump(tag="Pump_16",
+                               differential_pressure=(100, 'bar'))
+        pump_power = EnergyStream(tag="Power_Pump_16", amount=(10,"MW"))
+        # Test connection is made.
+        self.assertTrue(pump.connect_stream(pump_power, 'out', stream_governed=True))
+        # Test inlet properties of pump are equal to outlet stream's.
+        self.assertEqual(pump.power.value, pump_power.value)
+        self.assertEqual(pump.power.unit, pump_power.unit)
+
+    pytest.mark.positive
+    def test_CentrifugalPump_connection_with_energy_stream_inlet_equipment_governed(self):
+        pump = CentrifugalPump(tag="Pump_17",
+                               differential_pressure=(100, 'bar'))
+        pump_power = EnergyStream(tag="Power_Pump_17", amount=(10,"MW"))
+        # Test connection is made.
+        self.assertTrue(pump.connect_stream(pump_power, 'out', stream_governed=False))
+        # Test inlet properties of pump are equal to outlet stream's.
+        self.assertEqual(pump.power.value, pump_power.value)
+        self.assertEqual(pump.power.unit, pump_power.unit)
+    
+    @pytest.mark.positive
+    def test_CentrifugalPump_stream_disconnection_by_stream_object(self):
+        pump = CentrifugalPump(tag="Pump_18",
+                               differential_pressure=(100, 'bar'))
+        inlet_stream = MaterialStream(tag="Inlet_Pump_18")
+        outlet_stream = MaterialStream(tag="Outlet_Pump_18")
+        pump_power = EnergyStream(tag="Power_Pump_18")
+        # Test connection is made.
+        self.assertTrue(pump.connect_stream(inlet_stream, 'in', stream_governed=False))
+        self.assertTrue(pump.connect_stream(outlet_stream, 'out', stream_governed=False))
+        self.assertTrue(pump.connect_stream(pump_power))
+        # Test disconnection
+        self.assertTrue(pump.disconnect_stream(inlet_stream))
+        self.assertTrue(pump.disconnect_stream(outlet_stream))
+        self.assertTrue(pump.disconnect_stream(pump_power))
+    
+    @pytest.mark.positive
+    def test_CentrifugalPump_stream_disconnection_by_stream_tag(self):
+        pump = CentrifugalPump(tag="Pump_19",
+                               differential_pressure=(100, 'bar'))
+        inlet_stream = MaterialStream(tag="Inlet_Pump_19")
+        outlet_stream = MaterialStream(tag="Outlet_Pump_19")
+        pump_power = EnergyStream(tag="Power_Pump_19")
+        # Test connection is made.
+        self.assertTrue(pump.connect_stream(inlet_stream, 'in', stream_governed=False))
+        self.assertTrue(pump.connect_stream(outlet_stream, 'out', stream_governed=False))
+        self.assertTrue(pump.connect_stream(pump_power))
+        # Test disconnection
+        self.assertTrue(pump.disconnect_stream(stream_tag="Inlet_Pump_19"))
+        self.assertTrue(pump.disconnect_stream(stream_tag="Outlet_Pump_19"))
+        self.assertTrue(pump.disconnect_stream(stream_tag="Power_Pump_19"))
+    
+    @pytest.mark.positive
+    def test_CentrifugalPump_stream_disconnection_by_direction_stream_type(self):
+        pump = CentrifugalPump(tag="Pump_20",
+                               differential_pressure=(100, 'bar'))
+        inlet_stream = MaterialStream(tag="Inlet_Pump_20")
+        outlet_stream = MaterialStream(tag="Outlet_Pump_20")
+        pump_power = EnergyStream(tag="Power_Pump_19")
+        # Test connection is made.
+        self.assertTrue(pump.connect_stream(inlet_stream, 'in', stream_governed=False))
+        self.assertTrue(pump.connect_stream(outlet_stream, 'out', stream_governed=False))
+        self.assertTrue(pump.connect_stream(pump_power))
+        # Test disconnection
+        self.assertTrue(pump.disconnect_stream(direction="In", stream_type="Material"))
+        self.assertTrue(pump.disconnect_stream(direction="ouTlet", stream_type="materiaL"))
+        self.assertTrue(pump.disconnect_stream(stream_type="energy"))
 
     @pytest.mark.positive
     def test_CentrifugalPump_head_calulcation(self):
-        pump = CentrifugalPump(tag="Pump_16",
+        pump = CentrifugalPump(tag="Pump_21",
                                differential_pressure=(100, 'bar'))
-        inlet_stream = MaterialStream(tag="Inlet_Pump_16",
+        inlet_stream = MaterialStream(tag="Inlet_Pump_21",
                                       mass_flowrate=(1000, 'kg/h'),
                                       pressure=(30, 'bar'),
                                       temperature=(25, 'C'))

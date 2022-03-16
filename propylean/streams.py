@@ -1,7 +1,7 @@
 from ast import expr_context
 from thermo.chemical import Chemical
 import propylean.properties as prop
-class Stream:
+class Stream(object):
     def __init__(self, tag=None,
                  to_equipment=None,
                  from_equipment=None) -> None:
@@ -64,35 +64,33 @@ class Stream:
             if tag == equipment.tag:
                 return True
         return False
+    
+    def _tuple_property_value_unit_returner(self, value, property_type):
+        if isinstance(value, tuple):
+            return value[0], value[1]
+        elif isinstance(value, property_type):
+            return value.value, value.unit
+        elif any([isinstance(value, float), isinstance(value, int)]):
+            return value, None
         
 class EnergyStream (Stream, prop.Power):
     items = [] 
-    def __init__(self, value=0, unit='W', tag=None, 
-                 to_equipment_tag=None, to_equipment_type=None,
-                 from_equipment_tag=None, from_equipment_type=None):
-                 
-                 super().__init__(value=value, unit=unit)
-                 self.tag = tag
-                 self.assign_equipment('to', to_equipment_tag, to_equipment_type)
-                 self.assign_equipment('from', from_equipment_tag, from_equipment_type)
+    def __init__(self, tag=None, amount=None, to_equipment=None,
+                 from_equipment=None):
+                 value, unit = self._tuple_property_value_unit_returner(amount, prop.Power)
+                 if unit is None:
+                     unit = prop.Power().unit 
+                 super(EnergyStream, self).__init__(tag=None, 
+                                                    to_equipment=None, 
+                                                    from_equipment=None,
+                                                    value=value,
+                                                    unit=unit)
                  EnergyStream.items.append(self)
-    
-    def assign_equipment(self, to_or_from, equipment_tag, equipment_type, equipment_index=None):
-        inlet_outlet = None
-        if to_or_from in ['to','To','TO']:
-            inlet_outlet = 'inlet'
-            self.to_equipment_tag = equipment_tag
-            self.to_equipment_type = equipment_type
-            self.to_equipment_index = equipment_index if equipment_index != None else None
-        elif to_or_from in ['from','From','FROM']:
-            inlet_outlet = 'outlet'
-            self.from_equipment_tag = equipment_tag
-            self.from_equipment_type = equipment_type
-            self.from_equipment_index = equipment_index if equipment_index != None else None
+
 
     def __repr__(self) -> str:
         return 'Energy Stream Tag: ' + self.tag
-
+    
     @classmethod
     def list_objects(cls):
         return cls.items
@@ -175,7 +173,6 @@ class MaterialStream(Stream):
     @classmethod
     def list_objects(cls):
         return cls.items
-    
     
     def __repr__(self) -> str:
         return 'Material Stream Tag: ' + self.tag

@@ -1,4 +1,4 @@
-class _Property:
+class _Property(object):
     def __init__(self, value = None, unit= None):
         self._value = value
         self._unit = unit
