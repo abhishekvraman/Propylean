@@ -163,7 +163,7 @@ def _get_equipment_index_from_equipment_list(tag, equipment_list):
 
     return list_of_none_tag_equipments
 
-# Start of final classes pumps
+# Start of final classes of pumps.
 class CentrifugalPump(_PressureChangers):
     items = []    
     def __init__(self, **inputs) -> None:
@@ -202,10 +202,13 @@ class CentrifugalPump(_PressureChangers):
             Centrifugal Pump with tag: P1
         """
         self._index = len(CentrifugalPump.items)
-        super().__init__(  **inputs)
+        super().__init__( **inputs)
         self._NPSHr = prop.Length()
         self._NPSHa = prop.Length()
-        self._min_flow = prop.VolumetricFlowRate() 
+        self._min_flow = prop.VolumetricFlowRate()
+        # delattr(self, self._outlet_energy_stream_tag)
+        # delattr(self, self.energy_out)
+        # delattr(self, self._energy_out)
         
         if 'min_flow' in inputs:
             self.min_flow = inputs['min_flow']
@@ -255,14 +258,17 @@ class CentrifugalPump(_PressureChangers):
     @property
     def head(self):
         fluid_density = 1000 # TODO THIS NEEDS TO BE UPDATED WITH STREAM PROPERTY
-        return self.differential_pressure.value / (9.8 * fluid_density)
+        value = self.differential_pressure.value / (9.8 * fluid_density)
+        return prop.Length(value, "m")
     @property
     def hydraulic_power(self):
         fluid_density = 1000 # TODO THIS NEEDS TO BE UPDATED WITH STREAM PROPERTY
-        return self.inlet_mass_flowrate.value * fluid_density * 9.81 * self.head / (3.6e6)
+        value = self.inlet_mass_flowrate.value * fluid_density * 9.81 * self.head / (3.6e6)
+        return prop.Power(value, 'W')
     @property
     def brake_horse_power(self):
-        return self.hydraulic_power / self.efficiency
+        value = self.hydraulic_power / self.efficiency
+        return prop.Power(value, "W")
     @classmethod
     def list_objects(cls):
         return cls.items
@@ -283,6 +289,12 @@ class CentrifugalPump(_PressureChangers):
                                       stream_type=stream_type,
                                       stream_governed=stream_governed)
     
+    def disconnect_stream(self, stream_object=None, direction=None, stream_tag=None, stream_type=None):
+        if ((stream_object is not None and 
+            isinstance(stream_object, streams.EnergyStream)) or
+            stream_type in ['energy', 'power', 'e', 'p']):
+            direction = 'in'
+        return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
 class PositiveDisplacementPump(_PressureChangers):
     items = []
     def __init__(self, **inputs) -> None:
@@ -341,9 +353,16 @@ class PositiveDisplacementPump(_PressureChangers):
                                       stream_tag=stream_tag, 
                                       stream_type=stream_type,
                                       stream_governed=stream_governed)
+    
+    def disconnect_stream(self, stream_object=None, direction=None, stream_tag=None, stream_type=None):
+        if ((stream_object is not None and 
+            isinstance(stream_object, streams.EnergyStream)) or
+            stream_type in ['energy', 'power', 'e', 'p']):
+            direction = 'in'
+        return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
 # End of final classes of pumps
 
-# Start of final classes of Compressors and Expanders
+# Start of final classes of Compressors and Expanders.
 class CentrifugalCompressor(_PressureChangers):
     items = []
     def __init__(self, **inputs) -> None:
@@ -456,6 +475,13 @@ class CentrifugalCompressor(_PressureChangers):
                                       stream_tag=stream_tag, 
                                       stream_type=stream_type,
                                       stream_governed=stream_governed)
+    
+    def disconnect_stream(self, stream_object=None, direction=None, stream_tag=None, stream_type=None):
+        if ((stream_object is not None and 
+            isinstance(stream_object, streams.EnergyStream)) or
+            stream_type in ['energy', 'power', 'e', 'p']):
+            direction = 'in'
+        return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
 
 class Expander(_PressureChangers):
     items = []
@@ -488,6 +514,13 @@ class Expander(_PressureChangers):
                                       stream_tag=stream_tag, 
                                       stream_type=stream_type,
                                       stream_governed=stream_governed)
+    
+    def disconnect_stream(self, stream_object=None, direction=None, stream_tag=None, stream_type=None):
+        if ((stream_object is not None and 
+            isinstance(stream_object, streams.EnergyStream)) or
+            stream_type in ['energy', 'power', 'e', 'p']):
+            direction = 'out'
+        return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
 
 # End of final classes of compressors
 

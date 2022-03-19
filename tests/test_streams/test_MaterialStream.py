@@ -11,8 +11,8 @@ class test_MaterialStream(unittest.TestCase):
         self.assertEqual(m1.pressure, prop.Pressure())
         self.assertEqual(m1.temperature, prop.Temperature())
         self.assertEqual(m1.mass_flowrate, prop.MassFlowRate())
-        self.assertIsNone(m1.from_equipment)
-        self.assertIsNone(m1.to_equipment)
+        self.assertIsNone(m1._from_equipment_tag)
+        self.assertIsNone(m1._to_equipment_tag)
     
     def test_MaterialStream_instantiation_all_properties(self):
         m2 = MaterialStream(tag="m2", 

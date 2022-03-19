@@ -81,8 +81,8 @@ class _EquipmentOneInletOutlet(object):
         self._outlet_energy_stream_tag = None
         
         #Energy properties
-        self.energy_in = prop.Power()
-        self.energy_out = prop.Power()
+        self._energy_in = prop.Power()
+        self._energy_out = prop.Power()
 
         #Other Porperties
         self._is_disconnection = False
@@ -221,6 +221,32 @@ class _EquipmentOneInletOutlet(object):
         
         raise Exception("Dynamic simulation is not yet supported.")
         self._update_equipment_object(self)
+    
+    @property
+    def energy_in(self):
+        self = self._get_equipment_object(self)
+        return self._energy_in
+    @energy_in.setter
+    def energy_in(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
+        if unit is None:
+            unit = self.energy_in.unit
+        self._energy_in = prop.Power(value, unit)
+        self._update_equipment_object(self)
+
+    @property
+    def energy_out(self):
+        self = self._get_equipment_object(self)
+        return self._energy_out
+    @energy_out.setter
+    def energy_out(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
+        if unit is None:
+            unit = self.energy_out.unit
+        self._energy_in = prop.Power(value, unit)
+        self._update_equipment_object(self)   
     
     def _get_equipment_index(cls, tag):
         for index, equipment in enumerate(cls.items):
@@ -460,7 +486,7 @@ class _EquipmentOneInletOutlet(object):
               stream_tag = self.get_stream_tag(stream_type, direction)
               stream_type, direction = define_index_direction(stream_tag)
         else:
-            raise Exception("To disconnect stream from equipment, provide either just connected stream object or \
+            raise Exception("To disconnect stream from equipment, provide either just connected stream object or\
                              just stream tag or just direction & stream type") 
               
         self._is_disconnection = True
@@ -646,18 +672,18 @@ class _EquipmentOneInletOutlet(object):
         else:
             stream_object = streams.EnergyStream.list_objects()[stream_index]
             if is_inlet:
-                stream_object, \
-                self.energy_in = property_matcher(stream_object,
-                                                  self.energy_in,
+                stream_object.amount, \
+                self.energy_in = property_matcher(stream_object.amount,
+                                                  self._energy_in,
                                                   stream_governed)
                 
             else:
                 stream_object, \
                 self.energy_out = property_matcher(stream_object,
-                                                    self.energy_out,
+                                                    self._energy_out,
                                                     stream_governed)
             if not stream_governed:
-                streams.EnergyStream.update_object(stream_index, stream_object)
+                streams.EnergyStream._update_stream_object(stream_object)
 
     def _create_equipment_tag(cls):
         i = 1

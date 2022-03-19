@@ -2,15 +2,11 @@ from ast import expr_context
 from thermo.chemical import Chemical
 import propylean.properties as prop
 class Stream(object):
-    def __init__(self, tag=None,
-                 to_equipment=None,
-                 from_equipment=None) -> None:
+    def __init__(self, tag=None, **inputs) -> None:
         self._tag = None
-        self._to_equipment = None
-        self._from_equipment = None
+        self._to_equipment_tag = None
+        self._from_equipment_tag = None
         self.tag = tag if tag is not None else self._create_stream_tag()
-        self.to_equipment = to_equipment
-        self.from_equipment = from_equipment
 
     @property
     def tag(self):
@@ -73,20 +69,26 @@ class Stream(object):
         elif any([isinstance(value, float), isinstance(value, int)]):
             return value, None
         
-class EnergyStream (Stream, prop.Power):
+class EnergyStream (Stream):
     items = [] 
-    def __init__(self, tag=None, amount=None, to_equipment=None,
-                 from_equipment=None):
-                 value, unit = self._tuple_property_value_unit_returner(amount, prop.Power)
-                 if unit is None:
-                     unit = prop.Power().unit 
-                 super(EnergyStream, self).__init__(tag=None, 
-                                                    to_equipment=None, 
-                                                    from_equipment=None,
-                                                    value=value,
-                                                    unit=unit)
-                 EnergyStream.items.append(self)
+    def __init__(self, tag=None, amount=(0, 'W')):
+        super().__init__(tag)
+        self._amount = prop.Power() 
+        self.amount = amount
+        EnergyStream.items.append(self)
 
+    @property
+    def amount(self):
+        self = self._get_stream_object(self)
+        return self._amount
+    @amount.setter
+    def amount(self, value):
+        self = self._get_stream_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
+        if unit is None:
+            unit = self.amount.unit
+        self._amount = prop.Power(value, unit)
+        self._update_stream_object(self)
 
     def __repr__(self) -> str:
         return 'Energy Stream Tag: ' + self.tag
@@ -98,21 +100,16 @@ class EnergyStream (Stream, prop.Power):
 class MaterialStream(Stream):
     items = [] 
     def __init__(self,tag = None,
-                 to_equipment=None,
-                 from_equipment=None,
                  mass_flowrate = 0,
                  pressure = 101325,
                  temperature = 298):
                  
-                 self._tag = None
+                 super().__init__(tag)
                  self._index = len(MaterialStream.items)
                  self._mass_flowrate = prop.MassFlowRate()
                  self._pressure = prop.Pressure()
                  self._temperature = prop.Temperature()
-                 self.to_equipment = None
-                 self.from_equipment = None
                  
-                 self.tag = tag
                  self.mass_flowrate = mass_flowrate
                  self.temperature = temperature
                  self.pressure = pressure
@@ -126,13 +123,9 @@ class MaterialStream(Stream):
     @pressure.setter
     def pressure(self, value):
         self = self._get_stream_object(self)
-        unit = self._pressure.unit
-        if isinstance(value, tuple):
-            unit = value[1]
-            value = value[0]
-        elif isinstance(value, prop.Pressure):
-            unit = value.unit
-            value = value.value
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Pressure)
+        if unit is None:
+            unit = self._pressure.unit
         self._pressure = prop.Pressure(value, unit)
         self._update_stream_object(self)
 
@@ -143,13 +136,9 @@ class MaterialStream(Stream):
     @temperature.setter
     def temperature(self, value):
         self = self._get_stream_object(self)
-        unit = self._temperature.unit
-        if isinstance(value, tuple):
-            unit = value[1]
-            value = value[0]
-        elif isinstance(value, prop.Temperature):
-            unit = value.unit
-            value = value.value
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Temperature)
+        if unit is None:
+            unit = self._temperature.unit
         self._temperature = prop.Temperature(value, unit)
         self._update_stream_object(self)
 
@@ -160,13 +149,9 @@ class MaterialStream(Stream):
     @mass_flowrate.setter
     def mass_flowrate(self, value):
         self = self._get_stream_object(self)
-        unit = self._mass_flowrate.unit
-        if isinstance(value, tuple):
-            unit = value[1]
-            value = value[0]
-        elif isinstance(value, prop.MassFlowRate):
-            unit = value.unit
-            value = value.value
+        value, unit = self._tuple_property_value_unit_returner(value, prop.MassFlowRate)
+        if unit is None:
+            unit = self._mass_flowrate.unit
         self._mass_flowrate = prop.MassFlowRate(value, unit)
         self._update_stream_object(self)
 
