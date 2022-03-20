@@ -1,5 +1,4 @@
-from ast import expr_context
-from thermo.chemical import Chemical
+from thermo.chemical import Mixture
 import propylean.properties as prop
 class Stream(object):
     def __init__(self, tag=None, **inputs) -> None:
