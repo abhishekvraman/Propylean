@@ -195,7 +195,7 @@ class test_CentrifugalPump(unittest.TestCase):
         # Test connection is made.
         self.assertTrue(pump.connect_stream(pump_power, 'out', stream_governed=True))
         # Test inlet properties of pump are equal to outlet stream's.
-        self.assertEqual(pump.energy_in.value, pump_power.value)
+        self.assertEqual(pump.energy_in.value, pump_power.amount)
         self.assertEqual(pump.power.unit, pump_power.unit)
 
     pytest.mark.positive
@@ -284,11 +284,11 @@ class test_CentrifugalPump(unittest.TestCase):
                                       mass_flowrate=(1000, 'kg/h'),
                                       pressure=(30, 'bar'),
                                       temperature=(25, 'C'))
-        inlet_stream.compound_amounts = {"water": 100}
+        inlet_stream.components = {"water": 100}
         pump.connect_stream(inlet_stream, 'in', stream_governed=True)
         pressure = prop.Pressure(100, 'bar')
         pressure.unit = "Pa"
-        expected_head_value = pressure.value / (9.8 * inlet_stream.density)
+        expected_head_value = pressure.value / (9.8 * inlet_stream.density.value)
         pump_head = pump.head
         pump_head.unit = "m"
         self.assertAlmostEqual(expected_head_value, pump_head.value)

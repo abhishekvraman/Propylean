@@ -49,12 +49,14 @@ class test_MaterialStream(unittest.TestCase):
                                      ('pentane', 0.00032),
                                      ('hexane', 0.00066)])
         mx = Mixture(zs=m4.components)
-        m4.density.unit = "kg/m3"
-        m4.density_l.unit = "kg/m3"
-        m4.density_g = "kg/m3"
+        m4.density.unit = "kg/m^3"
+        m4.density_l.unit = "kg/m^3"
+        m4.density_g.unit = "kg/m^3"
+        m4.density_s.unit = "kg/m^3"
         self.assertEqual(m4.density.value, mx.rho())
         self.assertEqual(m4.density_l.value, mx.rhol())
         self.assertEqual(m4.density_g.value, mx.rhog())
+        self.assertEqual(m4.density_s.value, mx.rhos())
 
     def test_MaterialStream_components_flow_property_viscosity(self):
         m4 = MaterialStream(tag="m5", 
@@ -115,7 +117,7 @@ class test_MaterialStream(unittest.TestCase):
                                      ('pentane', 0.00032),
                                      ('hexane', 0.00066)])
         mx = Mixture(zs=m4.components)
-        m4.mol_flowrate.unit = "mol/h"
+        m4.molar_flowrate.unit = "mol/h"
         expected_molar_flowrate = 1000000/mx.MW()
         self.assertEqual(m4.mol_flowrate.value, expected_molar_flowrate)
     
@@ -135,7 +137,7 @@ class test_MaterialStream(unittest.TestCase):
                                      ('pentane', 0.00032),
                                      ('hexane', 0.00066)])
         mx = Mixture(zs=m4.components)
-        m4.MW.unit = "g/mol"
+        m4.molecular_weight.unit = "g/mol"
         expected_MW= mx.MW()
         self.assertEqual(m4.MW.value, expected_MW)
     

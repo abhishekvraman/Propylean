@@ -1,6 +1,8 @@
+from pandas import DataFrame
 from thermo.chemical import Mixture
 import propylean.properties as prop
 class Stream(object):
+   
     def __init__(self, tag=None, **inputs) -> None:
         self._tag = None
         self._to_equipment_tag = None
@@ -97,6 +99,7 @@ class EnergyStream (Stream):
         return cls.items
       
 class MaterialStream(Stream):
+    property_package = None
     items = [] 
     def __init__(self,tag = None,
                  mass_flowrate = 0,
@@ -112,6 +115,7 @@ class MaterialStream(Stream):
                  self.mass_flowrate = mass_flowrate
                  self.temperature = temperature
                  self.pressure = pressure
+                 self._density = prop.Density()
 
                  MaterialStream.items.append(self)
         
@@ -153,7 +157,126 @@ class MaterialStream(Stream):
             unit = self._mass_flowrate.unit
         self._mass_flowrate = prop.MassFlowRate(value, unit)
         self._update_stream_object(self)
+    
+    @property
+    def components(self):
+        self = self._get_stream_object(self)
+        return self._components
+    @components.setter
+    def components(self, value):
+        # if MaterialStream().property_package is None:
+        #     raise Exception("Property package must be set before setting components.")
+        # if not isinstance(value, DataFrame):
+        #     raise Exception("Compnents should be pandas DataFrame")
+        self = self._get_stream_object(self)
+        self._components = value
+        self._update_stream_object(self)
 
+    @property
+    def density(self):
+        self = self._get_stream_object(self)
+        return self._density
+    @density.setter
+    def density(self, value):
+        if MaterialStream().property_package:
+            raise Exception("Property cannot be changed when using a Property Package.")
+        self = self._get_stream_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Density)
+        if unit is None:
+            unit = self._density.unit
+        self._density = prop.Density(value, unit)
+        self._update_stream_object(self)
+    
+    @property
+    def density_l(self):
+        self = self._get_stream_object(self)
+        return self._density_l
+    @density_l.setter
+    def density_l(self, value):
+        if MaterialStream().property_package:
+            raise Exception("Property cannot be changed when using a Property Package.")
+        self = self._get_stream_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Density)
+        if unit is None:
+            unit = self._density_l.unit
+        self._density_l = prop.Density(value, unit)
+        self._update_stream_object(self)
+    
+    @property
+    def density_g(self):
+        self = self._get_stream_object(self)
+        return self._density_g
+    @density_g.setter
+    def density_g(self, value):
+        if MaterialStream().property_package:
+            raise Exception("Property cannot be changed when using a Property Package.")
+        self = self._get_stream_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Density)
+        if unit is None:
+            unit = self._density_g.unit
+        self._density_g = prop.Density(value, unit)
+        self._update_stream_object(self)
+    
+    @property
+    def density_s(self):
+        self = self._get_stream_object(self)
+        return self._density_s
+    @density_s.setter
+    def density_s(self, value):
+        if MaterialStream().property_package:
+            raise Exception("Property cannot be changed when using a Property Package.")
+        self = self._get_stream_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Density)
+        if unit is None:
+            unit = self._density_s.unit
+        self._density_s = prop.Density(value, unit)
+        self._update_stream_object(self)
+
+    @property
+    def d_viscosity(self):
+        self = self._get_stream_object(self)
+        return self._d_viscosity
+    @d_viscosity.setter
+    def d_viscosity(self, value):
+        if MaterialStream().property_package:
+            raise Exception("Property cannot be changed when using a Property Package.")
+        self = self._get_stream_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Density)
+        if unit is None:
+            unit = self._d_viscosity.unit
+        self._d_viscosity = prop.DViscosity(value, unit)
+        self._update_stream_object(self)
+    
+    @property
+    def d_viscosity_l(self):
+        self = self._get_stream_object(self)
+        return self._d_viscosity_l
+    @d_viscosity_l.setter
+    def d_viscosity_l(self, value):
+        if MaterialStream().property_package:
+            raise Exception("Property cannot be changed when using a Property Package.")
+        self = self._get_stream_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Density)
+        if unit is None:
+            unit = self._density_l.unit
+        self._d_viscosity_l = prop.DViscosity(value, unit)
+        self._update_stream_object(self)
+    
+    @property
+    def d_viscosity_g(self):
+        self = self._get_stream_object(self)
+        return self._d_viscosity_g
+    @d_viscosity_g.setter
+    def d_viscosity_g(self, value):
+        if MaterialStream().property_package:
+            raise Exception("Property cannot be changed when using a Property Package.")
+        self = self._get_stream_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Density)
+        if unit is None:
+            unit = self._d_viscosity_g.unit
+        self._d_viscosity_g = prop.DViscosity(value, unit)
+        self._update_stream_object(self)
+    
     @classmethod
     def list_objects(cls):
         return cls.items

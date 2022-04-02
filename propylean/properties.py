@@ -311,7 +311,7 @@ class VolumetricFlowRate(_Property):
             self._unit = unit
         except:
             raise Exception('''Selected unit is not supported or a correct unit of Volume Flow Rate.
-                               Unit selected in cubic meter per second (m^3/s). Following are the supported units:
+                               Following are the supported units:
                                1. m^3/s for cubic meter per second
                                2. ft^3/s for cubic feet per second
                                3. cm^3/s for cubic centimeter per second
@@ -329,6 +329,50 @@ class VolumetricFlowRate(_Property):
                                15. lit/min for Liters per minute
                                16. lit/h for Liters per hour
                                17. lit/d  for Liters per day
+                               You selected '{}'.
+                               '''.format(unit))
+
+class Density(_Property):
+    def __init__(self, value = 0, unit= 'kg/m^3'):
+        super().__init__(value, unit)
+        self.unit = unit
+    @_Property.unit.setter
+    def unit(self, unit):
+        try:
+            conversion_factors = {'g/cm^3': 0.001,
+                                'lbm/ft^3': 0.062479,
+                                'kg/m^3': 1
+                                }
+            self._value =  conversion_factors[unit] * self._value / conversion_factors[self._unit]
+            self._unit = unit
+        except:
+            raise Exception('''Selected unit is not supported or a correct unit of Density.
+                               Following are the supported units:
+                               1. kg/m^3 for kilograms per cubic meter
+                               2. g/cm^3 for grams per per cubic centimeter
+                               3. lbm/ft^3 for pound mass per cubic feet
+                               You selected '{}'.
+                               '''.format(unit))
+
+class DViscosity(_Property):
+    def __init__(self, value = 0, unit= 'Pa-s'):
+        super().__init__(value, unit)
+        self.unit = unit
+    @_Property.unit.setter
+    def unit(self, unit):
+        try:
+            conversion_factors = {'lb/(ft-s)': 1.4881,
+                                'cP': 1000,
+                                'Pa-s': 1
+                                }
+            self._value =  conversion_factors[unit] * self._value / conversion_factors[self._unit]
+            self._unit = unit
+        except:
+            raise Exception('''Selected unit is not supported or a correct unit of Density.
+                               Following are the supported units:
+                               1. Pa-s for Pascal second
+                               2. cP for centipoise
+                               3. lb/(ft-s) for pound mass per cubic feet
                                You selected '{}'.
                                '''.format(unit))
 

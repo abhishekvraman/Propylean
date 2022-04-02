@@ -126,7 +126,20 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         else:
             self._efficiency = value/100
         self._update_equipment_object(self)
-
+    
+    @property
+    def power(self):
+        self = self._get_equipment_object(self)
+        return self._power
+    @power.setter
+    def power(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
+        if unit is None:
+            unit = self._power.unit         
+        self._power = prop.Power(value, unit)
+        self._update_equipment_object(self)  
+    
 #Defining generic class for all types of vessels.  NEEDS SUPER CLASS WITH MULTI INPUT AND OUTPUT 
 class _Vessels(_EquipmentMultipleInletOutlet):
     def __init__(self, **inputs) -> None:

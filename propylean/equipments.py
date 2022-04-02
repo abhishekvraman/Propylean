@@ -263,10 +263,10 @@ class CentrifugalPump(_PressureChangers):
     @property
     def hydraulic_power(self):
         fluid_density = 1000 # TODO THIS NEEDS TO BE UPDATED WITH STREAM PROPERTY
-        value = self.inlet_mass_flowrate.value * fluid_density * 9.81 * self.head / (3.6e6)
+        value = self.inlet_mass_flowrate.value * fluid_density * 9.81 * self.head.value / (3.6e6)
         return prop.Power(value, 'W')
     @property
-    def brake_horse_power(self):
+    def power(self):
         value = self.hydraulic_power / self.efficiency
         return prop.Power(value, "W")
     @classmethod

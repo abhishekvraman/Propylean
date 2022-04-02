@@ -151,6 +151,22 @@ def test_Power_instantiation_conversion():
     power.unit = 'GWh/d'
     assert abs(power.value - 2.5120) <0.0001
 
+@pytest.mark.positive
+def test_property_density():
+    d1 = properties.Density(1000)
+    assert d1.value == 1000
+    assert d1.unit == "kg/m^3"
+    d1.unit = "lbm/ft^3"
+    assert abs(d1.value-62.479) < 0.01
+
+@pytest.mark.positive
+def test_property_dviscosity():
+    dv1 = properties.DViscosity(0.000902688)
+    assert dv1.value == 0.000902688
+    assert dv1.unit == "Pa-s"
+    dv1.unit = "cP"
+    assert abs(dv1.value-0.902688) < 0.001
+
 @pytest.mark.addition
 def test_property_addition():
     p1 = properties.Pressure(1, 'bar')
