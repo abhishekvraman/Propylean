@@ -33,47 +33,33 @@ class test_MaterialStream(unittest.TestCase):
         self.assertEqual(m3.temperature, prop.Temperature())
         self.assertEqual(m3.mass_flowrate, prop.MassFlowRate())
 
+    @pytest.mark.density
     def test_MaterialStream_components_flow_property_density(self):
         m4 = MaterialStream(tag="m4", 
                             pressure=(10, 'bar'),
                             temperature=300,
                             mass_flowrate=prop.MassFlowRate(1000, "kg/h"))
-        m4.components = OrderedDict([('methane', 0.96522),
-                                     ('nitrogen', 0.00259),
-                                     ('carbon dioxide', 0.00596),
-                                     ('ethane', 0.01819),
-                                     ('propane', 0.0046),
-                                     ('isobutane', 0.00098),
-                                     ('butane', 0.00101),
-                                     ('2-methylbutane', 0.00047),
-                                     ('pentane', 0.00032),
-                                     ('hexane', 0.00066)])
-        mx = Mixture(zs=m4.components)
+        mol_fraction = OrderedDict([('benzene', 0.96522),('toluene', 0.00259)])
+        m4.components = prop.Components(mol_fraction,'mol')
+        p = prop.Pressure(10, 'bar')
+        p.unit = 'Pa'
+        mx = Mixture(zs=mol_fraction, T=300, P=p.value)
         m4.density.unit = "kg/m^3"
         m4.density_l.unit = "kg/m^3"
         m4.density_g.unit = "kg/m^3"
         m4.density_s.unit = "kg/m^3"
-        self.assertEqual(m4.density.value, mx.rho())
-        self.assertEqual(m4.density_l.value, mx.rhol())
-        self.assertEqual(m4.density_g.value, mx.rhog())
-        self.assertEqual(m4.density_s.value, mx.rhos())
+        self.assertAlmostEqual(m4.density.value, mx.rho)
+        self.assertEqual(m4.density_l.value, mx.rhol)
+        self.assertEqual(m4.density_g.value, mx.rhog)
 
     def test_MaterialStream_components_flow_property_viscosity(self):
         m4 = MaterialStream(tag="m5", 
                             pressure=(10, 'bar'),
                             temperature=300,
                             mass_flowrate=prop.MassFlowRate(1000, "kg/h"))
-        m4.components = OrderedDict([('methane', 0.96522),
-                                     ('nitrogen', 0.00259),
-                                     ('carbon dioxide', 0.00596),
-                                     ('ethane', 0.01819),
-                                     ('propane', 0.0046),
-                                     ('isobutane', 0.00098),
-                                     ('butane', 0.00101),
-                                     ('2-methylbutane', 0.00047),
-                                     ('pentane', 0.00032),
-                                     ('hexane', 0.00066)])
-        mx = Mixture(zs=m4.components)
+        mol_fraction = OrderedDict([('benzene', 0.96522),('toluene', 0.00259)])
+        m4.components = prop.Components(mol_fraction,'mol')
+        mx = Mixture(zs=mol_fraction)
         m4.viscosity.unit = "Pa-s"
         m4.viscosity_l.unit = "Pa-s"
         m4.viscosity_g.unit = "Pa-s"
@@ -86,19 +72,11 @@ class test_MaterialStream(unittest.TestCase):
                             pressure=(10, 'bar'),
                             temperature=300,
                             mass_flowrate=prop.MassFlowRate(1000, "kg/h"))
-        m4.components = OrderedDict([('methane', 0.96522),
-                                     ('nitrogen', 0.00259),
-                                     ('carbon dioxide', 0.00596),
-                                     ('ethane', 0.01819),
-                                     ('propane', 0.0046),
-                                     ('isobutane', 0.00098),
-                                     ('butane', 0.00101),
-                                     ('2-methylbutane', 0.00047),
-                                     ('pentane', 0.00032),
-                                     ('hexane', 0.00066)])
-        mx = Mixture(zs=m4.components)
-        m4.vol_flowrate.unit = "m3/h"
-        expected_volumetric_flowrate = 1000/mx.rho()
+        mol_fraction = OrderedDict([('benzene', 0.96522),('toluene', 0.00259)])
+        m4.components = prop.Components(mol_fraction,'mol')
+        mx = Mixture(zs=mol_fraction)
+        m4.vol_flowrate.unit = "m^3/h"
+        expected_volumetric_flowrate = 1000/mx.rho
         self.assertEqual(m4.vol_flowrate.value, expected_volumetric_flowrate)
     
     def test_MaterialStream_components_flow_property_molar_flowrate(self):
@@ -106,17 +84,9 @@ class test_MaterialStream(unittest.TestCase):
                             pressure=(10, 'bar'),
                             temperature=300,
                             mass_flowrate=prop.MassFlowRate(1000, "kg/h"))
-        m4.components = OrderedDict([('methane', 0.96522),
-                                     ('nitrogen', 0.00259),
-                                     ('carbon dioxide', 0.00596),
-                                     ('ethane', 0.01819),
-                                     ('propane', 0.0046),
-                                     ('isobutane', 0.00098),
-                                     ('butane', 0.00101),
-                                     ('2-methylbutane', 0.00047),
-                                     ('pentane', 0.00032),
-                                     ('hexane', 0.00066)])
-        mx = Mixture(zs=m4.components)
+        mol_fraction = OrderedDict([('benzene', 0.96522),('toluene', 0.00259)])
+        m4.components = prop.Components(mol_fraction,'mol')
+        mx = Mixture(zs=mol_fraction)
         m4.molar_flowrate.unit = "mol/h"
         expected_molar_flowrate = 1000000/mx.MW()
         self.assertEqual(m4.mol_flowrate.value, expected_molar_flowrate)
@@ -126,17 +96,9 @@ class test_MaterialStream(unittest.TestCase):
                             pressure=(10, 'bar'),
                             temperature=300,
                             mass_flowrate=prop.MassFlowRate(1000, "kg/h"))
-        m4.components = OrderedDict([('methane', 0.96522),
-                                     ('nitrogen', 0.00259),
-                                     ('carbon dioxide', 0.00596),
-                                     ('ethane', 0.01819),
-                                     ('propane', 0.0046),
-                                     ('isobutane', 0.00098),
-                                     ('butane', 0.00101),
-                                     ('2-methylbutane', 0.00047),
-                                     ('pentane', 0.00032),
-                                     ('hexane', 0.00066)])
-        mx = Mixture(zs=m4.components)
+        mol_fraction = OrderedDict([('benzene', 0.96522),('toluene', 0.00259)])
+        m4.components = prop.Components(mol_fraction,'mol')
+        mx = Mixture(zs=mol_fraction)
         m4.molecular_weight.unit = "g/mol"
         expected_MW= mx.MW()
         self.assertEqual(m4.MW.value, expected_MW)
@@ -146,17 +108,9 @@ class test_MaterialStream(unittest.TestCase):
                             pressure=(10, 'bar'),
                             temperature=300,
                             mass_flowrate=prop.MassFlowRate(1000, "kg/h"))
-        m4.components = OrderedDict([('methane', 0.96522),
-                                     ('nitrogen', 0.00259),
-                                     ('carbon dioxide', 0.00596),
-                                     ('ethane', 0.01819),
-                                     ('propane', 0.0046),
-                                     ('isobutane', 0.00098),
-                                     ('butane', 0.00101),
-                                     ('2-methylbutane', 0.00047),
-                                     ('pentane', 0.00032),
-                                     ('hexane', 0.00066)])
-        mx = Mixture(zs=m4.components)
+        mol_fraction = OrderedDict([('benzene', 0.96522),('toluene', 0.00259)])
+        m4.components = prop.Components(mol_fraction,'mol')
+        mx = Mixture(zs=mol_fraction)
         self.assertEqual(m4.Z, mx.Z())
         self.assertEqual(m4.Z_l, mx.Zl())
         self.assertEqual(m4.Z_g, mx.Zg())
@@ -166,15 +120,7 @@ class test_MaterialStream(unittest.TestCase):
                             pressure=(10, 'bar'),
                             temperature=300,
                             mass_flowrate=prop.MassFlowRate(1000, "kg/h"))
-        m4.components = OrderedDict([('methane', 0.96522),
-                                     ('nitrogen', 0.00259),
-                                     ('carbon dioxide', 0.00596),
-                                     ('ethane', 0.01819),
-                                     ('propane', 0.0046),
-                                     ('isobutane', 0.00098),
-                                     ('butane', 0.00101),
-                                     ('2-methylbutane', 0.00047),
-                                     ('pentane', 0.00032),
-                                     ('hexane', 0.00066)])
-        mx = Mixture(zs=m4.components)
+        mol_fraction = OrderedDict([('benzene', 0.96522),('toluene', 0.00259)])
+        m4.components = prop.Components(mol_fraction,'mol')
+        mx = Mixture(zs=mol_fraction)
         self.assertEqual(m4.isentropic_exponent, mx.isentropic_exponent)

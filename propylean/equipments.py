@@ -267,7 +267,7 @@ class CentrifugalPump(_PressureChangers):
         return prop.Power(value, 'W')
     @property
     def power(self):
-        value = self.hydraulic_power / self.efficiency
+        value = self.hydraulic_power.value / self.efficiency
         return prop.Power(value, "W")
     @classmethod
     def list_objects(cls):

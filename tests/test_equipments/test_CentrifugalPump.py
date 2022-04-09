@@ -195,8 +195,8 @@ class test_CentrifugalPump(unittest.TestCase):
         # Test connection is made.
         self.assertTrue(pump.connect_stream(pump_power, 'out', stream_governed=True))
         # Test inlet properties of pump are equal to outlet stream's.
-        self.assertEqual(pump.energy_in.value, pump_power.amount)
-        self.assertEqual(pump.power.unit, pump_power.unit)
+        self.assertEqual(pump.energy_in, pump_power.amount)
+        self.assertEqual(pump.power, pump_power.unit)
 
     pytest.mark.positive
     def test_CentrifugalPump_connection_with_energy_stream_inlet_equipment_governed(self):
@@ -310,7 +310,7 @@ class test_CentrifugalPump(unittest.TestCase):
         expected_brake_horse_power = expected_hydraulic_power.value/pump.efficiency
         pump_hydraulic_power = pump.hydraulic_power
         pump_hydraulic_power.unit = "W"
-        pump_brake_horse_power = pump.brake_horse_power
+        pump_brake_horse_power = pump.power
         pump_brake_horse_power.unit = "W"
         self.assertAlmostEqual(expected_hydraulic_power, pump_hydraulic_power.value)
         self.assertAlmostEqual(expected_brake_horse_power, pump_brake_horse_power.value)

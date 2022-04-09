@@ -434,3 +434,8 @@ class Power(_Property):
                                21. TWh/d for Tera watt hour per day
                                You selected '{}'.
                                '''.format(unit))
+
+class Components(object):
+    def __init__(self, fractions=None, type="mass"):
+        self.fractions = fractions
+        self.type = type

@@ -1,5 +1,5 @@
 from pandas import DataFrame
-from thermo.chemical import Mixture
+from thermo import Mixture
 import propylean.properties as prop
 class Stream(object):
    
@@ -116,6 +116,13 @@ class MaterialStream(Stream):
                  self.temperature = temperature
                  self.pressure = pressure
                  self._density = prop.Density()
+                 self._density_l = prop.Density()
+                 self._density_g = prop.Density()
+                 self._density_s = prop.Density()
+                 self._d_viscosity = prop.DViscosity()
+                 self._d_viscosity_l = prop.DViscosity()
+                 self._d_viscosity_g = prop.DViscosity()
+                 self._components = prop.Components()
 
                  MaterialStream.items.append(self)
         
@@ -159,6 +166,24 @@ class MaterialStream(Stream):
         self._update_stream_object(self)
     
     @property
+    def vol_flowrate(self):
+        self = self._get_stream_object(self)
+        mass_flowrate = self.mass_flowrate
+        density = self.density
+        mass_flowrate.unit = 'kg/s'
+        density.unit = 'kg/m^3'
+        return prop.VolumetricFlowRate(mass_flowrate.value/density.value)
+    
+    @property
+    def mol_flowrate(self):
+        self = self._get_stream_object(self)
+        mass_flowrate = self.mass_flowrate
+        density = self.density
+        mass_flowrate.unit = 'kg/s'
+        density.unit = 'kg/m^3'
+        return prop.VolumetricFlowRate(mass_flowrate.value/density.value)
+
+    @property
     def components(self):
         self = self._get_stream_object(self)
         return self._components
@@ -170,6 +195,7 @@ class MaterialStream(Stream):
         #     raise Exception("Compnents should be pandas DataFrame")
         self = self._get_stream_object(self)
         self._components = value
+        self._update_properties()
         self._update_stream_object(self)
 
     @property
@@ -277,6 +303,34 @@ class MaterialStream(Stream):
         self._d_viscosity_g = prop.DViscosity(value, unit)
         self._update_stream_object(self)
     
+    def _update_properties(self):
+        if self.components.fractions is None:
+            return
+        arg_map = {'mass': 'ws',
+                   'mol': 'zs',
+                   'vol_l': 'Vfls',
+                   'vol_g': 'Vfgs'}
+        T = self.temperature
+        T.unit = 'K'
+        P = self.pressure
+        P.unit = 'Pa'
+        kwarg = {arg_map[self.components.type]: self.components.fractions,
+                 'T': T.value,
+                 'P': P.value}  
+        mx = Mixture(**kwarg)
+        rho = mx.rho
+        rhol = mx.rhol
+        rhog = mx.rhog
+        rhos = mx.rhos
+        if rho is not None:
+            self.density = prop.Density(rho, 'kg/m^3')
+        if rhol is not None:
+            self.density_l = prop.Density(mx.rhol, 'kg/m^3')
+        if rhog is not None:
+            self.density_g = prop.Density(mx.rhog, 'kg/m^3')
+        if rhos is not None:
+            self.density_s = mx.rhoss
+
     @classmethod
     def list_objects(cls):
         return cls.items

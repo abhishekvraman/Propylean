@@ -69,7 +69,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         if 'performance_curve' in inputs:
             self.performace_curve = inputs['performance_curve']
         
-        self._efficiency = None if 'efficiency' not in inputs else inputs['efficiency']
+        self._efficiency = 100 if 'efficiency' not in inputs else inputs['efficiency']
         
     @property
     def suction_pressure(self):
