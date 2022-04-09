@@ -7,7 +7,7 @@ class Stream(object):
         self._tag = None
         self._to_equipment_tag = None
         self._from_equipment_tag = None
-        self.tag = tag if tag is not None else self._create_stream_tag()
+        self.tag = tag
 
     @property
     def tag(self):
@@ -50,15 +50,16 @@ class Stream(object):
     def _create_stream_tag(cls):
         i = 1
         class_name = type(cls).__name__
-        tag = class_name+ "_" + str(i)
+        tag = class_name + "_" + str(i)
         while cls._check_tag_assigned(tag):
             tag = class_name+ "_" + str(i)
+            print(tag)
             i += 1
         return tag
     
     def _check_tag_assigned(cls, tag):
-        for equipment in cls.items:
-            if tag == equipment.tag:
+        for stream in cls.items:
+            if tag == stream.tag:
                 return True
         return False
     
@@ -204,7 +205,7 @@ class MaterialStream(Stream):
         return self._density
     @density.setter
     def density(self, value):
-        if MaterialStream().property_package:
+        if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Density)
@@ -219,7 +220,7 @@ class MaterialStream(Stream):
         return self._density_l
     @density_l.setter
     def density_l(self, value):
-        if MaterialStream().property_package:
+        if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Density)
@@ -234,7 +235,7 @@ class MaterialStream(Stream):
         return self._density_g
     @density_g.setter
     def density_g(self, value):
-        if MaterialStream().property_package:
+        if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Density)
@@ -249,7 +250,7 @@ class MaterialStream(Stream):
         return self._density_s
     @density_s.setter
     def density_s(self, value):
-        if MaterialStream().property_package:
+        if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Density)
@@ -264,7 +265,7 @@ class MaterialStream(Stream):
         return self._d_viscosity
     @d_viscosity.setter
     def d_viscosity(self, value):
-        if MaterialStream().property_package:
+        if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Density)
@@ -279,7 +280,7 @@ class MaterialStream(Stream):
         return self._d_viscosity_l
     @d_viscosity_l.setter
     def d_viscosity_l(self, value):
-        if MaterialStream().property_package:
+        if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Density)
@@ -294,7 +295,7 @@ class MaterialStream(Stream):
         return self._d_viscosity_g
     @d_viscosity_g.setter
     def d_viscosity_g(self, value):
-        if MaterialStream().property_package:
+        if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Density)
