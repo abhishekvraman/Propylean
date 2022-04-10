@@ -246,6 +246,28 @@ class MassFlowRate(_Property):
     def __add__(self, other):
         return super().__add__(other)
 
+class MolecularWeigth(_Property):
+    def __init__(self, value = 0, unit= 'g/mol'):
+        super().__init__(value, unit)
+        self.unit = unit
+    @_Property.unit.setter
+    def unit(self, unit):
+        try:
+            conversion_factors = {
+                                  'kg/mol': 0.001,
+                                  'g/mol': 1
+                                }
+            self._value =  conversion_factors[unit] * self._value / conversion_factors[self._unit]
+            self._unit = unit
+        except:
+            raise Exception('''Selected unit is not supported or a correct unit of Molecular Weight.
+                               Following are the supported units:
+                               1. g/mol for gram per mol
+                               2. kg/mol for kilogram per mol
+                               3. TODO...
+                               You selected '{}'.
+                               '''.format(unit))
+
 class MolarFlowRate(_Property):
     def __init__(self, value = 1, unit= 'mol/s'):
         super().__init__(value,unit)
@@ -310,7 +332,7 @@ class VolumetricFlowRate(_Property):
             self._value =  conversion_factors[unit] * self._value / conversion_factors[self._unit]
             self._unit = unit
         except:
-            raise Exception('''Selected unit is not supported or a correct unit of Volume Flow Rate.
+            raise Exception('''Selected unit is not supported or a correct unit of Volumetric Flow Rate.
                                Following are the supported units:
                                1. m^3/s for cubic meter per second
                                2. ft^3/s for cubic feet per second
@@ -368,7 +390,7 @@ class DViscosity(_Property):
             self._value =  conversion_factors[unit] * self._value / conversion_factors[self._unit]
             self._unit = unit
         except:
-            raise Exception('''Selected unit is not supported or a correct unit of Density.
+            raise Exception('''Selected unit is not supported or a correct unit of Dynamic Viscosity.
                                Following are the supported units:
                                1. Pa-s for Pascal second
                                2. cP for centipoise

@@ -125,6 +125,12 @@ class MaterialStream(Stream):
                  self._d_viscosity_g = prop.DViscosity()
                  self._components = prop.Components()
 
+                 self._vol_flowrate = prop.VolumetricFlowRate()
+                 self._mol_flowrate = prop.MolarFlowRate()
+                 self._molecular_weight = prop.MolecularWeigth()
+                 self._Z = 1
+                 self._isentropic_exponent = 1.3
+
                  MaterialStream.items.append(self)
         
     @property
@@ -173,16 +179,37 @@ class MaterialStream(Stream):
         density = self.density
         mass_flowrate.unit = 'kg/s'
         density.unit = 'kg/m^3'
-        return prop.VolumetricFlowRate(mass_flowrate.value/density.value)
+        unit = self._vol_flowrate.unit
+        self._vol_flowrate = prop.VolumetricFlowRate(mass_flowrate.value/density.value)
+        self._vol_flowrate.unit = unit
+        return self._vol_flowrate
     
+    @property
+    def molecular_weight(self):
+        self = self._get_stream_object(self)
+        return self._molecular_weight
+    @molecular_weight.setter
+    def molecular_weight(self, value):
+        if MaterialStream.property_package:
+            raise Exception("Property cannot be changed when using a Property Package.")
+        self = self._get_stream_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.MolecularWeigth)
+        if unit is None:
+            unit = self._molecular_weight.unit
+        self._molecular_weight = prop.MolecularWeigth(value, unit)
+        self._update_stream_object(self)
+
     @property
     def mol_flowrate(self):
         self = self._get_stream_object(self)
         mass_flowrate = self.mass_flowrate
-        density = self.density
+        molecular_weight = self.molecular_weight
         mass_flowrate.unit = 'kg/s'
-        density.unit = 'kg/m^3'
-        return prop.VolumetricFlowRate(mass_flowrate.value/density.value)
+        molecular_weight.unit = 'kg/mol'
+        unit = self._mol_flowrate.unit
+        self._mol_flowrate = prop.MolarFlowRate(mass_flowrate.value/molecular_weight.value)
+        self._mol_flowrate.unit = unit
+        return self._mol_flowrate
 
     @property
     def components(self):
@@ -268,7 +295,7 @@ class MaterialStream(Stream):
         if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
-        value, unit = self._tuple_property_value_unit_returner(value, prop.Density)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.DViscosity)
         if unit is None:
             unit = self._d_viscosity.unit
         self._d_viscosity = prop.DViscosity(value, unit)
@@ -283,7 +310,7 @@ class MaterialStream(Stream):
         if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
-        value, unit = self._tuple_property_value_unit_returner(value, prop.Density)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.DViscosity)
         if unit is None:
             unit = self._density_l.unit
         self._d_viscosity_l = prop.DViscosity(value, unit)
@@ -298,10 +325,34 @@ class MaterialStream(Stream):
         if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
-        value, unit = self._tuple_property_value_unit_returner(value, prop.Density)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.DViscosity)
         if unit is None:
             unit = self._d_viscosity_g.unit
         self._d_viscosity_g = prop.DViscosity(value, unit)
+        self._update_stream_object(self)
+    
+    @property
+    def isentropic_exponent(self):
+        self = self._get_stream_object(self)
+        return self._isentropic_exponent
+    @isentropic_exponent.setter
+    def isentropic_exponent(self, value):
+        if MaterialStream.property_package:
+            raise Exception("Property cannot be changed when using a Property Package.")
+        self = self._get_stream_object(self)
+        self._isentropic_exponent = value
+        self._update_stream_object(self)
+
+    @property
+    def isentropic_exponent(self):
+        self = self._get_stream_object(self)
+        return self._isentropic_exponent
+    @isentropic_exponent.setter
+    def isentropic_exponent(self, value):
+        if MaterialStream.property_package:
+            raise Exception("Property cannot be changed when using a Property Package.")
+        self = self._get_stream_object(self)
+        self._isentropic_exponent = value
         self._update_stream_object(self)
     
     def _update_properties(self):
@@ -319,18 +370,49 @@ class MaterialStream(Stream):
                  'T': T.value,
                  'P': P.value}  
         mx = Mixture(**kwarg)
+
+        # Assigning Desnisties
         rho = mx.rho
         rhol = mx.rhol
         rhog = mx.rhog
-        rhos = mx.rhos
         if rho is not None:
             self.density = prop.Density(rho, 'kg/m^3')
         if rhol is not None:
-            self.density_l = prop.Density(mx.rhol, 'kg/m^3')
+            self.density_l = prop.Density(rhol, 'kg/m^3')
         if rhog is not None:
-            self.density_g = prop.Density(mx.rhog, 'kg/m^3')
-        if rhos is not None:
-            self.density_s = mx.rhoss
+            self.density_g = prop.Density(rhog, 'kg/m^3')
+
+        # Assigning Viscosities
+        mu = mx.mu
+        mul = mx.mul
+        mug = mx.mug
+        if mu is not None:
+            self.d_viscosity = prop.DViscosity(mu, 'Pa-s')
+        if mul is not None:
+            self.d_viscosity_l = prop.DViscosity(mul, 'Pa-s')
+        if mug is not None:
+            self.d_viscosity_g = prop.DViscosity(mug, 'Pa-s')
+        
+        # Assigning Molecular Weight
+        MW = mx.MW
+        if MW is not None:
+            self.molecular_weight = prop.MolecularWeigth(MW, 'g/mol')
+        
+        #Assiging Compressibility Factor Z
+        Z = mx.Z
+        Z_l = mx.Zl
+        Z_g = mx.Zg
+        if Z is not None:
+            self.Z = Z
+        if Z_l is not None:
+            self.Z_l = Z_l
+        if Z_g is not None:
+            self.Z_g = Z_g
+        
+        # Assigning Isnetropic Exponent
+        isentropic_exponent = mx.isentropic_exponent
+        if isentropic_exponent is not None:
+            self.isentropic_exponent = isentropic_exponent
 
     @classmethod
     def list_objects(cls):

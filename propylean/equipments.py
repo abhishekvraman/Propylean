@@ -402,10 +402,6 @@ class CentrifugalCompressor(_PressureChangers):
         """
         self._index = len(CentrifugalCompressor.items)
         super().__init__( **inputs)
-        # TODO Replace methane wih stream properties
-        self.methane = Chemical('methane',
-                         T = self._inlet_temperature.value,
-                         P = self._inlet_pressure.value)
         if 'adiabatic_efficiency' not in inputs and 'polytropic_efficiency' in inputs:
             self.polytropic_efficiency = inputs['polytropic_efficiency']
         else:
@@ -435,14 +431,14 @@ class CentrifugalCompressor(_PressureChangers):
         self = self._get_equipment_object(self)
         return compressible_fluid.isentropic_efficiency(P1 = self._inlet_pressure.value,
                                                         P2 = self._outlet_pressure.value,
-                                                        k = self.methane.isentropic_exponent,
+                                                        k = self.isentropic_exponent,
                                                         eta_s = self.adiabatic_efficiency)
     @polytropic_efficiency.setter
     def polytropic_efficiency(self, value):
         self = self._get_equipment_object(self)
         self.adiabatic_efficiency = compressible_fluid.isentropic_efficiency(P1 = self._inlet_pressure.value,
                                                                              P2 = self._outlet_pressure.value,
-                                                                             k = self.methane.isentropic_exponent,
+                                                                             k = self.isentropic_exponent,
                                                                              eta_p = value)
         self._update_equipment_object(self)
 

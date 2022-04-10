@@ -284,7 +284,7 @@ class test_CentrifugalPump(unittest.TestCase):
                                       mass_flowrate=(1000, 'kg/h'),
                                       pressure=(30, 'bar'),
                                       temperature=(25, 'C'))
-        inlet_stream.components = {"water": 100}
+        inlet_stream.components = prop.Components({"water": 1})
         pump.connect_stream(inlet_stream, 'in', stream_governed=True)
         pressure = prop.Pressure(100, 'bar')
         pressure.unit = "Pa"
@@ -302,7 +302,7 @@ class test_CentrifugalPump(unittest.TestCase):
                                       mass_flowrate=(1000, 'kg/h'),
                                       pressure=(30, 'bar'),
                                       temperature=(25, 'C'))
-        inlet_stream.compound_amounts = {"water": 100}
+        inlet_stream.components = prop.Components({"water": 1})
         pump.connect_stream(inlet_stream, 'in', stream_governed=True)
         pressure = prop.Pressure(100, 'bar')
         pressure.unit = "Pa"
@@ -312,6 +312,6 @@ class test_CentrifugalPump(unittest.TestCase):
         pump_hydraulic_power.unit = "W"
         pump_brake_horse_power = pump.power
         pump_brake_horse_power.unit = "W"
-        self.assertAlmostEqual(expected_hydraulic_power, pump_hydraulic_power.value)
-        self.assertAlmostEqual(expected_brake_horse_power, pump_brake_horse_power.value)
+        self.assertAlmostEqual(expected_hydraulic_power.value, pump_hydraulic_power.value)
+        self.assertAlmostEqual(expected_brake_horse_power.value, pump_brake_horse_power.value)
 
