@@ -461,3 +461,7 @@ class Components(object):
     def __init__(self, fractions=None, type="mass"):
         self.fractions = fractions
         self.type = type
+    def __eq__(self, other):
+        if self.type==other.type and self.fractions==other.fractions:
+            return True
+        return False

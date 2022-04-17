@@ -187,37 +187,44 @@ class test_CentrifugalPump(unittest.TestCase):
         self.assertEqual(pump.inlet_temperature, pump.outlet_temperature)
         self.assertEqual(pump.inlet_mass_flowrate, pump.outlet_mass_flowrate)
     
-    @pytest.mark.positive
-    def test_CentrifugalPump_connection_with_energy_stream_inlet_stream_governed(self):
-        pump = CentrifugalPump(tag="Pump_16",
-                               differential_pressure=(100, 'bar'))
-        pump_power = EnergyStream(tag="Power_Pump_16", amount=(10,"MW"))
-        # Test connection is made.
-        self.assertTrue(pump.connect_stream(pump_power, 'out', stream_governed=True))
-        # Test inlet properties of pump are equal to outlet stream's.
-        self.assertEqual(pump.energy_in, pump_power.amount)
-        self.assertEqual(pump.power, pump_power.unit)
+    # TODO Uncomment below when power setting feature is provided.
+    # @pytest.mark.positive
+    # def test_CentrifugalPump_connection_with_energy_stream_inlet_stream_governed(self):
+    #     pump = CentrifugalPump(tag="Pump_16",
+    #                            differential_pressure=(100, 'bar'))
+    #     pump_power = EnergyStream(tag="Power_Pump_16", amount=(10,"MW"))
+    #     # Test connection is made.
+    #     self.assertTrue(pump.connect_stream(pump_power, stream_governed=True))
+    #     # Test inlet properties of pump are equal to outlet stream's.
+    #     self.assertEqual(pump.energy_in, pump_power.amount)
+    #     self.assertEqual(pump.power, pump_power.unit)
 
     pytest.mark.positive
     def test_CentrifugalPump_connection_with_energy_stream_inlet_equipment_governed(self):
         pump = CentrifugalPump(tag="Pump_17",
                                differential_pressure=(100, 'bar'))
         pump_power = EnergyStream(tag="Power_Pump_17", amount=(10,"MW"))
+        pump_inlet = MaterialStream(mass_flowrate=(1000, 'kg/h'),
+                                    pressure=(30, 'bar'),
+                                    temperature=(25, 'C'))
+        pump_inlet.components = prop.Components({"water": 1})
         # Test connection is made.
-        self.assertTrue(pump.connect_stream(pump_power, 'out', stream_governed=False))
+        self.assertTrue(pump.connect_stream(pump_inlet, "in", stream_governed=True))
+        self.assertTrue(pump.connect_stream(pump_power))
         # Test inlet properties of pump are equal to outlet stream's.
-        self.assertEqual(pump.power.value, pump_power.value)
-        self.assertEqual(pump.power.unit, pump_power.unit)
+        self.assertAlmostEqual(pump.power.value, pump_power.amount.value)
+        self.assertEqual(pump.power.unit, pump_power.amount.unit)
     
     @pytest.mark.positive
     def test_CentrifugalPump_stream_disconnection_by_stream_object(self):
         pump = CentrifugalPump(tag="Pump_18",
                                differential_pressure=(100, 'bar'))
         inlet_stream = MaterialStream(tag="Inlet_Pump_18")
+        inlet_stream.components = prop.Components({"water": 1})
         outlet_stream = MaterialStream(tag="Outlet_Pump_18")
         pump_power = EnergyStream(tag="Power_Pump_18")
         # Test connection is made.
-        self.assertTrue(pump.connect_stream(inlet_stream, 'in', stream_governed=False))
+        self.assertTrue(pump.connect_stream(inlet_stream, 'in', stream_governed=True))
         self.assertTrue(pump.connect_stream(outlet_stream, 'out', stream_governed=False))
         self.assertTrue(pump.connect_stream(pump_power))
         # Test disconnection
@@ -227,20 +234,23 @@ class test_CentrifugalPump(unittest.TestCase):
         self.assertIsNone(pump._inlet_material_stream_tag)
         self.assertIsNone(pump._outlet_material_stream_tag)
         self.assertIsNone(pump._inlet_energy_stream_tag)
-        self.assertRaises(AttributeError, pump._outlet_energy_stream_tag)
         self.assertIsNone(inlet_stream._to_equipment_tag)
         self.assertIsNone(outlet_stream._from_equipment_tag)
     
     @pytest.mark.positive
+    @pytest.mark.temp
     def test_CentrifugalPump_stream_disconnection_by_stream_tag(self):
         pump = CentrifugalPump(tag="Pump_19",
                                differential_pressure=(100, 'bar'))
         inlet_stream = MaterialStream(tag="Inlet_Pump_19")
+        inlet_stream.components = prop.Components({"water": 1})
         outlet_stream = MaterialStream(tag="Outlet_Pump_19")
         pump_power = EnergyStream(tag="Power_Pump_19")
         # Test connection is made.
-        self.assertTrue(pump.connect_stream(inlet_stream, 'in', stream_governed=False))
+        self.assertTrue(pump.connect_stream(inlet_stream, 'in', stream_governed=True))
         self.assertTrue(pump.connect_stream(outlet_stream, 'out', stream_governed=False))
+        self.assertEqual(inlet_stream.components, pump._inlet_material_components)
+        self.assertEqual(inlet_stream.components, outlet_stream.components)
         self.assertTrue(pump.connect_stream(pump_power))
         # Test disconnection
         self.assertTrue(pump.disconnect_stream(stream_tag="Inlet_Pump_19"))
@@ -249,7 +259,6 @@ class test_CentrifugalPump(unittest.TestCase):
         self.assertIsNone(pump._inlet_material_stream_tag)
         self.assertIsNone(pump._outlet_material_stream_tag)
         self.assertIsNone(pump._inlet_energy_stream_tag)
-        self.assertRaises(AttributeError, pump._outlet_energy_stream_tag)
         self.assertIsNone(inlet_stream._to_equipment_tag)
         self.assertIsNone(outlet_stream._from_equipment_tag)
     
@@ -258,10 +267,11 @@ class test_CentrifugalPump(unittest.TestCase):
         pump = CentrifugalPump(tag="Pump_20",
                                differential_pressure=(100, 'bar'))
         inlet_stream = MaterialStream(tag="Inlet_Pump_20")
+        inlet_stream.components = prop.Components({"water": 1})
         outlet_stream = MaterialStream(tag="Outlet_Pump_20")
         pump_power = EnergyStream(tag="Power_Pump_20")
         # Test connection is made.
-        self.assertTrue(pump.connect_stream(inlet_stream, 'in', stream_governed=False))
+        self.assertTrue(pump.connect_stream(inlet_stream, 'in', stream_governed=True))
         self.assertTrue(pump.connect_stream(outlet_stream, 'out', stream_governed=False))
         self.assertTrue(pump.connect_stream(pump_power))
         # Test disconnection
@@ -271,7 +281,6 @@ class test_CentrifugalPump(unittest.TestCase):
         self.assertIsNone(pump._inlet_material_stream_tag)
         self.assertIsNone(pump._outlet_material_stream_tag)
         self.assertIsNone(pump._inlet_energy_stream_tag)
-        self.assertRaises(AttributeError, pump._outlet_energy_stream_tag)
         self.assertIsNone(inlet_stream._to_equipment_tag)
         self.assertIsNone(outlet_stream._from_equipment_tag)
 
@@ -288,7 +297,7 @@ class test_CentrifugalPump(unittest.TestCase):
         pump.connect_stream(inlet_stream, 'in', stream_governed=True)
         pressure = prop.Pressure(100, 'bar')
         pressure.unit = "Pa"
-        expected_head_value = pressure.value / (9.8 * inlet_stream.density.value)
+        expected_head_value = 10000000 / (9.8 * inlet_stream.density.value)
         pump_head = pump.head
         pump_head.unit = "m"
         self.assertAlmostEqual(expected_head_value, pump_head.value)
@@ -306,12 +315,12 @@ class test_CentrifugalPump(unittest.TestCase):
         pump.connect_stream(inlet_stream, 'in', stream_governed=True)
         pressure = prop.Pressure(100, 'bar')
         pressure.unit = "Pa"
-        expected_hydraulic_power = prop.Power(10023.2, "W")
+        expected_hydraulic_power = prop.Power(2.78676, "W")
         expected_brake_horse_power = expected_hydraulic_power.value/pump.efficiency
         pump_hydraulic_power = pump.hydraulic_power
-        pump_hydraulic_power.unit = "W"
+        pump_hydraulic_power.unit = "kW"
         pump_brake_horse_power = pump.power
-        pump_brake_horse_power.unit = "W"
-        self.assertAlmostEqual(expected_hydraulic_power.value, pump_hydraulic_power.value)
-        self.assertAlmostEqual(expected_brake_horse_power.value, pump_brake_horse_power.value)
+        pump_brake_horse_power.unit = "kW"
+        self.assertAlmostEqual(expected_hydraulic_power.value, pump_hydraulic_power.value, 1)
+        self.assertAlmostEqual(expected_brake_horse_power, pump_brake_horse_power.value, 2)
 

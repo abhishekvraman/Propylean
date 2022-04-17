@@ -1,4 +1,3 @@
-from chemicals import mass_fractions
 import propylean.properties as prop
 from propylean import streams
 
@@ -79,6 +78,8 @@ class _EquipmentOneInletOutlet(object):
         self._outlet_material_stream_tag = None
         self._inlet_energy_stream_tag = None
         self._outlet_energy_stream_tag = None
+        self._inlet_material_components = prop.Components()
+        self._outlet_material_components = prop.Components()
         
         #Energy properties
         self._energy_in = prop.Power()
@@ -214,12 +215,11 @@ class _EquipmentOneInletOutlet(object):
         return self._inlet_mass_flowrate - self._outlet_mass_flowrate                             
     @inventory_change_rate.setter
     def inventory_change_rate(self, value):
+        raise Exception("Dynamic simulation is not yet supported.")
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.MassFlowRate)
         if unit is None:
             unit = self.inventory_change_rate.unit
-        
-        raise Exception("Dynamic simulation is not yet supported.")
         self._update_equipment_object(self)
     
     @property
@@ -234,6 +234,11 @@ class _EquipmentOneInletOutlet(object):
             unit = self.energy_in.unit
         self._energy_in = prop.Power(value, unit)
         self._update_equipment_object(self)
+    @energy_in.deleter
+    def energy_in(self):
+        self = self._get_equipment_object(self)
+        del self._energy_in
+        self._update_equipment_object(self)
 
     @property
     def energy_out(self):
@@ -246,7 +251,12 @@ class _EquipmentOneInletOutlet(object):
         if unit is None:
             unit = self.energy_out.unit
         self._energy_in = prop.Power(value, unit)
-        self._update_equipment_object(self)   
+        self._update_equipment_object(self)
+    @energy_out.deleter
+    def energy_out(self):
+        self = self._get_equipment_object(self)
+        del self._energy_out
+        self._update_equipment_object(self) 
     
     def _get_equipment_index(cls, tag):
         for index, equipment in enumerate(cls.items):
@@ -392,12 +402,7 @@ class _EquipmentOneInletOutlet(object):
         mapping_result = self._stream_equipment_mapper(stream_index, stream_type, is_inlet)
         if self._is_disconnection:
             stream_tag = None
-            self._is_disconnection = False
-        elif mapping_result:
-            self._stream_equipment_properties_matcher(stream_index, 
-                                                      stream_type,
-                                                      is_inlet,
-                                                      stream_governed)
+            
         if stream_type.lower() in ['material', 'mass', 'm']:
             if direction.lower() in ['in', 'inlet']:
                 self._inlet_material_stream_tag = stream_tag
@@ -409,6 +414,12 @@ class _EquipmentOneInletOutlet(object):
             else:
                 self._outlet_energy_stream_tag = stream_tag
         
+        if mapping_result and not self._is_disconnection:
+            self._is_disconnection = False
+            self._stream_equipment_properties_matcher(stream_index, 
+                                                      stream_type,
+                                                      is_inlet,
+                                                      stream_governed)
         return mapping_result
 
     def disconnect_stream(self, 
@@ -640,6 +651,10 @@ class _EquipmentOneInletOutlet(object):
         if stream_type.lower() in ['m', 'material', 'mass']:
             stream_object = streams.MaterialStream.list_objects()[stream_index]
             if is_inlet:
+                stream_object.components,\
+                self._inlet_material_components = property_matcher(stream_object.components,
+                                                          self._inlet_material_components,
+                                                          stream_governed)
                 stream_object.mass_flowrate, \
                 self.inlet_mass_flowrate = property_matcher(stream_object.mass_flowrate,
                                                             self._inlet_mass_flowrate,
@@ -653,6 +668,10 @@ class _EquipmentOneInletOutlet(object):
                                                           self._inlet_temperature,
                                                           stream_governed)
             else:
+                stream_object.components,\
+                self._outlet_material_components = property_matcher(stream_object.components,
+                                                          self._outlet_material_components,
+                                                          stream_governed)
                 stream_object.mass_flowrate, \
                 self.outlet_mass_flowrate = property_matcher(stream_object.mass_flowrate,
                                                              self._outlet_mass_flowrate,
@@ -665,6 +684,7 @@ class _EquipmentOneInletOutlet(object):
                 self.outlet_temperature = property_matcher(stream_object.temperature,
                                                            self._outlet_temperature,
                                                            stream_governed)
+            self._chemical_reaction(is_inlet)
             if not stream_governed:
                 streams.MaterialStream._update_stream_object(stream_object)
             else:
@@ -674,17 +694,90 @@ class _EquipmentOneInletOutlet(object):
             if is_inlet:
                 stream_object.amount, \
                 self.energy_in = property_matcher(stream_object.amount,
-                                                  self._energy_in,
-                                                  stream_governed)
-                
+                                                  self.energy_in,
+                                                  stream_governed)     
             else:
                 stream_object, \
                 self.energy_out = property_matcher(stream_object,
-                                                    self._energy_out,
+                                                    self.energy_out,
                                                     stream_governed)
             if not stream_governed:
                 streams.EnergyStream._update_stream_object(stream_object)
 
+    def _stream_object_property_getter(self, stream_index, 
+                                       stream_type,
+                                       property):
+        """ 
+            DESCRIPTION:
+                Internal function to get object of stream.
+            
+            PARAMETERS:
+                stream_index:
+                    Required: Yes
+                    Type: int
+                    Acceptable values: Non-negative integer
+                    Default value: Not Applicable
+                    Description: Index of the stream in the stream list it belongs to.
+                
+                stream_type:
+                    Required: Yes
+                    Type: string
+                    Acceptable values: 'material' or 'energy'
+                    Default value: Not Applicable
+                    Description: Index of the stream in the stream list it belongs to.
+            
+            RETURN VALUE:
+                Type: Stream
+            
+            ERROR RAISED:
+                Type:
+                Description: 
+            
+            SAMPLE USE CASES:
+                >>> 
+                
+        """
+        if stream_type.lower() in ['m', 'material', 'mass']:
+            stream_object = streams.MaterialStream.list_objects()[stream_index]  
+        else:
+            stream_object = streams.EnergyStream.list_objects()[stream_index]
+            return stream_object.amount
+        
+        if property=="tag":
+            return stream_object.tag
+        elif property=="pressure":
+            return stream_object.pressure
+        elif property=="temperature":
+            return stream_object.temperature
+        elif property=="mass_flowrate":
+            return stream_object.mass_flowrate
+        elif property=="vol_flowrate":
+            return stream_object.vol_flowrate
+        elif property=="molecular_weight":
+            return stream_object.molecular_weight
+        elif property=="mol_flowrate":
+            return stream_object.mol_flowrate
+        elif property=="components":
+            return stream_object.components
+        elif property=="density":
+            return stream_object.density
+        elif property=="density_l":
+            return stream_object.density_l
+        elif property=="density_g":
+            return stream_object.density_g
+        elif property=="d_viscosity":
+            return stream_object.d_viscosity
+        elif property=="d_viscosity_l":
+            return stream_object.d_viscosity_l
+        elif property=="d_viscosity_g":
+            return stream_object.d_viscosity_g
+        elif property=="isentropic_exponent":
+            return stream_object.isentropic_exponent
+        elif property=="phase":
+            return stream_object.phase
+        elif property=="Z_g":
+            return stream_object.Z_g
+            
     def _create_equipment_tag(cls):
         i = 1
         class_name = type(cls).__name__
@@ -707,6 +800,12 @@ class _EquipmentOneInletOutlet(object):
             return value.value, value.unit
         elif any([isinstance(value, float), isinstance(value, int)]):
             return value, None
+
+    def _chemical_reaction(self, is_inlet):
+        if is_inlet:
+            self._outlet_material_components = self._inlet_material_components
+        else:
+            self._inlet_material_components = self._outlet_material_components        
 
 #Defining generic base class for all equipments with multiple inlet and outlet. TODO !!!!!!       
 class _EquipmentMultipleInletOutlet:

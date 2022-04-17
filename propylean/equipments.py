@@ -206,9 +206,7 @@ class CentrifugalPump(_PressureChangers):
         self._NPSHr = prop.Length()
         self._NPSHa = prop.Length()
         self._min_flow = prop.VolumetricFlowRate()
-        # delattr(self, self._outlet_energy_stream_tag)
-        # delattr(self, self.energy_out)
-        # delattr(self, self._energy_out)
+        del self.energy_out
         
         if 'min_flow' in inputs:
             self.min_flow = inputs['min_flow']
@@ -251,24 +249,67 @@ class CentrifugalPump(_PressureChangers):
     @property
     def NPSHa(self):
         self = self._get_equipment_object(self)
-        # TODO: Update
-        density = 1000
-        return self.inlet_pressure/(9.8 * density)
+        if self._inlet_material_stream_tag is None:
+            raise Exception("Pump should be connected with MaterialStream at the inlet")
+        stream_index = streams.get_stream_index(self._inlet_material_stream_tag, "material")
+        density = self._stream_object_property_getter(stream_index, "material", "density")
+        density.unit = "kg/m^3"
+        old_p_unit = self.inlet_pressure.unit
+        self.inlet_pressure.unit = 'Pa'
+        value = self.inlet_pressure.value/(9.8 * density.value)
+        self.inlet_pressure.unit = old_p_unit
+        return prop.Length(value, "m")
 
     @property
     def head(self):
-        fluid_density = 1000 # TODO THIS NEEDS TO BE UPDATED WITH STREAM PROPERTY
-        value = self.differential_pressure.value / (9.8 * fluid_density)
+        self = self._get_equipment_object(self)
+        if (self._outlet_material_stream_tag is None and
+            self._inlet_material_stream_tag is None):
+            raise Exception("Pump should be connected with MaterialStream either at inlet or outlet")
+        stream_tag = self._inlet_material_stream_tag if self._outlet_material_stream_tag is None else self._outlet_material_stream_tag
+        stream_index = streams.get_stream_index(stream_tag, "material")
+        density = self._stream_object_property_getter(stream_index, "material", "density")
+        density.unit = "kg/m^3"
+        dp = self.differential_pressure
+        dp.unit = "Pa"
+        value = dp.value / (9.8 * density.value)
         return prop.Length(value, "m")
     @property
     def hydraulic_power(self):
-        fluid_density = 1000 # TODO THIS NEEDS TO BE UPDATED WITH STREAM PROPERTY
-        value = self.inlet_mass_flowrate.value * fluid_density * 9.81 * self.head.value / (3.6e6)
+        self = self._get_equipment_object(self)
+        if (self._outlet_material_stream_tag is None and
+            self._inlet_material_stream_tag is None):
+            raise Exception("Centrifugal Pump should be connected with MaterialStream either at inlet or outlet")
+        stream_tag = self._inlet_material_stream_tag if self._outlet_material_stream_tag is None else self._outlet_material_stream_tag
+        stream_index = streams.get_stream_index(stream_tag, "material")
+        vol_flowrate = self._stream_object_property_getter(stream_index, "material", "vol_flowrate")
+        vol_flowrate.unit = "m^3/h"
+        dp = self.differential_pressure
+        dp.unit = "Pa"
+        value = vol_flowrate.value * dp.value / (3.6e3)
         return prop.Power(value, 'W')
     @property
     def power(self):
+        self = self._get_equipment_object(self)
+        self.hydraulic_power.unit = "W"
         value = self.hydraulic_power.value / self.efficiency
         return prop.Power(value, "W")
+    @power.setter
+    def power(self, value):
+        #TODO Proived setting feature for power
+        raise Exception("Pump power value setting is not yet supported. Modify differential pressure to get required power.")
+    @property
+    def energy_in(self):
+        return self.power
+    @energy_in.setter
+    def energy_in(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
+        if unit is None:
+            unit = self.energy_in.unit
+        self._energy_in = prop.Power(value, unit)
+        self._update_equipment_object(self)
+    
     @classmethod
     def list_objects(cls):
         return cls.items
@@ -283,6 +324,7 @@ class CentrifugalPump(_PressureChangers):
             isinstance(stream_object, streams.EnergyStream)) or
             stream_type in ['energy', 'power', 'e', 'p']):
             direction = 'in'
+            stream_governed = False
         return super().connect_stream(direction=direction, 
                                       stream_object=stream_object, 
                                       stream_tag=stream_tag, 
@@ -295,6 +337,7 @@ class CentrifugalPump(_PressureChangers):
             stream_type in ['energy', 'power', 'e', 'p']):
             direction = 'in'
         return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
+
 class PositiveDisplacementPump(_PressureChangers):
     items = []
     def __init__(self, **inputs) -> None:
@@ -717,25 +760,27 @@ class PipeSegment(_EquipmentOneInletOutlet):
         if self.inlet_mass_flowrate.value == 0:
             return prop.Pressure(0, self._inlet_pressure.unit)
         roughness = (4.57e-5, 4.5e-5, 0.000259, 1.5e-5, 1.5e-6) #in meters
-        # TODO
-        T = prop.Temperature(self.inlet_temperature.value,
-                             self.inlet_temperature.unit)
-        T.unit = 'K'
-        P = prop.Pressure(self.inlet_pressure.value,
-                          self.inlet_pressure.unit)
-        P.unit = 'Pa'
-        water = Chemical('water',
-                         T = T.value,
-                         P = P.value)
+        if (self._outlet_material_stream_tag is None and
+            self._inlet_material_stream_tag is None):
+            raise Exception("PipeSegment should be connected with MaterialStream either at inlet or outlet")
+        stream_tag = self._inlet_material_stream_tag if self._outlet_material_stream_tag is None else self._outlet_material_stream_tag
+        stream_index = streams.get_stream_index(stream_tag, "material")
+        density = self._stream_object_property_getter(stream_index, "material", "density")
+        viscosity = self._stream_object_property_getter(stream_index, "material", "d_viscosity")
+        vol_flowrate = self._stream_object_property_getter(stream_index, "material", "vol_flowrate")
+        density.unit = "kg/m^3"
+        viscosity.unit = "Pa-s"
+        vol_flowrate.unit = "m^3/s"
         ID = self.ID
         ID.unit = 'm'
         length = self.length
         length.unit = 'm'
-        V=(self.inlet_mass_flowrate.value/water.rhol)/(pi* ID.value**2)/4
+
+        V=(vol_flowrate.value)/(pi* ID.value**2)/4
         Re = Reynolds(V=V,
                       D=ID.value, 
-                      rho=water.rhol, 
-                      mu=water.mul)
+                      rho=density.value, 
+                      mu=viscosity.value)
         fd = friction_factor(Re, eD=roughness[self.material-1]/ID.value)
         K = K_from_f(fd=fd, L=length.value, D=ID.value)        
         drop = round(dP_from_K(K, rho=1000, V=V),3)
@@ -787,23 +832,32 @@ class ControlValve(_EquipmentOneInletOutlet):
     @property
     def Kv(self):
         self = self._get_equipment_object(self)
-        # TODO UPDATE BELOW BASED ON STREAMS
-        water = Chemical('water',
-                         T = self.inlet_temperature.value,
-                         P = self._inlet_pressure.value)
-        if water.phase == 'l':
-            return cv_calculations.size_control_valve_l(water.rhol, water.Psat, water.Pc, water.mul,
+        if (self._outlet_material_stream_tag is None and
+            self._inlet_material_stream_tag is None):
+            raise Exception("PipeSegment should be connected with MaterialStream either at inlet or outlet")
+        stream_tag = self._inlet_material_stream_tag if self._outlet_material_stream_tag is None else self._outlet_material_stream_tag
+        stream_index = streams.get_stream_index(stream_tag, "material")
+        density = self._stream_object_property_getter(stream_index, "material", "density")
+        phase = self._stream_object_property_getter(stream_index, "material", "phase")
+        d_viscosity = self._stream_object_property_getter(stream_index, "material", "d_viscosity")
+        isentropic_exponent = self._stream_object_property_getter(stream_index, "material", "isentropic_exponent")
+        MW = self._stream_object_property_getter(stream_index, "material", "molecular_weight")
+        Z_g = self._stream_object_property_getter(stream_index, "material", "Z_g")
+        Psat = self._stream_object_property_getter(stream_index, "material", "Psat")
+        Pc = self._stream_object_property_getter(stream_index, "material", "Pc")
+        if phase == 'l':
+            return cv_calculations.size_control_valve_l(density.value, Psat, Pc, d_viscosity.value,
                                                         self._inlet_pressure.value, self._outlet_pressure.value, 
-                                                        self.inlet_mass_flowrate.value/water.rhol)
-        elif water.phase == 'g':
+                                                        self.inlet_mass_flowrate.value/density.value)
+        elif phase == 'g':
             return cv_calculations.size_control_valve_g(T = self.inlet_temperature.value, 
-                                                        MW = water.MW,
+                                                        MW = MW,
                                                         mu= 1.48712E-05, # water.mug,
-                                                        gamma = water.isentropic_exponent, 
-                                                        Z = water.Zg,
+                                                        gamma = isentropic_exponent, 
+                                                        Z = Z_g,
                                                         P1 = self._inlet_pressure.value, 
                                                         P2 = self._outlet_pressure.value, 
-                                                        Q = self.inlet_mass_flowrate.value/water.rhog)
+                                                        Q = self.inlet_mass_flowrate.value/density.value)
         else:
             raise Exception('Possibility of fluid solification inside the control valve')
 

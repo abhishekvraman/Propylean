@@ -1,4 +1,3 @@
-from pandas import DataFrame
 from thermo import Mixture
 import propylean.properties as prop
 class Stream(object):
@@ -130,6 +129,9 @@ class MaterialStream(Stream):
                  self._molecular_weight = prop.MolecularWeigth()
                  self._Z = 1
                  self._isentropic_exponent = 1.3
+                 self._phase = None
+                 self._Psat = None
+                 self._Pc = None
 
                  MaterialStream.items.append(self)
         
@@ -175,13 +177,14 @@ class MaterialStream(Stream):
     @property
     def vol_flowrate(self):
         self = self._get_stream_object(self)
-        mass_flowrate = self.mass_flowrate
+        old_mf_unit = self.mass_flowrate.unit
         density = self.density
-        mass_flowrate.unit = 'kg/s'
+        self.mass_flowrate.unit = 'kg/s'
         density.unit = 'kg/m^3'
         unit = self._vol_flowrate.unit
-        self._vol_flowrate = prop.VolumetricFlowRate(mass_flowrate.value/density.value)
+        self._vol_flowrate = prop.VolumetricFlowRate(self.mass_flowrate.value/density.value)
         self._vol_flowrate.unit = unit
+        self.mass_flowrate.unit = old_mf_unit
         return self._vol_flowrate
     
     @property
@@ -202,13 +205,15 @@ class MaterialStream(Stream):
     @property
     def mol_flowrate(self):
         self = self._get_stream_object(self)
-        mass_flowrate = self.mass_flowrate
-        molecular_weight = self.molecular_weight
-        mass_flowrate.unit = 'kg/s'
-        molecular_weight.unit = 'kg/mol'
+        old_mf_unit = self.mass_flowrate.unit
+        old_mw_unit = self.molecular_weight.unit
+        self.mass_flowrate.unit = 'kg/s'
+        self.molecular_weight.unit = 'kg/mol'
         unit = self._mol_flowrate.unit
-        self._mol_flowrate = prop.MolarFlowRate(mass_flowrate.value/molecular_weight.value)
+        self._mol_flowrate = prop.MolarFlowRate(self.mass_flowrate.value/self.molecular_weight.value)
         self._mol_flowrate.unit = unit
+        self.mass_flowrate.unit = old_mf_unit
+        self.molecular_weight.unit = old_mw_unit
         return self._mol_flowrate
 
     @property
@@ -344,15 +349,39 @@ class MaterialStream(Stream):
         self._update_stream_object(self)
 
     @property
-    def isentropic_exponent(self):
+    def phase(self):
         self = self._get_stream_object(self)
-        return self._isentropic_exponent
-    @isentropic_exponent.setter
-    def isentropic_exponent(self, value):
+        return self._phase
+    @phase.setter
+    def phase(self, value):
         if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
-        self._isentropic_exponent = value
+        self._phase = value
+        self._update_stream_object(self)
+    
+    @property
+    def Psat(self):
+        self = self._get_stream_object(self)
+        return self._Psat
+    @Psat.setter
+    def Psat(self, value):
+        if MaterialStream.property_package:
+            raise Exception("Property cannot be changed when using a Property Package.")
+        self = self._get_stream_object(self)
+        self._Psat = value
+        self._update_stream_object(self)
+
+    @property
+    def Pc(self):
+        self = self._get_stream_object(self)
+        return self._Pc
+    @Pc.setter
+    def Pc(self, value):
+        if MaterialStream.property_package:
+            raise Exception("Property cannot be changed when using a Property Package.")
+        self = self._get_stream_object(self)
+        self._Pc = value
         self._update_stream_object(self)
     
     def _update_properties(self):
@@ -362,16 +391,18 @@ class MaterialStream(Stream):
                    'mol': 'zs',
                    'vol_l': 'Vfls',
                    'vol_g': 'Vfgs'}
-        T = self.temperature
-        T.unit = 'K'
-        P = self.pressure
-        P.unit = 'Pa'
+        old_p_unit = self.pressure.unit 
+        old_t_unit = self.temperature.unit
+        self.pressure.unit = 'Pa'
+        self.temperature.unit = 'K'
         kwarg = {arg_map[self.components.type]: self.components.fractions,
-                 'T': T.value,
-                 'P': P.value}  
+                 'T': self.temperature.value,
+                 'P': self.pressure.value}  
         mx = Mixture(**kwarg)
+        self.pressure.unit = old_p_unit
+        self.temperature.unit = old_t_unit
 
-        # Assigning Desnisties
+        # Assigning Densities
         rho = mx.rho
         rhol = mx.rhol
         rhog = mx.rhog
@@ -413,6 +444,22 @@ class MaterialStream(Stream):
         isentropic_exponent = mx.isentropic_exponent
         if isentropic_exponent is not None:
             self.isentropic_exponent = isentropic_exponent
+        
+        # Assigning Phase
+        phase = mx.phase
+        if phase is not None:
+            self.phase = phase
+        
+        # Assiging Psat and Pc
+        Psat_indiv = mx.Psats
+        Psat = None
+        if len(Psat_indiv)==0:
+            Psat = Psat_indiv[0]
+        if Psat is not None:
+            self.Psat = Psat
+        Pc = mx.Pc
+        if Pc is not None:
+            self.Pc = Pc
 
     @classmethod
     def list_objects(cls):
@@ -431,16 +478,9 @@ def get_stream_index(tag, stream_type=None):
         return [(get_stream_index(tag, 'energy'),'Energy Stream'),(get_stream_index(tag, 'material'),'Material Stream')]
     else:
         raise Exception('Stream type does not exist! Please ensure stream type is either Energy or Material')
-    list_of_none_tag_streams =[]
 
-    for index, stream in enumerate(stream_list):
-        if stream.tag == None and tag==None:
-            list_of_none_tag_streams.append(index)           
-        elif stream.tag == tag:
+    for index, stream in enumerate(stream_list):        
+        if stream.tag == tag:
             return index
-        
-    if tag != None:
-        raise Exception("Stream tag not found!!")
-
-    return list_of_none_tag_streams
-
+    
+    raise Exception("Stream tag not found!!")

@@ -30,7 +30,7 @@ class test_MaterialStream(unittest.TestCase):
 
     def test_MaterialStream_instantiation_no_base_properties(self):
         m3 = MaterialStream()
-        self.assertEqual(m3.tag, "MaterialStream_1")
+        self.assertIn("MaterialStream_", m3.tag)
         self.assertEqual(m3.pressure, prop.Pressure())
         self.assertEqual(m3.temperature, prop.Temperature())
         self.assertEqual(m3.mass_flowrate, prop.MassFlowRate())
