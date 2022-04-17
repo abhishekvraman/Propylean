@@ -69,7 +69,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         if 'performance_curve' in inputs:
             self.performace_curve = inputs['performance_curve']
         
-        self._efficiency = None if 'efficiency' not in inputs else inputs['efficiency']
+        self._efficiency = 100 if 'efficiency' not in inputs else inputs['efficiency']
         
     @property
     def suction_pressure(self):
@@ -83,7 +83,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         return super(_PressureChangers, self).outlet_pressure
     @discharge_pressure.setter
     def discharge_pressure(self, value):
-        super(_PressureChangers,self. __class__).outlet_pressure.fset(self, value)
+        super(_PressureChangers,self.__class__).outlet_pressure.fset(self, value)
     
     @property
     def differential_pressure(self):
@@ -91,47 +91,55 @@ class _PressureChangers(_EquipmentOneInletOutlet):
                              self.pressure_drop.unit)
     @differential_pressure.setter
     def differential_pressure(self, value):
-        self = self._get_equipment_object(self.index)
-        unit = self.pressure_drop.unit
-        if isinstance(value, tuple):
-            unit = value[1]
-            value = value[0]
-        elif isinstance(value, prop.Pressure):
-            unit = value.unit
-            value = value.value         
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Pressure)
+        if unit is None:
+            unit = self.pressure_drop.unit         
         self.pressure_drop = prop.Pressure(-1 * value,
                                            unit)   
-        self._update_equipment_object(self.index, self)   
+        self._update_equipment_object(self)   
     
-
     @property
     def performance_curve(self):
-        self = self._get_equipment_object(self.index)
+        self = self._get_equipment_object(self)
         return self._perfomace_curve
     @performance_curve.setter
     def pump_curve(self,value):
-        self = self._get_equipment_object(self.index)
-        if isinstance(value,pd.DataFrame) and value.shape[1] == 2:
+        self = self._get_equipment_object(self)
+        if isinstance(value, pd.DataFrame) and value.shape[1] == 2:
                 self._performance_curve = value
         else:
             raise Exception("Please enter performance_curve as pandas dataframe of 2 columns.\nOne for Flow and other for head.")
-        self._update_equipment_object(self.index, self)
+        self._update_equipment_object(self)
     
     @property
     def efficiency(self):
-        self = self._get_equipment_object(self.index)
+        self = self._get_equipment_object(self)
         return self._efficiency
     @efficiency.setter
     def efficiency(self, value):
-        self = self._get_equipment_object(self.index)
+        self = self._get_equipment_object(self)
         if value < 0:
             raise Exception("Please enter a positive value for efficiency")
         elif value <= 1:
             self._efficiency = value
         else:
             self._efficiency = value/100
-        self._update_equipment_object(self.index, self)
-
+        self._update_equipment_object(self)
+    
+    @property
+    def power(self):
+        self = self._get_equipment_object(self)
+        return self._power
+    @power.setter
+    def power(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
+        if unit is None:
+            unit = self._power.unit         
+        self._power = prop.Power(value, unit)
+        self._update_equipment_object(self)  
+    
 #Defining generic class for all types of vessels.  NEEDS SUPER CLASS WITH MULTI INPUT AND OUTPUT 
 class _Vessels(_EquipmentMultipleInletOutlet):
     def __init__(self, **inputs) -> None:

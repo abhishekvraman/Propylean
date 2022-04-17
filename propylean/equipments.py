@@ -163,7 +163,7 @@ def _get_equipment_index_from_equipment_list(tag, equipment_list):
 
     return list_of_none_tag_equipments
 
-# Start of final classes pumps
+# Start of final classes of pumps.
 class CentrifugalPump(_PressureChangers):
     items = []    
     def __init__(self, **inputs) -> None:
@@ -202,10 +202,17 @@ class CentrifugalPump(_PressureChangers):
             Centrifugal Pump with tag: P1
         """
         self._index = len(CentrifugalPump.items)
-        super().__init__(  **inputs)
-        self._min_flow = prop.VolumetricFlowRate() if 'min_flow' not in inputs else inputs['min_flow']
-        self._NPSHr = None if 'NPSHr' not in inputs else inputs['NPSHr']
-        self._NPSHa = None # TODO: Calculate automatically.
+        super().__init__( **inputs)
+        self._NPSHr = prop.Length()
+        self._NPSHa = prop.Length()
+        self._min_flow = prop.VolumetricFlowRate()
+        del self.energy_out
+        
+        if 'min_flow' in inputs:
+            self.min_flow = inputs['min_flow']
+        if "NPSHr" in inputs:
+            self.NPSHr = inputs['NPSHr']
+    
         CentrifugalPump.items.append(self)
     
     def __repr__(self):
@@ -215,32 +222,94 @@ class CentrifugalPump(_PressureChangers):
 
     @property
     def min_flow(self):
+        self = self._get_equipment_object(self)
         return self._min_flow
     @min_flow.setter
     def min_flow(self, value):
-        self = self._get_equipment_object(self.index)
-        unit = self._min_flow.unit
-        if isinstance(value, prop.VolumetricFlowRate):
-            unit = value.unit
-            value = value.value
-        elif isinstance(value, tuple):
-            unit = value[1]
-            value = value[0]
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.VolumetricFlowRate)
+        if unit is None:
+            unit = self._min_flow.unit
         self._min_flow = prop.VolumetricFlowRate(value, unit)
-        self._update_equipment_object(self.index, self)
+        self._update_equipment_object(self)
 
+    @property
+    def NPSHr(self):
+        self = self._get_equipment_object(self)
+        return self._NPSHr
+    @NPSHr.setter
+    def NPSHr(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Pressure)
+        if unit is None:
+            unit = self._NPSHr.unit
+        self._NPSHr = prop.Length(value, unit)
+        self._update_equipment_object(self)
+    
+    @property
+    def NPSHa(self):
+        self = self._get_equipment_object(self)
+        if self._inlet_material_stream_tag is None:
+            raise Exception("Pump should be connected with MaterialStream at the inlet")
+        stream_index = streams.get_stream_index(self._inlet_material_stream_tag, "material")
+        density = self._stream_object_property_getter(stream_index, "material", "density")
+        density.unit = "kg/m^3"
+        old_p_unit = self.inlet_pressure.unit
+        self.inlet_pressure.unit = 'Pa'
+        value = self.inlet_pressure.value/(9.8 * density.value)
+        self.inlet_pressure.unit = old_p_unit
+        return prop.Length(value, "m")
 
     @property
     def head(self):
-        fluid_density = 1000 # TODO THIS NEEDS TO BE UPDATED WITH STREAM PROPERTY
-        return self.differential_pressure.value / (9.8 * fluid_density)
+        self = self._get_equipment_object(self)
+        if (self._outlet_material_stream_tag is None and
+            self._inlet_material_stream_tag is None):
+            raise Exception("Pump should be connected with MaterialStream either at inlet or outlet")
+        stream_tag = self._inlet_material_stream_tag if self._outlet_material_stream_tag is None else self._outlet_material_stream_tag
+        stream_index = streams.get_stream_index(stream_tag, "material")
+        density = self._stream_object_property_getter(stream_index, "material", "density")
+        density.unit = "kg/m^3"
+        dp = self.differential_pressure
+        dp.unit = "Pa"
+        value = dp.value / (9.8 * density.value)
+        return prop.Length(value, "m")
     @property
     def hydraulic_power(self):
-        fluid_density = 1000 # TODO THIS NEEDS TO BE UPDATED WITH STREAM PROPERTY
-        return self.inlet_mass_flowrate.value * fluid_density * 9.81 * self.head / (3.6e6)
+        self = self._get_equipment_object(self)
+        if (self._outlet_material_stream_tag is None and
+            self._inlet_material_stream_tag is None):
+            raise Exception("Centrifugal Pump should be connected with MaterialStream either at inlet or outlet")
+        stream_tag = self._inlet_material_stream_tag if self._outlet_material_stream_tag is None else self._outlet_material_stream_tag
+        stream_index = streams.get_stream_index(stream_tag, "material")
+        vol_flowrate = self._stream_object_property_getter(stream_index, "material", "vol_flowrate")
+        vol_flowrate.unit = "m^3/h"
+        dp = self.differential_pressure
+        dp.unit = "Pa"
+        value = vol_flowrate.value * dp.value / (3.6e3)
+        return prop.Power(value, 'W')
     @property
-    def brake_horse_power(self):
-        return self.hydraulic_power / self.efficiency
+    def power(self):
+        self = self._get_equipment_object(self)
+        self.hydraulic_power.unit = "W"
+        value = self.hydraulic_power.value / self.efficiency
+        return prop.Power(value, "W")
+    @power.setter
+    def power(self, value):
+        #TODO Proived setting feature for power
+        raise Exception("Pump power value setting is not yet supported. Modify differential pressure to get required power.")
+    @property
+    def energy_in(self):
+        return self.power
+    @energy_in.setter
+    def energy_in(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
+        if unit is None:
+            unit = self.energy_in.unit
+        self._energy_in = prop.Power(value, unit)
+        self._update_equipment_object(self)
+    
     @classmethod
     def list_objects(cls):
         return cls.items
@@ -255,12 +324,20 @@ class CentrifugalPump(_PressureChangers):
             isinstance(stream_object, streams.EnergyStream)) or
             stream_type in ['energy', 'power', 'e', 'p']):
             direction = 'in'
+            stream_governed = False
         return super().connect_stream(direction=direction, 
                                       stream_object=stream_object, 
                                       stream_tag=stream_tag, 
                                       stream_type=stream_type,
                                       stream_governed=stream_governed)
     
+    def disconnect_stream(self, stream_object=None, direction=None, stream_tag=None, stream_type=None):
+        if ((stream_object is not None and 
+            isinstance(stream_object, streams.EnergyStream)) or
+            stream_type in ['energy', 'power', 'e', 'p']):
+            direction = 'in'
+        return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
+
 class PositiveDisplacementPump(_PressureChangers):
     items = []
     def __init__(self, **inputs) -> None:
@@ -319,9 +396,16 @@ class PositiveDisplacementPump(_PressureChangers):
                                       stream_tag=stream_tag, 
                                       stream_type=stream_type,
                                       stream_governed=stream_governed)
+    
+    def disconnect_stream(self, stream_object=None, direction=None, stream_tag=None, stream_type=None):
+        if ((stream_object is not None and 
+            isinstance(stream_object, streams.EnergyStream)) or
+            stream_type in ['energy', 'power', 'e', 'p']):
+            direction = 'in'
+        return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
 # End of final classes of pumps
 
-# Start of final classes of Compressors and Expanders
+# Start of final classes of Compressors and Expanders.
 class CentrifugalCompressor(_PressureChangers):
     items = []
     def __init__(self, **inputs) -> None:
@@ -361,10 +445,6 @@ class CentrifugalCompressor(_PressureChangers):
         """
         self._index = len(CentrifugalCompressor.items)
         super().__init__( **inputs)
-        # TODO Replace methane wih stream properties
-        self.methane = Chemical('methane',
-                         T = self._inlet_temperature.value,
-                         P = self._inlet_pressure.value)
         if 'adiabatic_efficiency' not in inputs and 'polytropic_efficiency' in inputs:
             self.polytropic_efficiency = inputs['polytropic_efficiency']
         else:
@@ -378,27 +458,36 @@ class CentrifugalCompressor(_PressureChangers):
 
     @property
     def adiabatic_efficiency(self):
+        self = self._get_equipment_object(self)
         return self._adiabatic_efficiency
     @adiabatic_efficiency.setter
     def adiabatic_efficiency(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.VolumetricFlowRate)
         if value ==  None:
             value = 0.7
         self._adiabatic_efficiency = value
+        self._update_equipment_object(self)
     
     @property
     def polytropic_efficiency(self):
+        self = self._get_equipment_object(self)
         return compressible_fluid.isentropic_efficiency(P1 = self._inlet_pressure.value,
                                                         P2 = self._outlet_pressure.value,
-                                                        k = self.methane.isentropic_exponent,
+                                                        k = self.isentropic_exponent,
                                                         eta_s = self.adiabatic_efficiency)
     @polytropic_efficiency.setter
     def polytropic_efficiency(self, value):
+        self = self._get_equipment_object(self)
         self.adiabatic_efficiency = compressible_fluid.isentropic_efficiency(P1 = self._inlet_pressure.value,
                                                                              P2 = self._outlet_pressure.value,
-                                                                             k = self.methane.isentropic_exponent,
+                                                                             k = self.isentropic_exponent,
                                                                              eta_p = value)
+        self._update_equipment_object(self)
+
     @property
     def power(self):
+        self = self._get_equipment_object(self)
         work = compressible_fluid.isentropic_work_compression(T1 = self.inlet_temperature.value,
                                                               k = self.methane.isentropic_exponent,
                                                               Z = self.methane.Z,
@@ -425,6 +514,13 @@ class CentrifugalCompressor(_PressureChangers):
                                       stream_tag=stream_tag, 
                                       stream_type=stream_type,
                                       stream_governed=stream_governed)
+    
+    def disconnect_stream(self, stream_object=None, direction=None, stream_tag=None, stream_type=None):
+        if ((stream_object is not None and 
+            isinstance(stream_object, streams.EnergyStream)) or
+            stream_type in ['energy', 'power', 'e', 'p']):
+            direction = 'in'
+        return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
 
 class Expander(_PressureChangers):
     items = []
@@ -457,6 +553,13 @@ class Expander(_PressureChangers):
                                       stream_tag=stream_tag, 
                                       stream_type=stream_type,
                                       stream_governed=stream_governed)
+    
+    def disconnect_stream(self, stream_object=None, direction=None, stream_tag=None, stream_type=None):
+        if ((stream_object is not None and 
+            isinstance(stream_object, streams.EnergyStream)) or
+            stream_type in ['energy', 'power', 'e', 'p']):
+            direction = 'out'
+        return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
 
 # End of final classes of compressors
 
@@ -464,10 +567,154 @@ class Expander(_PressureChangers):
 class PipeSegment(_EquipmentOneInletOutlet):
     items = []
     def __init__(self, **inputs) -> None:
+        """ 
+        DESCRIPTION:
+            Final class for creating objects to represent a Pipe Segmenet.
+        
+        PARAMETERS:
+            Read _EquipmentOneInletOutlet class for more arguments for this class
+            ID:
+                Required: Yes
+                Type: int or float or property.Lenght(recommended)
+                Acceptable values: Non-negative values
+                Default value: None
+                Description: Internal Diameter of the pipe segment.
+
+            OD:
+                Required: Yes
+                Type: int or float or property.Lenght(recommended)
+                Acceptable values: Non-negative values
+                Default value: None
+                Description: Outer Diameter of the pipe segment.
+            
+            Length:
+                Required: Yes
+                Type: int or float or property.Lenght(recommended)
+                Acceptable values: Non-negative values
+                Default value: None
+                Description: Outer Diameter of the pipe segment.
+
+            segment_type:
+                Required: No
+                Type: int
+                Acceptable values: 1 to 13.
+                Default value: 1
+                Description: Segment type/fitting type of the pipe segment.
+            
+            material:
+                Required: No
+                Type: int
+                Acceptable values: 1 to 5.
+                Default value: 1
+                Description: Material type of the pipe segment.
+        
+        RETURN VALUE:
+            Type: PipeSegment
+            Description: Returns an object of type PipeSegment with all properties of
+                         a pipe segments and fittings used in process industry piping.
+        
+        ERROR RAISED:
+            Type:
+            Description:
+        
+        SAMPLE USE CASES:
+            >>> PS_1 = PipeSegment(tag="P1")
+            >>> print(PS_1)
+            Pipe Segment with tag: P1
+        """
         self._index = len(PipeSegment.items)
         super().__init__( **inputs)
         self._pressure_drop = prop.Pressure(0)
+        self._ID = prop.Length()
+        self._OD = prop.Length()
+        self._length = prop.Length()
+        self._segment_type = 1
+        self._material = 1
+
         self.segment_type = 1 if 'segment_type' not in inputs else inputs['segment_type']
+        
+        if self.segment_type == 1:
+            if 'length' in inputs:
+                self.length = inputs['length']                
+            else:
+                raise Exception('Straight Tube segment requires length value')  
+        
+        if 'material' in inputs:
+            self.material = inputs['material']
+        
+        if ('ID' in inputs):
+            self.ID = inputs['ID']
+        elif ('OD' in inputs and 'thickness' in inputs):
+            self.OD = inputs['OD']
+            self.thickness = inputs['thickness']
+        else:
+            raise Exception('Define atleast ID or OD with thickness to define a pipe segment object') 
+        PipeSegment.items.append(self)
+    
+    def __repr__(self):
+        return "Pipe Segment with tag: " + self.tag   #ADD SEGMENT TYPE!!
+    def __hash__(self):
+        return hash(self.__repr__())
+    
+    @property
+    def length(self):
+        self = self._get_equipment_object(self)
+        return self._length
+    @length.setter
+    def length(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
+        if unit is None:
+            unit = self._length.unit
+        self._length = prop.Length(value, unit)
+        self._update_equipment_object(self)
+
+    @property
+    def ID(self):
+        self = self._get_equipment_object(self)
+        return self._ID
+    @ID.setter
+    def ID(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
+        if unit is None:
+            unit = self._ID.unit
+        self._ID = prop.Length(value, unit)
+        self._update_equipment_object(self)
+    
+    @property
+    def OD(self):
+        self = self._get_equipment_object(self)
+        return self._OD
+    @OD.setter
+    def OD(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
+        if unit is None:
+            unit = self._OD.unit
+        self._OD =prop.Length(value, unit)
+        self._update_equipment_object(self)
+    
+    @property
+    def thickness(self):
+        self = self._get_equipment_object(self)
+        return self._OD - self._ID
+    @thickness.setter
+    def thickness(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value)
+        if unit is None:
+            unit = self.thickness
+        self._OD = self._ID + prop.Length(value, unit)
+        self._update_equipment_object(self)
+
+    @property
+    def segment_type(self):
+        self = self._get_equipment_object(self)
+        return self._segment_type
+    @segment_type.setter
+    def segment_type(self, value):
+        self = self._get_equipment_object(self)
         segments = '''\nSegments can be of following types and in range of numbers below:
                     1. Straight Tube
                     2. Elbow
@@ -482,60 +729,61 @@ class PipeSegment(_EquipmentOneInletOutlet):
                     11. Lift check valve
                     12. Reducer
                     13. Expander'''
-        if self.segment_type == 1:
-            if 'length' in inputs:
-                self.length = inputs['length']                
-            else:
-                raise Exception('Straight Tube segment requires length value')
-        elif self.segment_type not in range(1,14):
+        if value not in range(1,14):
             raise Exception(segments)
-
+        self._segment_type = value
+        self._update_equipment_object(self)
+    
+    @property
+    def material(self):
+        self = self._get_equipment_object(self)
+        return self._material
+    @material.setter
+    def material(self, value):
+        self = self._get_equipment_object(self)
         materials = '''\nSegment material can be of following types and in range of numbers below:
                     1. Raw Steel
                     2. Carbon Steel
                     3. Cast Iron
                     4. Stainless Steel
-                    5. PVC'''   
-        self.material = 1
-        
-        if 'material' in inputs:
-            if inputs['material'] in range(1,6):
-                self.material = inputs['material']
-            else:
-                raise Exception(materials)
-        
-        self.OD = None
-        if ('ID' in inputs):
-            self.ID = inputs['ID']
-        elif ('OD' in inputs and 'thickness' in inputs):
-            self.OD = inputs['OD']
-            self.ID = self.OD - inputs['thickness']
-        else:
-            raise Exception('Define atleast ID or OD with thickness to define a pipe segment object') 
-        PipeSegment.items.append(self)
-    
-    def __repr__(self):
-        return "Pipe Segment with tag: " + self.tag   #ADD SEGMENT TYPE!!
-    def __hash__(self):
-        return hash(self.__repr__())
-    
+                    5. PVC''' 
+        if value not in range(1, 6):
+            raise Exception(materials)
+        self._material = value
+        self._update_equipment_object(self)
+
     @property
     def pressure_drop(self):
+        self = self._get_equipment_object(self)
         from fluids.friction import friction_factor
         from fluids.core import Reynolds, K_from_f, dP_from_K
         if self.inlet_mass_flowrate.value == 0:
             return prop.Pressure(0, self._inlet_pressure.unit)
         roughness = (4.57e-5, 4.5e-5, 0.000259, 1.5e-5, 1.5e-6) #in meters
-        water = Chemical('water',
-                         T = self.inlet_temperature.value,
-                         P = self.inlet_pressure.value)
-        Re = Reynolds(V=(self.inlet_mass_flowrate.value/water.rhol)/(pi* self.ID**2)/4,
-                      D=self.ID, 
-                      rho=water.rhol, 
-                      mu=water.mul)
-        fd = friction_factor(Re, eD=roughness[self.material-1]/self.ID)
-        K = K_from_f(fd=fd, L=self.length, D=self.ID)        
-        drop = round(dP_from_K(K, rho=1000, V=3),3)
+        if (self._outlet_material_stream_tag is None and
+            self._inlet_material_stream_tag is None):
+            raise Exception("PipeSegment should be connected with MaterialStream either at inlet or outlet")
+        stream_tag = self._inlet_material_stream_tag if self._outlet_material_stream_tag is None else self._outlet_material_stream_tag
+        stream_index = streams.get_stream_index(stream_tag, "material")
+        density = self._stream_object_property_getter(stream_index, "material", "density")
+        viscosity = self._stream_object_property_getter(stream_index, "material", "d_viscosity")
+        vol_flowrate = self._stream_object_property_getter(stream_index, "material", "vol_flowrate")
+        density.unit = "kg/m^3"
+        viscosity.unit = "Pa-s"
+        vol_flowrate.unit = "m^3/s"
+        ID = self.ID
+        ID.unit = 'm'
+        length = self.length
+        length.unit = 'm'
+
+        V=(vol_flowrate.value)/(pi* ID.value**2)/4
+        Re = Reynolds(V=V,
+                      D=ID.value, 
+                      rho=density.value, 
+                      mu=viscosity.value)
+        fd = friction_factor(Re, eD=roughness[self.material-1]/ID.value)
+        K = K_from_f(fd=fd, L=length.value, D=ID.value)        
+        drop = round(dP_from_K(K, rho=1000, V=V),3)
         drop = prop.Pressure(drop, 'Pa')
         drop.unit = self._inlet_pressure.unit
         return drop
@@ -543,20 +791,6 @@ class PipeSegment(_EquipmentOneInletOutlet):
     def pressure_drop(self, value):
         raise Exception('''Cannot manually set pressure drop for PipeSegment!\n
                          Pressure drop depends on physical properties PipeSegment and Material flowing.''')
-        
-    @property
-    def thickness(self):
-        if self.ID == None or self.OD == None:
-            return None
-        return self.OD - self.ID
-    @thickness.setter
-    def thickness(self, value):
-        if self.ID != None:
-            self.OD = self.ID + value
-        elif self.OD !=None:
-            self.ID = self.OD - value
-        else:
-            raise Exception("Atleast define ID or OD of pipe before defining thickness")
     
     @classmethod
     def list_objects(cls):
@@ -565,6 +799,27 @@ class PipeSegment(_EquipmentOneInletOutlet):
 class ControlValve(_EquipmentOneInletOutlet):
     items = []
     def __init__(self, **inputs) -> None:
+        """ 
+        DESCRIPTION:
+            Final class for creating objects to represent a Control Valve.
+        
+        PARAMETERS:
+            Read _EquipmentOneInletOutlet class for more arguments for this class
+        
+        RETURN VALUE:
+            Type: ControlValve
+            Description: Returns an object of type ControlValve with all properties of
+                         a control valve used in process industry.
+        
+        ERROR RAISED:
+            Type:
+            Description:
+        
+        SAMPLE USE CASES:
+            >>> CV_1 = ControlValve(tag="CV1")
+            >>> print(CV_1)
+            Contrl Valve with tag: CV1
+        """
         self._index = len(ControlValve.items)
         super().__init__( **inputs)
         ControlValve.items.append(self)
@@ -576,25 +831,35 @@ class ControlValve(_EquipmentOneInletOutlet):
 
     @property
     def Kv(self):
-        # UPDATE BELOW BASED ON STREAMS
-        water = Chemical('water',
-                         T = self.inlet_temperature.value,
-                         P = self._inlet_pressure.value)
-        if water.phase == 'l':
-            return cv_calculations.size_control_valve_l(water.rhol, water.Psat, water.Pc, water.mul,
+        self = self._get_equipment_object(self)
+        if (self._outlet_material_stream_tag is None and
+            self._inlet_material_stream_tag is None):
+            raise Exception("PipeSegment should be connected with MaterialStream either at inlet or outlet")
+        stream_tag = self._inlet_material_stream_tag if self._outlet_material_stream_tag is None else self._outlet_material_stream_tag
+        stream_index = streams.get_stream_index(stream_tag, "material")
+        density = self._stream_object_property_getter(stream_index, "material", "density")
+        phase = self._stream_object_property_getter(stream_index, "material", "phase")
+        d_viscosity = self._stream_object_property_getter(stream_index, "material", "d_viscosity")
+        isentropic_exponent = self._stream_object_property_getter(stream_index, "material", "isentropic_exponent")
+        MW = self._stream_object_property_getter(stream_index, "material", "molecular_weight")
+        Z_g = self._stream_object_property_getter(stream_index, "material", "Z_g")
+        Psat = self._stream_object_property_getter(stream_index, "material", "Psat")
+        Pc = self._stream_object_property_getter(stream_index, "material", "Pc")
+        if phase == 'l':
+            return cv_calculations.size_control_valve_l(density.value, Psat, Pc, d_viscosity.value,
                                                         self._inlet_pressure.value, self._outlet_pressure.value, 
-                                                        self.inlet_mass_flowrate.value/water.rhol)
-        elif water.phase == 'g':
+                                                        self.inlet_mass_flowrate.value/density.value)
+        elif phase == 'g':
             return cv_calculations.size_control_valve_g(T = self.inlet_temperature.value, 
-                                                        MW = water.MW,
+                                                        MW = MW,
                                                         mu= 1.48712E-05, # water.mug,
-                                                        gamma = water.isentropic_exponent, 
-                                                        Z = water.Zg,
+                                                        gamma = isentropic_exponent, 
+                                                        Z = Z_g,
                                                         P1 = self._inlet_pressure.value, 
                                                         P2 = self._outlet_pressure.value, 
-                                                        Q = self.inlet_mass_flowrate.value/water.rhog)
+                                                        Q = self.inlet_mass_flowrate.value/density.value)
         else:
-            raise Exception('Possibility of fluid solification at control valve')
+            raise Exception('Possibility of fluid solification inside the control valve')
 
     @classmethod
     def list_objects(cls):
