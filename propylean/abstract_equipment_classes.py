@@ -697,8 +697,8 @@ class _EquipmentOneInletOutlet(object):
                                                   self.energy_in,
                                                   stream_governed)     
             else:
-                stream_object, \
-                self.energy_out = property_matcher(stream_object,
+                stream_object.amount, \
+                self.energy_out = property_matcher(stream_object.amount,
                                                     self.energy_out,
                                                     stream_governed)
             if not stream_governed:

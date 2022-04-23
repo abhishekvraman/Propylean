@@ -52,7 +52,6 @@ class Stream(object):
         tag = class_name + "_" + str(i)
         while cls._check_tag_assigned(tag):
             tag = class_name+ "_" + str(i)
-            print(tag)
             i += 1
         return tag
     
