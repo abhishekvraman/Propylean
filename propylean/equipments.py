@@ -636,7 +636,8 @@ class PipeSegment(_EquipmentOneInletOutlet):
                                 | Ball Valve     | 20 cm  |  NA       | Carbon Steel  | NA         |
                                 | Reducer        | 20X18cm|  NA       | Carbon Steel  | NA         |
                                 +------------------------------------------------------------------+
-                                Note: OD and tickness can also be sepcified.
+                                Note: OD and tickness can also be sepcified instead of ID. If all are provided,
+                                      ID will be considered
                              >>> segment_frame = pd.DataFrame({'segment_type': [1, 2, 6, 12],
                                                                'ID': [(20, 'cm'), (20, 'cm'), (20, 'cm'), (18, 'cm')],
                                                                'length': [(10, 'm'), None, None, None],
@@ -670,6 +671,7 @@ class PipeSegment(_EquipmentOneInletOutlet):
         self._material = 1
         from pandas import DataFrame
         self._segment_frame = DataFrame()
+        self._segment_obj_list = None
         
         if 'segment_frame' not in inputs:
             del self.segment_frame
@@ -678,27 +680,29 @@ class PipeSegment(_EquipmentOneInletOutlet):
                 if 'length' in inputs:
                     self.length = inputs['length']               
                 else:
-                    raise Exception('Straight Tube segment requires length value')
+                    raise Exception('Straight Tube segment requires "length" value.')
                 if 'elevation' in inputs:
                     self.elevation = inputs['elevation']
             
             if 'material' in inputs:
                 self.material = inputs['material']
             
-            if ('ID' in inputs):
+            if ('ID' in inputs and inputs['ID'] is not None):
                 self.ID = inputs['ID']
+                if 'OD' in inputs and inputs['OD'] is not None:
+                    self.OD = inputs['OD']
+                elif 'thickness' in inputs and inputs['thickness'] is not None:
+                    self.thickness = inputs['thickness']
             elif ('OD' in inputs and 'thickness' in inputs):
                 self.OD = inputs['OD']
                 self.ID = inputs['thickness']
                 self.ID = self.OD - self.ID
             else:
                 raise Exception('Define atleast ID or OD with thickness to define a pipe segment object') 
-            if 'OD' in inputs and 'thickness' not in inputs:
-                self.OD = inputs['OD']
-            elif 'thickness' in inputs:
-                self.thickness = inputs['thickness']
+            
         else:
-            self.segment_frame = inputs['segment_frame']
+            self.segment_frame = inputs['segment_frame']   
+            self._segment_obj_list = []                                     
             del self.ID
             del self.OD
             del self.material
@@ -741,16 +745,19 @@ class PipeSegment(_EquipmentOneInletOutlet):
     @property
     def equivalent_length(self):
         equivalent_length = self.length
-        try:
-            for segment in self.segment_frame:
-                if segment["segment_type"]==1:
-                    p = PipeSegment(ID=segment['ID'], 
-                                    length=segment['length'],
-                                    material=segment['material'])
-                    equivalent_length += p.length
-        except:
-            pass
         return equivalent_length
+    @property
+    def elevation(self):
+        self = self._get_equipment_object(self)
+        return self._elevation
+    @elevation.setter
+    def elevation(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
+        if unit is None:
+            unit = self._elevation.unit
+        self._elevation = prop.Length(value, unit)
+        self._update_equipment_object(self)
 
     @property
     def ID(self):
@@ -856,23 +863,11 @@ class PipeSegment(_EquipmentOneInletOutlet):
         self = self._get_equipment_object(self)
         del self._material
         self._update_equipment_object(self)
-    
-    @property
-    def elevation(self):
-        self = self._get_equipment_object(self)
-        return self._elevation
-    @elevation.setter
-    def elevation(self, value):
-        self = self._get_equipment_object(self)
-        value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
-        if unit is None:
-            unit = self.elevation
-        self._elevation = prop.Length(value, unit)
-        self._update_equipment_object(self)
 
     @property
     def pressure_drop(self):
         self = self._get_equipment_object(self)
+        pressure_drop = prop.Pressure(0, self.inlet_pressure.unit)
         if self.inlet_mass_flowrate.value == 0:
             return prop.Pressure(0, self._inlet_pressure.unit)
         if (self._outlet_material_stream_tag is None and
@@ -886,19 +881,49 @@ class PipeSegment(_EquipmentOneInletOutlet):
         density.unit = "kg/m^3"
         viscosity.unit = "Pa-s"
         vol_flowrate.unit = "m^3/s"
-        ID = self.ID
-        ID.unit = 'm'
-        length = self.equivalent_length
-        length.unit = 'm'
-        drop_friction = self.dp_friction(vol_flowrate, ID, length, density, viscosity)
-        drop_hydrostatic = self.dp_hydrostatic(density)
-        return drop_friction+drop_hydrostatic
+        if self._segment_obj_list is None:
+            ID = self.ID
+            ID.unit = 'm'
+            length = self.equivalent_length
+            length.unit = 'm'
+            drop_friction = self.dp_friction(vol_flowrate, ID, length, density, viscosity)
+            drop_hydrostatic = self.dp_hydrostatic(density)
+            pressure_drop = drop_friction + drop_hydrostatic
+        else:
+            for column in ['segment_type', 'ID', 'OD', 'thickness', 'length', 'material', 'elevation']:
+                if column not in list(self.segment_frame.columns):
+                    self.segment_frame[column] = None
+            rows = zip(self.segment_frame['segment_type'],
+                        self.segment_frame['ID'],
+                        self.segment_frame['OD'],
+                        self.segment_frame['thickness'],
+                        self.segment_frame['length'],
+                        self.segment_frame['material'],
+                        self.segment_frame['elevation'])
+            for row in rows:
+                ps = PipeSegment(segment_type=row[0],
+                                 ID=row[1],
+                                 OD=row[2],
+                                 thickness=row[3],
+                                 length=row[4],
+                                 material=row[5],
+                                 elevation=row[6])
+                ID = ps.ID
+                ID.unit = 'm'
+                length = ps.equivalent_length
+                length.unit = 'm'
+                drop_friction = ps.dp_friction(vol_flowrate, ID, length, density, viscosity)
+                drop_hydrostatic = ps.dp_hydrostatic(density)
+                pressure_drop += drop_friction + drop_hydrostatic
+        return pressure_drop
+        
     @pressure_drop.setter
     def pressure_drop(self, value):
         raise Exception('''Cannot manually set pressure drop for PipeSegment!\n
-                         Pressure drop depends on physical properties of the PipeSegment and Material flowing.''')
+                         Pressure drop depends on physical properties of the PipeSegment and MaterialStream connected.''')
     
     def dp_hydrostatic(self, density):
+        self = self._get_equipment_object(self)
         elevation_old_unit = self.elevation.unit
         self.elevation.unit = "m"
         hydro_drop = prop.Pressure(self.elevation.value * density.value * 9.8)
@@ -908,29 +933,26 @@ class PipeSegment(_EquipmentOneInletOutlet):
 
     def dp_friction(self, vol_flowrate, ID, length, density, viscosity,
                     method=settings.pipe_dp_method, Darcy=settings.Darcy):
-        if self.segment_type==1:
-            from fluids.friction import friction_factor
-            from fluids.core import Reynolds, K_from_f, dP_from_K
-            roughness = (4.57e-5, 4.5e-5, 0.000259, 1.5e-5, 1.5e-6) #in meters
+        self = self._get_equipment_object(self)
+        from fluids.friction import friction_factor
+        from fluids.core import Reynolds, K_from_f, dP_from_K
+        roughness = (4.57e-5, 4.5e-5, 0.000259, 1.5e-5, 1.5e-6) #in meters
 
-            V=(vol_flowrate.value)/(pi* ID.value**2)/4
-            Re = Reynolds(V=V,
-                        D=ID.value, 
-                        rho=density.value, 
-                        mu=viscosity.value)
-            fd = friction_factor(Re=Re, 
-                                eD=roughness[self.material-1]/ID.value,
-                                Method=method,
-                                Darcy=Darcy)
-            K = K_from_f(fd=fd, L=length.value, D=ID.value)        
-            drop = round(dP_from_K(K, rho=1000, V=V),3)
-            drop = prop.Pressure(drop, 'Pa')
-            drop.unit = self._inlet_pressure.unit
-            return drop
-        else:
-            raise Exception("Pressure drop for other segments coming soon!!")
+        V=(vol_flowrate.value)/(pi* ID.value**2)/4
+        Re = Reynolds(V=V,
+                    D=ID.value, 
+                    rho=density.value, 
+                    mu=viscosity.value)
+        fd = friction_factor(Re=Re, 
+                            eD=roughness[self.material-1]/ID.value,
+                            Method=method,
+                            Darcy=Darcy)
+        K = K_from_f(fd=fd, L=length.value, D=ID.value)        
+        drop = round(dP_from_K(K, rho=1000, V=V),3)
+        drop = prop.Pressure(drop, 'Pa')
+        drop.unit = self._inlet_pressure.unit
+        return drop
             
-
     @classmethod
     def list_objects(cls):
         return cls.items
