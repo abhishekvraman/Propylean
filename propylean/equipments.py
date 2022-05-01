@@ -1,5 +1,6 @@
 from msilib.schema import ODBCAttribute
-from propylean.settings import settings
+from propylean.settings import Settings
+from propylean.constants import Constants
 from propylean.generic_equipment_classes import _PressureChangers, _EquipmentOneInletOutlet, _Vessels, _Exchangers
 from thermo.chemical import Chemical
 from fluids import control_valve as cv_calculations
@@ -623,26 +624,32 @@ class PipeSegment(_EquipmentOneInletOutlet):
                 Default value: 1
                 Description: Material type of the pipe segment.
             
+            shape:
+                Required: Yes, only if segment_type is 12 or 13
+                Type: tuple
+                Description: Only in segment type is reducer or expander 
+            
             segment_frame:
                 Required: No
                 Type: Pandas DataFrame
                 Description: List of PipeSegment objects in with columns as above arguments.
                              >>> import pandas as pd
                              For below list of segements, DataFrame to be created is as follows:
-                                +------------------------------------------------------------------+
-                                | Segment Type   |  ID    |  length   |  material     | elevation  |
-                                | Straight Tube  | 20 cm  |  10 m     | Carbon Steel  | 2 m down   |
-                                | Elbow          | 20 cm  |  NA       | Carbon Steel  | NA         |
-                                | Ball Valve     | 20 cm  |  NA       | Carbon Steel  | NA         |
-                                | Reducer        | 20X18cm|  NA       | Carbon Steel  | NA         |
-                                +------------------------------------------------------------------+
+                                +-----------------------------------------------------------------------------+
+                                | Segment Type   |  ID    |  length   |  material     | elevation  | Shape    |
+                                | Straight Tube  | 20 cm  |  10 m     | Carbon Steel  | 2 m down   |          |
+                                | Elbow          | 20 cm  |  NA       | Carbon Steel  | NA         |          |
+                                | Ball Valve     | 20 cm  |  NA       | Carbon Steel  | NA         |          |
+                                | Reducer        |        |  NA       | Carbon Steel  | NA         | (20, 18) |
+                                +-----------------------------------------------------------------------------+
                                 Note: OD and tickness can also be sepcified instead of ID. If all are provided,
                                       ID will be considered
                              >>> segment_frame = pd.DataFrame({'segment_type': [1, 2, 6, 12],
                                                                'ID': [(20, 'cm'), (20, 'cm'), (20, 'cm'), (18, 'cm')],
                                                                'length': [(10, 'm'), None, None, None],
                                                                'material': [2, 2, 2, 2],
-                                                               'elevation': [(-2, 'm'), None, None, None]})
+                                                               'elevation': [(-2, 'm'), None, None, None],
+                                                               'shape': [None, None, None, (20, 18)]})
         
         RETURN VALUE:
             Type: PipeSegment
@@ -683,6 +690,8 @@ class PipeSegment(_EquipmentOneInletOutlet):
                     raise Exception('Straight Tube segment requires "length" value.')
                 if 'elevation' in inputs:
                     self.elevation = inputs['elevation']
+            elif self.segment_type in range(12, 14):
+                self._shape = inputs['shape']
             
             if 'material' in inputs:
                 self.material = inputs['material']
@@ -744,7 +753,30 @@ class PipeSegment(_EquipmentOneInletOutlet):
         self._update_equipment_object(self)
     @property
     def equivalent_length(self):
-        equivalent_length = self.length
+        self = self._get_equipment_object(self)
+        ID = self.ID
+        ID.unit = 'm'
+        if self.material==5:
+            Le_by_D = Constants.Le_BY_D["plastic"]
+            if self.segment_type in range(13, 15):
+                Le_by_D = Constants.REDUCER_Le_BY_D_PLASTIC
+            else:
+                Le_by_D = Constants.REDUCER_Le_BY_D_STEEL
+        else:
+            Le_by_D = Constants.Le_BY_D["steel"]
+        if self.segment_type == 1:
+            equivalent_length = self.length
+        elif self.segment_type in range(2, 12):
+            equivalent_length = Le_by_D[self.segment_type-2] * ID.value
+            equivalent_length = prop.Length(equivalent_length)
+        elif self.segment_type in range(12, 14):
+            ratio = int(10*self._shape[1]/self._shape[0])
+            if ratio > 9:
+                ratio = 9
+            elif ratio < 4:
+                ratio = 4
+            equivalent_length = Le_by_D[ratio] * self._shape[0]
+            equivalent_length = prop.Length(equivalent_length)
         return equivalent_length
     @property
     def elevation(self):
@@ -820,14 +852,14 @@ class PipeSegment(_EquipmentOneInletOutlet):
         segments = '''\nSegments can be of following types and in range of numbers below:
                     1. Straight Tube
                     2. Elbow
-                    3. Tee
-                    4. Angle valve
-                    5. Butterfly valve
-                    6. Ball valve
-                    7. Gate valve
-                    8. Globe valve
+                    3. Tee (straight through)
+                    4. Tee (through branch)
+                    5. Butterfly valve 
+                    6. Ball valve (full bore)
+                    7. Gate valve(full open)
+                    8. Globe valve (full open)
                     9. Swing check valve
-                    10. Ball check valve
+                    10. Wafer disk check valve
                     11. Lift check valve
                     12. Reducer
                     13. Expander'''
@@ -890,7 +922,7 @@ class PipeSegment(_EquipmentOneInletOutlet):
             drop_hydrostatic = self.dp_hydrostatic(density)
             pressure_drop = drop_friction + drop_hydrostatic
         else:
-            for column in ['segment_type', 'ID', 'OD', 'thickness', 'length', 'material', 'elevation']:
+            for column in ['segment_type', 'ID', 'OD', 'thickness', 'length', 'material', 'elevation', 'shape']:
                 if column not in list(self.segment_frame.columns):
                     self.segment_frame[column] = None
             rows = zip(self.segment_frame['segment_type'],
@@ -899,7 +931,8 @@ class PipeSegment(_EquipmentOneInletOutlet):
                         self.segment_frame['thickness'],
                         self.segment_frame['length'],
                         self.segment_frame['material'],
-                        self.segment_frame['elevation'])
+                        self.segment_frame['elevation'],
+                        self.segment_frame['shape'])
             for row in rows:
                 ps = PipeSegment(segment_type=row[0],
                                  ID=row[1],
@@ -907,7 +940,8 @@ class PipeSegment(_EquipmentOneInletOutlet):
                                  thickness=row[3],
                                  length=row[4],
                                  material=row[5],
-                                 elevation=row[6])
+                                 elevation=row[6],
+                                 shape=row[7])
                 ID = ps.ID
                 ID.unit = 'm'
                 length = ps.equivalent_length
@@ -932,11 +966,11 @@ class PipeSegment(_EquipmentOneInletOutlet):
         return hydro_drop
 
     def dp_friction(self, vol_flowrate, ID, length, density, viscosity,
-                    method=settings.pipe_dp_method, Darcy=settings.Darcy):
+                    method=Settings.pipe_dp_method, Darcy=Settings.Darcy):
         self = self._get_equipment_object(self)
         from fluids.friction import friction_factor
         from fluids.core import Reynolds, K_from_f, dP_from_K
-        roughness = (4.57e-5, 4.5e-5, 0.000259, 1.5e-5, 1.5e-6) #in meters
+        from propylean.constants import Constants
 
         V=(vol_flowrate.value)/(pi* ID.value**2)/4
         Re = Reynolds(V=V,
@@ -944,7 +978,7 @@ class PipeSegment(_EquipmentOneInletOutlet):
                     rho=density.value, 
                     mu=viscosity.value)
         fd = friction_factor(Re=Re, 
-                            eD=roughness[self.material-1]/ID.value,
+                            eD=Constants.ROUGHNESS[self.material-1]/ID.value,
                             Method=method,
                             Darcy=Darcy)
         K = K_from_f(fd=fd, L=length.value, D=ID.value)        

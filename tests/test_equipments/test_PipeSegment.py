@@ -60,7 +60,7 @@ class test_PipeSegment(unittest.TestCase):
     
     @pytest.mark.positive
     def test_PipeSegment_segment_type(self):
-        for i in range(1, 14):
+        for i in range(1, 12):
             ps = PipeSegment(ID=(20, "cm"), 
                             segment_type=i,
                             length=10)
@@ -302,8 +302,8 @@ class test_PipeSegment(unittest.TestCase):
         inlet_stream.components = prop.Components({"water": 1})
         ps.connect_stream(inlet_stream, 'in', stream_governed=True)
         ps.pressure_drop.unit = "bar"
-        from propylean.settings import settings
-        settings.pipe_dp_method = "Colebrook"
+        from propylean.settings import Settings
+        Settings.pipe_dp_method = "Colebrook"
         # TODO Change assert for better accuracy of pressure drop calculations
         self.assertGreater(ps.pressure_drop.value, 0)
     
@@ -320,8 +320,8 @@ class test_PipeSegment(unittest.TestCase):
         hydrostatic_pressure.unit = "bar"
         self.assertAlmostEqual(hydrostatic_pressure.value, 
                                prop.Pressure(0.9576, 'bar').value, 1)
-        from propylean.settings import settings
-        settings.pipe_dp_method = "Colebrook"
+        from propylean.settings import Settings
+        Settings.pipe_dp_method = "Colebrook"
         # TODO Change assert for better accuracy of pressure drop calculations
         self.assertGreater(ps.pressure_drop.value, 0)
     
@@ -332,7 +332,8 @@ class test_PipeSegment(unittest.TestCase):
                                       'ID': [(34.7675, 'cm'), (34.7675, 'cm'), (34.7675, 'cm'), (18, 'cm')],
                                       'length': [(20, 'm'), None, None, None],
                                       'material': [2, 2, 2, 2],
-                                      'elevation': [(10, 'm'), None, None, None]})
+                                      'elevation': [(10, 'm'), None, None, None],
+                                      'shape': [None, None, None, (20, 18)]})
         ps = PipeSegment(segment_frame=segment_frame)
         inlet_stream = MaterialStream(mass_flowrate=(100000, 'kg/min'),
                                       pressure=(100, 'bar'),
@@ -340,14 +341,14 @@ class test_PipeSegment(unittest.TestCase):
         inlet_stream.components = prop.Components({"water": 1})
         self.assertTrue(ps.connect_stream(inlet_stream, 'in', stream_governed=True))
         ps.pressure_drop.unit = "bar"
-        from propylean.settings import settings
-        settings.pipe_dp_method = "Colebrook"
+        from propylean.settings import Settings
+        Settings.pipe_dp_method = "Colebrook"
         # TODO Change assert for better accuracy of pressure drop calculations
         self.assertGreater(ps.pressure_drop.value, 0)
     
     @pytest.mark.positive
-    def test_PipeSegment_pressure_drop_reducer(self):
-        for i in range(2, 14):
+    def test_PipeSegment_pressure_drop_others(self):
+        for i in range(2, 12):
             ps = PipeSegment(ID=(347.675, "mm"), segment_type=i)
             inlet_stream = MaterialStream(mass_flowrate=(100000, 'kg/min'),
                                           pressure=(100, 'bar'),
@@ -358,3 +359,28 @@ class test_PipeSegment(unittest.TestCase):
             
             # TODO Change assert for better accuracy of pressure drop calculations
             self.assertGreater(ps.pressure_drop.value, 0)
+    
+    @pytest.mark.positive
+    def test_PipeSegment_pressure_drop_reducer_expander(self):
+        
+        ps = PipeSegment(segment_type=12, ID=(18, 'mm'), shape=(20, 18))
+        inlet_stream = MaterialStream(mass_flowrate=(100000, 'kg/min'),
+                                        pressure=(100, 'bar'),
+                                        temperature=(40, 'C'))
+        inlet_stream.components = prop.Components({"water": 1})
+        ps.connect_stream(inlet_stream, 'in', stream_governed=True)
+        ps.pressure_drop.unit = "bar"
+        
+        # TODO Change assert for better accuracy of pressure drop calculations
+        self.assertGreater(ps.pressure_drop.value, 0)
+        
+        ps = PipeSegment(segment_type=13, ID=(18, 'mm'), shape=(20, 18))
+        inlet_stream = MaterialStream(mass_flowrate=(100000, 'kg/min'),
+                                        pressure=(100, 'bar'),
+                                        temperature=(40, 'C'))
+        inlet_stream.components = prop.Components({"water": 1})
+        ps.connect_stream(inlet_stream, 'in', stream_governed=True)
+        ps.pressure_drop.unit = "bar"
+        
+        # TODO Change assert for better accuracy of pressure drop calculations
+        self.assertGreater(ps.pressure_drop.value, 0)
