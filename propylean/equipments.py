@@ -423,13 +423,6 @@ class CentrifugalCompressor(_PressureChangers):
                 Acceptable values: Non-negative values
                 Default value: None
                 Description: Adiabatic Efficiency of the compressor
-
-            polytropic_efficiency:
-                Required: No
-                Type: int or float (recommended)
-                Acceptable values: Non-negative values
-                Default value: None
-                Description: Adiabatic Efficiency of the compressor 
         
         RETURN VALUE:
             Type: CentrifugalCompressor
@@ -447,10 +440,7 @@ class CentrifugalCompressor(_PressureChangers):
         """
         self._index = len(CentrifugalCompressor.items)
         super().__init__( **inputs)
-        if 'adiabatic_efficiency' not in inputs and 'polytropic_efficiency' in inputs:
-            self.polytropic_efficiency = inputs['polytropic_efficiency']
-        else:
-            self.adiabatic_efficiency = 0.7 if 'adiabatic_efficiency' not in inputs else inputs['adiabatic_efficiency']
+        self.adiabatic_efficiency = 0.7 if 'adiabatic_efficiency' not in inputs else inputs['adiabatic_efficiency']
         CentrifugalCompressor.items.append(self)
     
     def __repr__(self):
@@ -465,7 +455,6 @@ class CentrifugalCompressor(_PressureChangers):
     @adiabatic_efficiency.setter
     def adiabatic_efficiency(self, value):
         self = self._get_equipment_object(self)
-        value, unit = self._tuple_property_value_unit_returner(value, prop.VolumetricFlowRate)
         if value ==  None:
             value = 0.7
         self._adiabatic_efficiency = value
@@ -474,16 +463,22 @@ class CentrifugalCompressor(_PressureChangers):
     @property
     def polytropic_efficiency(self):
         self = self._get_equipment_object(self)
+        stream_tag = self._inlet_material_stream_tag if self._outlet_material_stream_tag is None else self._outlet_material_stream_tag
+        stream_index = streams.get_stream_index(stream_tag, "material")
+        isentropic_exponent = self._stream_object_property_getter(stream_index, "material", "isentropic_exponent")
         return compressible_fluid.isentropic_efficiency(P1 = self._inlet_pressure.value,
                                                         P2 = self._outlet_pressure.value,
-                                                        k = self.isentropic_exponent,
+                                                        k = isentropic_exponent,
                                                         eta_s = self.adiabatic_efficiency)
     @polytropic_efficiency.setter
     def polytropic_efficiency(self, value):
         self = self._get_equipment_object(self)
+        stream_tag = self._inlet_material_stream_tag if self._outlet_material_stream_tag is None else self._outlet_material_stream_tag
+        stream_index = streams.get_stream_index(stream_tag, "material")
+        isentropic_exponent = self._stream_object_property_getter(stream_index, "material", "isentropic_exponent")
         self.adiabatic_efficiency = compressible_fluid.isentropic_efficiency(P1 = self._inlet_pressure.value,
                                                                              P2 = self._outlet_pressure.value,
-                                                                             k = self.isentropic_exponent,
+                                                                             k = isentropic_exponent,
                                                                              eta_p = value)
         self._update_equipment_object(self)
 
@@ -1017,6 +1012,8 @@ class ControlValve(_EquipmentOneInletOutlet):
         """
         self._index = len(ControlValve.items)
         super().__init__( **inputs)
+        del self.energy_in
+        del self.energy_out
         ControlValve.items.append(self)
     
     def __repr__(self):
@@ -1030,6 +1027,9 @@ class ControlValve(_EquipmentOneInletOutlet):
         if (self._outlet_material_stream_tag is None and
             self._inlet_material_stream_tag is None):
             raise Exception("PipeSegment should be connected with MaterialStream either at inlet or outlet")
+        P1 = self.inlet_pressure
+        P2 = self.outlet_pressure
+        P1.unit = P2.unit = "Pa"
         stream_tag = self._inlet_material_stream_tag if self._outlet_material_stream_tag is None else self._outlet_material_stream_tag
         stream_index = streams.get_stream_index(stream_tag, "material")
         density = self._stream_object_property_getter(stream_index, "material", "density")
@@ -1037,24 +1037,48 @@ class ControlValve(_EquipmentOneInletOutlet):
         d_viscosity = self._stream_object_property_getter(stream_index, "material", "d_viscosity")
         isentropic_exponent = self._stream_object_property_getter(stream_index, "material", "isentropic_exponent")
         MW = self._stream_object_property_getter(stream_index, "material", "molecular_weight")
-        Z_g = self._stream_object_property_getter(stream_index, "material", "Z_g")
+        
         Psat = self._stream_object_property_getter(stream_index, "material", "Psat")
         Pc = self._stream_object_property_getter(stream_index, "material", "Pc")
         if phase == 'l':
             return cv_calculations.size_control_valve_l(density.value, Psat, Pc, d_viscosity.value,
-                                                        self._inlet_pressure.value, self._outlet_pressure.value, 
+                                                        P1.value, P2.value, 
                                                         self.inlet_mass_flowrate.value/density.value)
         elif phase == 'g':
+            Z_g = self._stream_object_property_getter(stream_index, "material", "Z_g")
             return cv_calculations.size_control_valve_g(T = self.inlet_temperature.value, 
                                                         MW = MW,
-                                                        mu= 1.48712E-05, # water.mug,
+                                                        mu= d_viscosity,
                                                         gamma = isentropic_exponent, 
                                                         Z = Z_g,
-                                                        P1 = self._inlet_pressure.value, 
-                                                        P2 = self._outlet_pressure.value, 
+                                                        P1 = P1.value, 
+                                                        P2 = P2.value, 
                                                         Q = self.inlet_mass_flowrate.value/density.value)
         else:
             raise Exception('Possibility of fluid solification inside the control valve')
+
+    def connect_stream(self, 
+                       stream_object=None, 
+                       direction=None, 
+                       stream_tag=None, 
+                       stream_type=None,
+                       stream_governed=True):
+        if ((stream_object is not None and 
+            isinstance(stream_object, streams.EnergyStream)) or
+            stream_type in ['energy', 'power', 'e', 'p']):
+            raise Exception("No energy stream is associated  with control valve.")
+        return super().connect_stream(direction=direction, 
+                                      stream_object=stream_object, 
+                                      stream_tag=stream_tag, 
+                                      stream_type=stream_type,
+                                      stream_governed=stream_governed)
+    
+    def disconnect_stream(self, stream_object=None, direction=None, stream_tag=None, stream_type=None):
+        if ((stream_object is not None and 
+            isinstance(stream_object, streams.EnergyStream)) or
+            stream_type in ['energy', 'power', 'e', 'p']):
+            raise Exception("No energy stream is associated  with control valve.")
+        return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
 
     @classmethod
     def list_objects(cls):
@@ -1081,6 +1105,8 @@ class FlowMeter(_EquipmentOneInletOutlet):
     def __init__(self, **inputs) -> None:
         self._index = len(FlowMeter.items)
         super().__init__( **inputs)
+        del self.energy_out
+        del self.energy_in
         FlowMeter.items.append(self)
 
     def __repr__(self):

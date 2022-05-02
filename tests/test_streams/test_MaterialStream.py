@@ -148,9 +148,22 @@ class test_MaterialStream(unittest.TestCase):
         self.assertEqual(m4.isentropic_exponent, mx.isentropic_exponent)
     
     @pytest.mark.positive
+    def test_MaterialStream_components_thermodynamic_property_phase(self):
+        m4 = MaterialStream(tag="m11", 
+                            pressure=(10, 'bar'),
+                            temperature=300,
+                            mass_flowrate=prop.MassFlowRate(1000, "kg/h"))
+        mol_fraction = OrderedDict([('benzene', 0.96522),('toluene', 0.00259)])
+        m4.components = prop.Components(mol_fraction, 'mol')
+        p = prop.Pressure(10, 'bar')
+        p.unit = 'Pa'
+        mx = Mixture(zs=mol_fraction, T=300, P=p.value)
+        self.assertEqual(m4.phase, mx.phase)
+
+    @pytest.mark.positive
     @pytest.mark.unit_change
     def test_MaterialStream_property_unit_change(self):
-        m4 = MaterialStream(tag="m11", 
+        m4 = MaterialStream(tag="m12", 
                             pressure=(10, 'bar'),
                             temperature=300,
                             mass_flowrate=prop.MassFlowRate(1000, "kg/h"))

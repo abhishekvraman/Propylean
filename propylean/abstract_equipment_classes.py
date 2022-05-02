@@ -89,7 +89,7 @@ class _EquipmentOneInletOutlet(object):
         self._is_disconnection = False
 
         if 'pressure_drop' in inputs:
-            self.pressure_drop = prop.Pressure(inputs['pressure_drop'])
+            self.pressure_drop = inputs['pressure_drop']
     
     @property
     def index(self):
@@ -734,7 +734,7 @@ class _EquipmentOneInletOutlet(object):
                 Description: 
             
             SAMPLE USE CASES:
-                >>> 
+                >>> Psat = self._stream_object_property_getter(stream_index, "material", "Psat")
                 
         """
         if stream_type.lower() in ['m', 'material', 'mass']:
@@ -777,6 +777,10 @@ class _EquipmentOneInletOutlet(object):
             return stream_object.phase
         elif property=="Z_g":
             return stream_object.Z_g
+        elif property=="Psat":
+            return stream_object.Psat
+        elif property=="Pc":
+            return stream_object.Pc
             
     def _create_equipment_tag(cls):
         i = 1
