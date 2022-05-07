@@ -1,6 +1,6 @@
 import pytest
 import unittest
-from propylean.equipments import PositiveDisplacementPump
+from propylean.equipments.rotary import PositiveDisplacementPump
 from propylean.streams import MaterialStream, EnergyStream
 import propylean.properties as prop
 import pandas as pd

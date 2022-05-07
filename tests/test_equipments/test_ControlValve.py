@@ -1,6 +1,6 @@
 import pytest
 import unittest
-from propylean.equipments import ControlValve
+from propylean.instruments import ControlValve
 from propylean.streams import MaterialStream
 import propylean.properties as prop
 from typing import OrderedDict
