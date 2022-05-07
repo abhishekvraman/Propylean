@@ -457,6 +457,28 @@ class Power(_Property):
                                You selected '{}'.
                                '''.format(unit))
 
+class Frequency(_Property):
+    def __init__(self, value = 0, unit= 'Hz'):
+        super().__init__(value, unit)
+        self.unit = unit
+    @_Property.unit.setter
+    def unit(self, unit):
+        try:
+            conversion_factors = {'/hour': 3600,
+                                '/min': 60,
+                                'Hz': 1
+                                }
+            self._value =  conversion_factors[unit] * self._value / conversion_factors[self._unit]
+            self._unit = unit
+        except:
+            raise Exception('''Selected unit is not supported or a correct unit of Dynamic Viscosity.
+                               Following are the supported units:
+                               1. Hz for Hertz(cycle per second)
+                               2. /min for cylce per minute
+                               3. /hour for cycle per hour
+                               You selected '{}'.
+                               '''.format(unit))
+
 class Components(object):
     def __init__(self, fractions=None, type="mass"):
         self.fractions = fractions

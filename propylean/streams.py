@@ -411,27 +411,27 @@ class MaterialStream(Stream):
         rho = mx.rho
         if rho is not None:
             self.density = prop.Density(rho, 'kg/m^3')
-        if phase=='l/g' or phase=='l':
-            rhol = mx.rhol
-            if rhol is not None:
-                self.density_l = prop.Density(rhol, 'kg/m^3')
-        if phase=='l/g' or phase=='g':
-            rhog = mx.rhog
-            if rhog is not None:
-                self.density_g = prop.Density(rhog, 'kg/m^3')
+        
+        rhol = mx.rhol
+        if rhol is not None:
+            self.density_l = prop.Density(rhol, 'kg/m^3')
+    
+        rhog = mx.rhog
+        if rhog is not None:
+            self.density_g = prop.Density(rhog, 'kg/m^3')
 
         # Assigning Viscosities
         mu = mx.mu
         if mu is not None:
             self.d_viscosity = prop.DViscosity(mu, 'Pa-s')
-        if phase=='l/g' or phase=='l':
-            mul = mx.mul
-            if mul is not None:
-                self.d_viscosity_l = prop.DViscosity(mul, 'Pa-s')
-        if phase=='l/g' or phase=='g':    
-            mug = mx.mug       
-            if mug is not None:
-                self.d_viscosity_g = prop.DViscosity(mug, 'Pa-s')
+        
+        mul = mx.mul
+        if mul is not None:
+            self.d_viscosity_l = prop.DViscosity(mul, 'Pa-s')
+            
+        mug = mx.mug       
+        if mug is not None:
+            self.d_viscosity_g = prop.DViscosity(mug, 'Pa-s')
         
         # Assigning Molecular Weight
         MW = mx.MW
@@ -442,14 +442,14 @@ class MaterialStream(Stream):
         Z = mx.Z
         if Z is not None:
             self.Z = Z
-        if phase=='l/g' or phase=='l':
-            Z_l = mx.Zl
-            if Z_l is not None:
-                self.Z_l = Z_l
-        if phase=='l/g' or phase=='g':
-            Z_g = mx.Zg
-            if Z_g is not None:
-                self.Z_g = Z_g
+        
+        Z_l = mx.Zl
+        if Z_l is not None:
+            self.Z_l = Z_l
+        
+        Z_g = mx.Zg
+        if Z_g is not None:
+            self.Z_g = Z_g
         
         # Assigning Isnetropic Exponent
         isentropic_exponent = mx.isentropic_exponent

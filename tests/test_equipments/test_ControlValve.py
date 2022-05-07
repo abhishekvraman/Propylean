@@ -238,10 +238,10 @@ class test_ControlValve(unittest.TestCase):
                           pressure_drop=(10, 'bar'))
         inlet_stream = MaterialStream(tag="Inlet_cv_23",
                                       mass_flowrate=(1000, 'kg/h'),
-                                      pressure=(2, 'atm'),
-                                      temperature=(25, 'C'))
-        vol_fraction = OrderedDict([('nitrogen', 0.8),('oxygen', 0.2)])
-        inlet_stream.components = prop.Components(vol_fraction, "vol_g")
+                                      pressure=(1E6, 'Pa'),
+                                      temperature=(350, 'K'))
+        vol_fraction = OrderedDict([('nitrogen', 0.6), ('oxygen', 0.4)])
+        inlet_stream.components = prop.Components(vol_fraction, "mass")
         cv.connect_stream(inlet_stream, 'in', stream_governed=True)
         # TODO: Improve calulation accuracy
         self.assertGreater(cv.Kv, 0)
