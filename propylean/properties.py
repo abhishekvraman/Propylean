@@ -1,7 +1,8 @@
 class _Property(object):
-    def __init__(self, value = None, unit= None):
+    def __init__(self, value=None, unit=None, df=None):
         self._value = value
         self._unit = unit
+        self._df = df
     def __eq__(self, other):
         if (isinstance(other, _Property) and
             self.value == other.value and
@@ -21,6 +22,13 @@ class _Property(object):
     @unit.setter
     def unit(self, unit):
         self._unit = unit
+    
+    @property
+    def df(self):
+        return self._df
+    @df.setter
+    def df(self, df):
+        self._df = df
 
     def __repr__(self) -> str:
         return str(self.value) + ' ' + self.unit
@@ -44,7 +52,7 @@ class _Property(object):
             return False
 
 class Length(_Property):
-    def __init__(self, value = 0, unit= 'm'):
+    def __init__(self, value=0, unit='m'):
         super().__init__(value,unit)
         self.unit = unit
 
@@ -205,7 +213,7 @@ class Temperature(_Property):
         return subtraction 
         
 class MassFlowRate(_Property):
-    def __init__(self, value = 0, unit= 'kg/s'):
+    def __init__(self, value=0, unit='kg/s'):
         super().__init__(value, unit)
         self.unit = unit
     
