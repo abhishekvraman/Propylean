@@ -104,7 +104,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         self = self._get_equipment_object(self)
         return self._perfomace_curve
     @performance_curve.setter
-    def pump_curve(self,value):
+    def performance_curve(self,value):
         self = self._get_equipment_object(self)
         if isinstance(value, pd.DataFrame) and value.shape[1] == 2:
                 self._performance_curve = value
