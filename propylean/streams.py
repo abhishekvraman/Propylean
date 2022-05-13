@@ -127,7 +127,8 @@ class MaterialStream(Stream):
                  self._vol_flowrate = prop.VolumetricFlowRate()
                  self._mol_flowrate = prop.MolarFlowRate()
                  self._molecular_weight = prop.MolecularWeigth()
-                 self._Z = 1
+                 self._Z_g = 1
+                 self._Z_l = 0
                  self._isentropic_exponent = 1.3
                  self._phase = None
                  self._Psat = None
@@ -382,6 +383,30 @@ class MaterialStream(Stream):
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
         self._Pc = value
+        self._update_stream_object(self)
+    
+    @property
+    def Z_g(self):
+        self = self._get_stream_object(self)
+        return self._Z_g
+    @Z_g.setter
+    def Z_g(self, value):
+        if MaterialStream.property_package:
+            raise Exception("Property cannot be changed when using a Property Package.")
+        self = self._get_stream_object(self)
+        self._Z_g = value
+        self._update_stream_object(self)
+    
+    @property
+    def Z_l(self):
+        self = self._get_stream_object(self)
+        return self._Z_g
+    @Z_l.setter
+    def Z_l(self, value):
+        if MaterialStream.property_package:
+            raise Exception("Property cannot be changed when using a Property Package.")
+        self = self._get_stream_object(self)
+        self._Z_l = value
         self._update_stream_object(self)
     
     def _update_properties(self):

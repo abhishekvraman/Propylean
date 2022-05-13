@@ -109,8 +109,7 @@ class CentrifugalPump(_PressureChangers):
         self = self._get_equipment_object(self)
         if self._inlet_material_stream_tag is None:
             raise Exception("Pump should be connected with MaterialStream at the inlet")
-        stream_index = streams.get_stream_index(self._inlet_material_stream_tag, "material")
-        density = self._stream_object_property_getter(stream_index, "material", "density")
+        density = self._connected_stream_property_getter(True, "material", "density")
         density.unit = "kg/m^3"
         old_p_unit = self.inlet_pressure.unit
         self.inlet_pressure.unit = 'Pa'
@@ -124,9 +123,8 @@ class CentrifugalPump(_PressureChangers):
         if (self._outlet_material_stream_tag is None and
             self._inlet_material_stream_tag is None):
             raise Exception("Pump should be connected with MaterialStream either at inlet or outlet")
-        stream_tag = self._inlet_material_stream_tag if self._outlet_material_stream_tag is None else self._outlet_material_stream_tag
-        stream_index = streams.get_stream_index(stream_tag, "material")
-        density = self._stream_object_property_getter(stream_index, "material", "density")
+        is_inlet = False if self._inlet_material_stream_index is None else True
+        density = self._connected_stream_property_getter(is_inlet, "material", "density")
         density.unit = "kg/m^3"
         dp = self.differential_pressure
         dp.unit = "Pa"
@@ -138,9 +136,8 @@ class CentrifugalPump(_PressureChangers):
         if (self._outlet_material_stream_tag is None and
             self._inlet_material_stream_tag is None):
             raise Exception("Centrifugal Pump should be connected with MaterialStream either at inlet or outlet")
-        stream_tag = self._inlet_material_stream_tag if self._outlet_material_stream_tag is None else self._outlet_material_stream_tag
-        stream_index = streams.get_stream_index(stream_tag, "material")
-        vol_flowrate = self._stream_object_property_getter(stream_index, "material", "vol_flowrate")
+        is_inlet = False if self._inlet_material_stream_index is None else True
+        vol_flowrate = self._connected_stream_property_getter(is_inlet, "material", "vol_flowrate")
         vol_flowrate.unit = "m^3/h"
         dp = self.differential_pressure
         dp.unit = "Pa"
@@ -270,8 +267,7 @@ class PositiveDisplacementPump(_PressureChangers):
         self = self._get_equipment_object(self)
         if self._inlet_material_stream_tag is None:
             raise Exception("Pump should be connected with MaterialStream at the inlet")
-        stream_index = streams.get_stream_index(self._inlet_material_stream_tag, "material")
-        density = self._stream_object_property_getter(stream_index, "material", "density")
+        density = self._connected_stream_property_getter(True, "material", "density")
         density.unit = "kg/m^3"
         old_p_unit = self.inlet_pressure.unit
         old_acc_head_unit = self.accel_head.unit
@@ -300,9 +296,8 @@ class PositiveDisplacementPump(_PressureChangers):
         if (self._outlet_material_stream_tag is None and
             self._inlet_material_stream_tag is None):
             raise Exception("Pump should be connected with MaterialStream either at inlet or outlet")
-        stream_tag = self._inlet_material_stream_tag if self._outlet_material_stream_tag is None else self._outlet_material_stream_tag
-        stream_index = streams.get_stream_index(stream_tag, "material")
-        density = self._stream_object_property_getter(stream_index, "material", "density")
+        is_inlet = False if self._inlet_material_stream_index is None else True
+        density = self._connected_stream_property_getter(is_inlet, "material", "density")
         density.unit = "kg/m^3"
         dp = self.differential_pressure
         dp.unit = "Pa"
@@ -312,8 +307,7 @@ class PositiveDisplacementPump(_PressureChangers):
     @property
     def accel_head(self):
         L, V = self._get_suction_length_velocity()
-        stream_index = streams.get_stream_index(self._inlet_material_stream_tag, "material")
-        density = self._stream_object_property_getter(stream_index, "material", "density")
+        density = self._connected_stream_property_getter(True, "material", "density")
         density.unit = "kg/m^3"
         SG = density.value/1000
         k = 1
@@ -323,8 +317,8 @@ class PositiveDisplacementPump(_PressureChangers):
     @property
     def power(self):
         self = self._get_equipment_object(self)
-        stream_index = streams.get_stream_index(self._inlet_material_stream_tag, "material")
-        vol_flow = self._stream_object_property_getter(stream_index, "material", "vol_flowrate")
+        is_inlet = False if self._inlet_material_stream_index is None else True
+        vol_flow = self._connected_stream_property_getter(is_inlet, "material", "vol_flowrate")
         vol_flow.unit = "gal/min"
         old_dp_unit = self.differential_pressure.unit
         self.differential_pressure.unit = 'psi'
@@ -444,9 +438,8 @@ class CentrifugalCompressor(_PressureChangers):
     @property
     def polytropic_efficiency(self):
         self = self._get_equipment_object(self)
-        stream_tag = self._inlet_material_stream_tag if self._outlet_material_stream_tag is None else self._outlet_material_stream_tag
-        stream_index = streams.get_stream_index(stream_tag, "material")
-        isentropic_exponent = self._stream_object_property_getter(stream_index, "material", "isentropic_exponent")
+        is_inlet = False if self._inlet_material_stream_index is None else True
+        isentropic_exponent = self._connected_stream_property_getter(is_inlet, "material", "isentropic_exponent")
         return compressible_fluid.isentropic_efficiency(P1 = self._inlet_pressure.value,
                                                         P2 = self._outlet_pressure.value,
                                                         k = isentropic_exponent,
@@ -454,9 +447,8 @@ class CentrifugalCompressor(_PressureChangers):
     @polytropic_efficiency.setter
     def polytropic_efficiency(self, value):
         self = self._get_equipment_object(self)
-        stream_tag = self._inlet_material_stream_tag if self._outlet_material_stream_tag is None else self._outlet_material_stream_tag
-        stream_index = streams.get_stream_index(stream_tag, "material")
-        isentropic_exponent = self._stream_object_property_getter(stream_index, "material", "isentropic_exponent")
+        is_inlet = False if self._intlet_material_stream_index is None else True
+        isentropic_exponent = self._connected_stream_property_getter(is_inlet, "material", "isentropic_exponent")
         self.adiabatic_efficiency = compressible_fluid.isentropic_efficiency(P1 = self._inlet_pressure.value,
                                                                              P2 = self._outlet_pressure.value,
                                                                              k = isentropic_exponent,
@@ -466,13 +458,30 @@ class CentrifugalCompressor(_PressureChangers):
     @property
     def power(self):
         self = self._get_equipment_object(self)
+        is_inlet = False if self._inlet_material_stream_index is None else True
+        isentropic_exponent = self._connected_stream_property_getter(is_inlet, "material", "isentropic_exponent")
+        Z = self._connected_stream_property_getter(is_inlet, "material", "Z_g")
+        MW = self._connected_stream_property_getter(is_inlet, "material", "molecular_weight")
         work = compressible_fluid.isentropic_work_compression(T1 = self.inlet_temperature.value,
-                                                              k = self.methane.isentropic_exponent,
-                                                              Z = self.methane.Z,
+                                                              k = isentropic_exponent,
+                                                              Z = Z,
                                                               P1 = self._inlet_pressure.value,
                                                               P2 = self._outlet_pressure.value,
                                                               eta = self.adiabatic_efficiency)
-        return work * self.inlet_mass_flowrate.value / self.methane.MW
+        return prop.Power(work * self.inlet_mass_flowrate.value / MW.value)
+        
+    @property
+    def energy_in(self):
+        return self.power
+    @energy_in.setter
+    def energy_in(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
+        if unit is None:
+            unit = self.energy_in.unit
+        self._energy_in = prop.Power(value, unit)
+        self._update_equipment_object(self)
+
     @classmethod
     def list_objects(cls):
         return cls.items
@@ -487,6 +496,7 @@ class CentrifugalCompressor(_PressureChangers):
             isinstance(stream_object, streams.EnergyStream)) or
             stream_type in ['energy', 'power', 'e', 'p']):
             direction = 'in'
+            stream_governed = False
         return super().connect_stream(direction=direction, 
                                       stream_object=stream_object, 
                                       stream_tag=stream_tag, 

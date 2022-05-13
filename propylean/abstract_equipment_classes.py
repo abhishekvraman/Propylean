@@ -78,8 +78,10 @@ class _EquipmentOneInletOutlet(object):
         self._outlet_material_stream_tag = None
         self._inlet_energy_stream_tag = None
         self._outlet_energy_stream_tag = None
-        self._inlet_material_components = prop.Components()
-        self._outlet_material_components = prop.Components()
+        self._inlet_material_stream_index = None
+        self._outlet_material_stream_index = None
+        self._inlet_energy_stream_index = None
+        self._outlet_energy_stream_index = None
         
         #Energy properties
         self._energy_in = prop.Power()
@@ -287,7 +289,7 @@ class _EquipmentOneInletOutlet(object):
     def get_stream_tag(self, stream_type, direction):
         """ 
         DESCRIPTION:
-            Class method to get stream tag using steam type and the direction.
+            Method to get stream tag using steam type and the direction.
         
         PARAMETERS:
             stream_type:
@@ -401,21 +403,24 @@ class _EquipmentOneInletOutlet(object):
 
         mapping_result = self._stream_equipment_mapper(stream_index, stream_type, is_inlet)
         if self._is_disconnection:
-            stream_tag = None
+            stream_tag = stream_index = None
             
         if stream_type.lower() in ['material', 'mass', 'm']:
             if direction.lower() in ['in', 'inlet']:
                 self._inlet_material_stream_tag = stream_tag
+                self._inlet_material_stream_index = stream_index
             else:
                 self._outlet_material_stream_tag = stream_tag
+                self._outlet_material_stream_index = stream_index
         else:
             if direction.lower() in ['in', 'inlet']:
                 self._inlet_energy_stream_tag = stream_tag
+                self._inlet_energy_stream_index = stream_index
             else:
                 self._outlet_energy_stream_tag = stream_tag
+                self._outlet_energy_stream_index = stream_index
         
         if mapping_result and not self._is_disconnection:
-            self._is_disconnection = False
             self._stream_equipment_properties_matcher(stream_index, 
                                                       stream_type,
                                                       is_inlet,
@@ -651,10 +656,6 @@ class _EquipmentOneInletOutlet(object):
         if stream_type.lower() in ['m', 'material', 'mass']:
             stream_object = streams.MaterialStream.list_objects()[stream_index]
             if is_inlet:
-                stream_object.components,\
-                self._inlet_material_components = property_matcher(stream_object.components,
-                                                          self._inlet_material_components,
-                                                          stream_governed)
                 stream_object.mass_flowrate, \
                 self.inlet_mass_flowrate = property_matcher(stream_object.mass_flowrate,
                                                             self._inlet_mass_flowrate,
@@ -668,10 +669,6 @@ class _EquipmentOneInletOutlet(object):
                                                           self._inlet_temperature,
                                                           stream_governed)
             else:
-                stream_object.components,\
-                self._outlet_material_components = property_matcher(stream_object.components,
-                                                          self._outlet_material_components,
-                                                          stream_governed)
                 stream_object.mass_flowrate, \
                 self.outlet_mass_flowrate = property_matcher(stream_object.mass_flowrate,
                                                              self._outlet_mass_flowrate,
@@ -684,7 +681,7 @@ class _EquipmentOneInletOutlet(object):
                 self.outlet_temperature = property_matcher(stream_object.temperature,
                                                            self._outlet_temperature,
                                                            stream_governed)
-            self._chemical_reaction(is_inlet)
+            self._physical_chemical_reaction(is_inlet)
             if not stream_governed:
                 streams.MaterialStream._update_stream_object(stream_object)
             else:
@@ -704,20 +701,17 @@ class _EquipmentOneInletOutlet(object):
             if not stream_governed:
                 streams.EnergyStream._update_stream_object(stream_object)
 
-    def _stream_object_property_getter(self, stream_index, 
-                                       stream_type,
-                                       property):
+    def _connected_stream_property_getter(self, is_inlet, stream_type, property=None):
         """ 
             DESCRIPTION:
                 Internal function to get object of stream.
             
             PARAMETERS:
-                stream_index:
+                is_inlet:
                     Required: Yes
-                    Type: int
-                    Acceptable values: Non-negative integer
+                    Type: bool
                     Default value: Not Applicable
-                    Description: Index of the stream in the stream list it belongs to.
+                    Description: True if stream is inlet to equipment. False if stream is outlet.
                 
                 stream_type:
                     Required: Yes
@@ -725,21 +719,30 @@ class _EquipmentOneInletOutlet(object):
                     Acceptable values: 'material' or 'energy'
                     Default value: Not Applicable
                     Description: Index of the stream in the stream list it belongs to.
+                
+                property:
+                    Required: Yes if stream_type is material
+                    Type: String
+                    Description: Type of property. See the if else ladder.
+
             
             RETURN VALUE:
-                Type: Stream
+                Type: Any supported property
             
             ERROR RAISED:
                 Type:
                 Description: 
             
             SAMPLE USE CASES:
-                >>> Psat = self._stream_object_property_getter(stream_index, "material", "Psat")
+                >>> Psat = self._connected_stream_property_getter(True, "material", "Psat")
                 
         """
+        
         if stream_type.lower() in ['m', 'material', 'mass']:
+            stream_index = self._inlet_material_stream_index if is_inlet else self._outlet_material_stream_index
             stream_object = streams.MaterialStream.list_objects()[stream_index]  
         else:
+            stream_index = self._inlet_energy_stream_index if is_inlet else self._outlet_energy_stream_index
             stream_object = streams.EnergyStream.list_objects()[stream_index]
             return stream_object.amount
         
@@ -805,11 +808,19 @@ class _EquipmentOneInletOutlet(object):
         elif any([isinstance(value, float), isinstance(value, int)]):
             return value, None
 
-    def _chemical_reaction(self, is_inlet):
-        if is_inlet:
-            self._outlet_material_components = self._inlet_material_components
-        else:
-            self._inlet_material_components = self._outlet_material_components        
+    def _physical_chemical_reaction(self, is_inlet):
+        if (self._inlet_material_stream_index is not None and 
+            self._outlet_material_stream_index is not None):
+            inlet_stream_object = streams.MaterialStream.list_objects()[self._inlet_material_stream_index]
+            outlet_stream_object = streams.MaterialStream.list_objects()[self._outlet_material_stream_index]
+            if is_inlet:
+                outlet_stream_object.components = inlet_stream_object.components
+            else:
+                inlet_stream_object.components = outlet_stream_object.components
+
+            # TODO exchange all properties between streams.
+        
+              
 
 #Defining generic base class for all equipments with multiple inlet and outlet. TODO !!!!!!       
 class _EquipmentMultipleInletOutlet:

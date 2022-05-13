@@ -346,11 +346,11 @@ class PipeSegment(_EquipmentOneInletOutlet):
         if (self._outlet_material_stream_tag is None and
             self._inlet_material_stream_tag is None):
             raise Exception("PipeSegment should be connected with MaterialStream either at inlet or outlet")
-        stream_tag = self._inlet_material_stream_tag if self._outlet_material_stream_tag is None else self._outlet_material_stream_tag
-        stream_index = streams.get_stream_index(stream_tag, "material")
-        density = self._stream_object_property_getter(stream_index, "material", "density")
-        viscosity = self._stream_object_property_getter(stream_index, "material", "d_viscosity")
-        vol_flowrate = self._stream_object_property_getter(stream_index, "material", "vol_flowrate")
+       
+        is_inlet = False if self._inlet_material_stream_index is None else True
+        density = self._connected_stream_property_getter(is_inlet, "material", "density")
+        viscosity = self._connected_stream_property_getter(is_inlet, "material", "d_viscosity")
+        vol_flowrate = self._connected_stream_property_getter(is_inlet, "material", "vol_flowrate")
         density.unit = "kg/m^3"
         viscosity.unit = "Pa-s"
         vol_flowrate.unit = "m^3/s"

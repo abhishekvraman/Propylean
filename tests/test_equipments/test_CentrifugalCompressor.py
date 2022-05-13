@@ -201,9 +201,11 @@ class test_CentrifugalCompressor(unittest.TestCase):
                                differential_pressure=(10, 'bar'))
         compressor_power = EnergyStream(tag="Power_compressor_17", amount=(10, "MW"))
         compressor_inlet = MaterialStream(mass_flowrate=(1000, 'kg/h'),
-                                    pressure=(30, 'bar'),
-                                    temperature=(25, 'C'))
-        compressor_inlet.components = prop.Components({"methane": 1}, 'mol')
+                                          pressure=(30, 'bar'),
+                                          temperature=(25, 'C'))
+        compressor_inlet.isentropic_exponent = 1.36952
+        compressor_inlet.Z_g = 0.94024
+        compressor_inlet.molecular_weight = prop.MolecularWeigth(16.043, 'g/mol')
         # Test connection is made.
         self.assertTrue(compressor.connect_stream(compressor_inlet, "in", stream_governed=True))
         self.assertTrue(compressor.connect_stream(compressor_power))
@@ -216,7 +218,9 @@ class test_CentrifugalCompressor(unittest.TestCase):
         compressor = CentrifugalCompressor(tag="compressor_18",
                                differential_pressure=(10, 'bar'))
         inlet_stream = MaterialStream(tag="Inlet_compressor_18")
-        inlet_stream.components = prop.Components({"methane": 1}, 'mol')
+        inlet_stream.isentropic_exponent = 1.36952
+        inlet_stream.Z_g = 0.94024
+        inlet_stream.molecular_weight = prop.MolecularWeigth(16.043, 'g/mol')
         outlet_stream = MaterialStream(tag="Outlet_compressor_18")
         compressor_power = EnergyStream(tag="Power_compressor_18")
         # Test connection is made.
@@ -238,7 +242,9 @@ class test_CentrifugalCompressor(unittest.TestCase):
         compressor = CentrifugalCompressor(tag="compressor_19",
                                differential_pressure=(10, 'bar'))
         inlet_stream = MaterialStream(tag="Inlet_compressor_19")
-        inlet_stream.components = prop.Components({"methane": 1}, 'mol')
+        inlet_stream.isentropic_exponent = 1.36952
+        inlet_stream.Z_g = 0.94024
+        inlet_stream.molecular_weight = prop.MolecularWeigth(16.043, 'g/mol')
         outlet_stream = MaterialStream(tag="Outlet_compressor_19")
         compressor_power = EnergyStream(tag="Power_compressor_19")
         # Test connection is made.
@@ -262,7 +268,9 @@ class test_CentrifugalCompressor(unittest.TestCase):
         compressor = CentrifugalCompressor(tag="compressor_20",
                                differential_pressure=(10, 'bar'))
         inlet_stream = MaterialStream(tag="Inlet_compressor_20")
-        inlet_stream.components = prop.Components({"methane": 1}, 'mol')
+        inlet_stream.isentropic_exponent = 1.36952
+        inlet_stream.Z_g = 0.94024
+        inlet_stream.molecular_weight = prop.MolecularWeigth(16.043, 'g/mol')
         outlet_stream = MaterialStream(tag="Outlet_compressor_20")
         compressor_power = EnergyStream(tag="Power_compressor_20")
         # Test connection is made.
@@ -280,7 +288,22 @@ class test_CentrifugalCompressor(unittest.TestCase):
         self.assertIsNone(outlet_stream._from_equipment_tag)
 
     @pytest.mark.positive
-    def test_CentrifugalCompressor_head_calulcation(self):
+    def test_CentrifugalCompressor_adiabatic_head_calulcation(self):
+        compressor = CentrifugalCompressor(differential_pressure=(10, 'bar'),
+                                           efficiency=75)
+        inlet_stream = MaterialStream(mass_flowrate=(1000, 'kg/h'),
+                                      pressure=(30, 'bar'),
+                                      temperature=(25, 'C'))
+        inlet_stream.isentropic_exponent = 1.36952
+        inlet_stream.Z_g = 0.94024
+        inlet_stream.molecular_weight = prop.MolecularWeigth(16.043, 'g/mol')
+        compressor.connect_stream(inlet_stream, 'in', stream_governed=True)
+        compressor_head = compressor.adiabatic_head
+        compressor_head.unit = "m"
+        self.assertGreater(compressor_head.value, 0)
+    
+    @pytest.mark.positive
+    def test_CentrifugalCompressor_polytropic_head_calulcation(self):
         compressor = CentrifugalCompressor(tag="compressor_21",
                                differential_pressure=(10, 'bar'),
                                efficiency=75)
@@ -288,14 +311,13 @@ class test_CentrifugalCompressor(unittest.TestCase):
                                       mass_flowrate=(1000, 'kg/h'),
                                       pressure=(30, 'bar'),
                                       temperature=(25, 'C'))
-        inlet_stream.components = prop.Components({"methane": 1}, 'mol')
+        inlet_stream.isentropic_exponent = 1.36952
+        inlet_stream.Z_g = 0.94024
+        inlet_stream.molecular_weight = prop.MolecularWeigth(16.043, 'g/mol')
         compressor.connect_stream(inlet_stream, 'in', stream_governed=True)
-        pressure = prop.Pressure(100, 'bar')
-        pressure.unit = "Pa"
-        expected_head_value = 10000000 / (9.8 * inlet_stream.density.value)
-        compressor_head = compressor.head
+        compressor_head = compressor.polytropic_head
         compressor_head.unit = "m"
-        self.assertAlmostEqual(expected_head_value, compressor_head.value)
+        self.assertGreater(compressor_head.value, 0)
     
     @pytest.mark.positive
     def test_CentrifugalCompressor_power_calculations(self):
@@ -306,8 +328,9 @@ class test_CentrifugalCompressor(unittest.TestCase):
                                       mass_flowrate=(1000, 'kg/h'),
                                       pressure=(30, 'bar'),
                                       temperature=(25, 'C'))
-        inlet_stream.components = prop.Components({"methane": 1}, 'mol')
+        inlet_stream.isentropic_exponent = 1.36952
+        inlet_stream.Z_g = 0.94024
+        inlet_stream.molecular_weight = prop.MolecularWeigth(16.043, 'g/mol')
         compressor.connect_stream(inlet_stream, 'in', stream_governed=True)
-        
-        self.assertAlmostEqual(compressor.power, prop.Power())
+        self.assertGreater(compressor.power.value, 0)
 
