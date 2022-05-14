@@ -1,3 +1,4 @@
+from sre_constants import ANY
 import propylean.properties as prop
 from propylean import streams
 
@@ -681,7 +682,6 @@ class _EquipmentOneInletOutlet(object):
                 self.outlet_temperature = property_matcher(stream_object.temperature,
                                                            self._outlet_temperature,
                                                            stream_governed)
-            self._physical_chemical_reaction(is_inlet)
             if not stream_governed:
                 streams.MaterialStream._update_stream_object(stream_object)
             else:
@@ -700,6 +700,7 @@ class _EquipmentOneInletOutlet(object):
                                                     stream_governed)
             if not stream_governed:
                 streams.EnergyStream._update_stream_object(stream_object)
+        self._physical_chemical_reaction()
 
     def _connected_stream_property_getter(self, is_inlet, stream_type, property=None):
         """ 
@@ -808,19 +809,38 @@ class _EquipmentOneInletOutlet(object):
         elif any([isinstance(value, float), isinstance(value, int)]):
             return value, None
 
-    def _physical_chemical_reaction(self, is_inlet):
-        if (self._inlet_material_stream_index is not None and 
-            self._outlet_material_stream_index is not None):
-            inlet_stream_object = streams.MaterialStream.list_objects()[self._inlet_material_stream_index]
-            outlet_stream_object = streams.MaterialStream.list_objects()[self._outlet_material_stream_index]
-            if is_inlet:
-                outlet_stream_object.components = inlet_stream_object.components
-            else:
-                inlet_stream_object.components = outlet_stream_object.components
-
-            # TODO exchange all properties between streams.
+    def _physical_chemical_reaction(self):
+        # If both inlet and outlet streams are not conneted to the equipment
+        # no need to exchange properties between streams.
         
-              
+        if (self._outlet_material_stream_index is not None and
+            self._inlet_material_stream_index is not None):
+            inlet_m_stream_object = streams.MaterialStream.list_objects()[self._inlet_material_stream_index]
+            outlet_m_stream_object = streams.MaterialStream.list_objects()[self._outlet_material_stream_index]
+
+            # Inlet streams will always be governing.
+            outlet_m_stream_object.molecular_weight = inlet_m_stream_object.molecular_weight
+            outlet_m_stream_object.components = inlet_m_stream_object.components
+            outlet_m_stream_object.density = inlet_m_stream_object.density
+            outlet_m_stream_object.density_l = inlet_m_stream_object.density_l
+            outlet_m_stream_object.density_g = inlet_m_stream_object.density_g
+            outlet_m_stream_object.density_s = inlet_m_stream_object.density_s
+            outlet_m_stream_object.d_viscosity = inlet_m_stream_object.d_viscosity
+            outlet_m_stream_object.d_viscosity_l = inlet_m_stream_object.d_viscosity_l
+            outlet_m_stream_object.d_viscosity_g = inlet_m_stream_object.d_viscosity_g
+            outlet_m_stream_object.isentropic_exponent = inlet_m_stream_object.isentropic_exponent
+            outlet_m_stream_object.phase = inlet_m_stream_object.phase
+            outlet_m_stream_object.Psat = inlet_m_stream_object.Psat
+            outlet_m_stream_object.Pc = inlet_m_stream_object.Pc
+            outlet_m_stream_object.Z_g = inlet_m_stream_object.Z_g
+            outlet_m_stream_object.Z_l = inlet_m_stream_object.Z_l
+
+        if (self._outlet_energy_stream_index is not None and
+            self._inlet_energy_stream_index is not None):
+            inlet_e_stream_object = streams.EnergyStream.list_objects()[self._inlet_energy_stream_index]
+            outlet_e_stream_object = streams.EnergyStream.list_objects()[self._outlet_energy_stream_index]
+            outlet_e_stream_object.amount = inlet_e_stream_object.amount
+                
 
 #Defining generic base class for all equipments with multiple inlet and outlet. TODO !!!!!!       
 class _EquipmentMultipleInletOutlet:

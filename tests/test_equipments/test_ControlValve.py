@@ -132,7 +132,7 @@ class test_ControlValve(unittest.TestCase):
         cv.inlet_pressure = (30, 'bar')
         cv.inlet_mass_flowrate = (1000, 'kg/h')
         cv.inlet_temperature = (320, 'K')
-        inlet_stream = MaterialStream(tag="Inlet_cv_14")
+        inlet_stream = MaterialStream(tag="Inlet_cv_14", pressure=(20, 'bar'))
         # Test connection is made.
         self.assertTrue(cv.connect_stream(inlet_stream, 'in', stream_governed=False))
         # Test inlet properties of cv are equal to inlet stream's.
@@ -151,7 +151,7 @@ class test_ControlValve(unittest.TestCase):
         cv.outlet_pressure = (130, 'bar')
         cv.outlet_mass_flowrate = (1000, 'kg/h')
         cv.outlet_temperature = (30, 'C')
-        outlet_stream = MaterialStream(tag="Outlet_cv_15")
+        outlet_stream = MaterialStream(tag="Outlet_cv_15", pressure=(20, 'bar'))
         # Test connection is made.
         self.assertTrue(cv.connect_stream(outlet_stream, 'out', stream_governed=False))
         # Test outlet properties of cv are equal to outlet stream's.
@@ -167,7 +167,7 @@ class test_ControlValve(unittest.TestCase):
     def test_ControlValve_stream_disconnection_by_stream_object(self):
         cv = ControlValve(tag="cv_18",
                           pressure_drop=(10, 'bar'))
-        inlet_stream = MaterialStream(tag="Inlet_cv_18")
+        inlet_stream = MaterialStream(tag="Inlet_cv_18", pressure=(20, 'bar'))
         inlet_stream.components = prop.Components({"water": 1})
         outlet_stream = MaterialStream(tag="Outlet_cv_18")
     
@@ -190,7 +190,7 @@ class test_ControlValve(unittest.TestCase):
     def test_ControlValve_stream_disconnection_by_stream_tag(self):
         cv = ControlValve(tag="cv_19",
                           pressure_drop=(10, 'bar'))
-        inlet_stream = MaterialStream(tag="Inlet_cv_19")
+        inlet_stream = MaterialStream(tag="Inlet_cv_19", pressure=(20, 'bar'))
         inlet_stream.components = prop.Components({"water": 1})
         outlet_stream = MaterialStream(tag="Outlet_cv_19")
     
@@ -213,7 +213,7 @@ class test_ControlValve(unittest.TestCase):
     def test_ControlValve_stream_disconnection_by_direction_stream_type(self):
         cv = ControlValve(tag="cv_20",
                           pressure_drop=(10, 'bar'))
-        inlet_stream = MaterialStream(tag="Inlet_cv_20")
+        inlet_stream = MaterialStream(tag="Inlet_cv_20", pressure=(20, 'bar'))
         inlet_stream.components = prop.Components({"water": 1})
         outlet_stream = MaterialStream(tag="Outlet_cv_20")
    
