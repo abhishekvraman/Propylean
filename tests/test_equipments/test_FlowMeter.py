@@ -208,7 +208,6 @@ class test_FlowMeter(unittest.TestCase):
         # Test connection is made.
         self.assertTrue(flow_meter.connect_stream(inlet_stream, 'in', stream_governed=True))
         self.assertTrue(flow_meter.connect_stream(outlet_stream, 'out', stream_governed=False))
-        self.assertEqual(inlet_stream.components, flow_meter._inlet_material_components)
         self.assertEqual(inlet_stream.components, outlet_stream.components)
         # Test disconnection
         self.assertTrue(flow_meter.disconnect_stream(stream_tag="Inlet_flow_meter_19"))

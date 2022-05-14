@@ -248,7 +248,6 @@ class test_PositiveDisplacementPump(unittest.TestCase):
         # Test connection is made.
         self.assertTrue(pump.connect_stream(inlet_stream, 'in', stream_governed=True))
         self.assertTrue(pump.connect_stream(outlet_stream, 'out', stream_governed=False))
-        self.assertEqual(inlet_stream.components, pump._inlet_material_components)
         self.assertEqual(inlet_stream.components, outlet_stream.components)
         self.assertTrue(pump.connect_stream(pump_power))
         # Test disconnection

@@ -197,7 +197,6 @@ class test_ControlValve(unittest.TestCase):
         # Test connection is made.
         self.assertTrue(cv.connect_stream(inlet_stream, 'in', stream_governed=True))
         self.assertTrue(cv.connect_stream(outlet_stream, 'out', stream_governed=False))
-        self.assertEqual(inlet_stream.components, cv._inlet_material_components)
         self.assertEqual(inlet_stream.components, outlet_stream.components)
         
         # Test disconnection
@@ -233,21 +232,25 @@ class test_ControlValve(unittest.TestCase):
         self.assertIsNone(outlet_stream._from_equipment_tag)
     
     @pytest.mark.positive
-    def test_ControlValve_Kv_calulcations_gas(self):
+    def test_ControlValve_Cv_calulcations_gas(self):
         cv = ControlValve(tag="cv_23",
                           pressure_drop=(10, 'bar'))
         inlet_stream = MaterialStream(tag="Inlet_cv_23",
                                       mass_flowrate=(1000, 'kg/h'),
                                       pressure=(1E6, 'Pa'),
                                       temperature=(350, 'K'))
-        vol_fraction = OrderedDict([('nitrogen', 0.6), ('oxygen', 0.4)])
-        inlet_stream.components = prop.Components(vol_fraction, "mass")
+        inlet_stream.isentropic_exponent = 1.36952
+        inlet_stream.phase = "g"
+        inlet_stream.Z_g = 0.94024
+        inlet_stream.molecular_weight = prop.MolecularWeigth(16.043, 'g/mol')
+        inlet_stream.d_viscosity = prop.DViscosity(0.01162, 'cP')
+        inlet_stream.density = prop.Density(21.34756)
         cv.connect_stream(inlet_stream, 'in', stream_governed=True)
         # TODO: Improve calulation accuracy
-        self.assertGreater(cv.Kv, 0)
+        self.assertGreater(cv.Cv, 0)
 
     @pytest.mark.positive
-    def test_ControlValve_Kv_calulcations_liquid(self):
+    def test_ControlValve_Cv_calulcations_liquid(self):
         cv = ControlValve(tag="cv_24",
                           pressure_drop=(10, 'bar'))
         inlet_stream = MaterialStream(tag="Inlet_cv_24",
@@ -257,4 +260,4 @@ class test_ControlValve(unittest.TestCase):
         inlet_stream.components = prop.Components({"water": 1})
         cv.connect_stream(inlet_stream, 'in', stream_governed=True)
         # TODO: Improve calulation accuracy
-        self.assertGreater(cv.Kv, 0)
+        self.assertGreater(cv.Cv, 0)

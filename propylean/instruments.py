@@ -41,7 +41,7 @@ class ControlValve(_EquipmentOneInletOutlet):
         return hash(self.__repr__())
 
     @property
-    def Kv(self):
+    def Cv(self):
         self = self._get_equipment_object(self)
         if (self._outlet_material_stream_tag is None and
             self._inlet_material_stream_tag is None):
@@ -49,25 +49,23 @@ class ControlValve(_EquipmentOneInletOutlet):
         P1 = self.inlet_pressure
         P2 = self.outlet_pressure
         P1.unit = P2.unit = "Pa"
-        stream_tag = self._inlet_material_stream_tag if self._outlet_material_stream_tag is None else self._outlet_material_stream_tag
-        stream_index = streams.get_stream_index(stream_tag, "material")
-        density = self._stream_object_property_getter(stream_index, "material", "density")
-        phase = self._stream_object_property_getter(stream_index, "material", "phase")
-        d_viscosity = self._stream_object_property_getter(stream_index, "material", "d_viscosity")
-        isentropic_exponent = self._stream_object_property_getter(stream_index, "material", "isentropic_exponent")
-        MW = self._stream_object_property_getter(stream_index, "material", "molecular_weight")
-        
-        Psat = self._stream_object_property_getter(stream_index, "material", "Psat")
-        Pc = self._stream_object_property_getter(stream_index, "material", "Pc")
+        is_inlet = True if self._outlet_material_stream_tag is None else False
+        density = self._connected_stream_property_getter(is_inlet, "material", "density")
+        phase = self._connected_stream_property_getter(is_inlet, "material", "phase")
+        d_viscosity = self._connected_stream_property_getter(is_inlet, "material", "d_viscosity")
+        isentropic_exponent = self._connected_stream_property_getter(is_inlet, "material", "isentropic_exponent")
+        MW = self._connected_stream_property_getter(is_inlet, "material", "molecular_weight")
+        Psat = self._connected_stream_property_getter(is_inlet, "material", "Psat")
+        Pc = self._connected_stream_property_getter(is_inlet, "material", "Pc")
         if phase == 'l':
             return cv_calculations.size_control_valve_l(density.value, Psat, Pc, d_viscosity.value,
                                                         P1.value, P2.value, 
                                                         self.inlet_mass_flowrate.value/density.value)
-        elif phase == 'g':
-            Z_g = self._stream_object_property_getter(stream_index, "material", "Z_g")
+        elif phase == 'g' or phase == 'l/g':
+            Z_g = self._connected_stream_property_getter(is_inlet, "material", "Z_g")
             return cv_calculations.size_control_valve_g(T = self.inlet_temperature.value, 
-                                                        MW = MW,
-                                                        mu= d_viscosity,
+                                                        MW = MW.value,
+                                                        mu= d_viscosity.value,
                                                         gamma = isentropic_exponent, 
                                                         Z = Z_g,
                                                         P1 = P1.value, 

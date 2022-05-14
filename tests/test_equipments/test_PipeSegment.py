@@ -259,7 +259,6 @@ class test_PipeSegment(unittest.TestCase):
         # Test connection is made.
         self.assertTrue(ps.connect_stream(inlet_stream, 'in', stream_governed=True))
         self.assertTrue(ps.connect_stream(outlet_stream, 'out', stream_governed=False))
-        self.assertEqual(inlet_stream.components, ps._inlet_material_components)
         self.assertEqual(inlet_stream.components, outlet_stream.components)
         self.assertTrue(ps.connect_stream(ps_power, "in"))
         # Test disconnection
