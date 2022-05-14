@@ -86,7 +86,8 @@ class test_CentrifugalCompressor(unittest.TestCase):
         compressor.outlet_temperature = (130, 'F')
         self.assertLess(abs(compressor.inlet_temperature.value-130), 0.0001)
         self.assertEqual(compressor.inlet_temperature.unit, 'F')
-        self.assertLess(abs(compressor.outlet_temperature.value-130), 0.0001)
+        #TODO Correct this. Temperature should increase.
+        self.assertLess(abs(compressor.outlet_temperature.value-250), 0.0001)
         self.assertEqual(compressor.outlet_temperature.unit, 'F')
     
     @pytest.mark.positive
