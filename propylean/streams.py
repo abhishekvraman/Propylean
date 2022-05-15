@@ -1,6 +1,6 @@
-from audioop import avg
 from thermo import Mixture
 import propylean.properties as prop
+
 class Stream(object):
    
     def __init__(self, tag=None, **inputs) -> None:
