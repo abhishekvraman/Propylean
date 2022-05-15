@@ -6,7 +6,7 @@ long_description = (this_directory / "README.md").read_text()
 setup(
   name = 'Propylean',       
   packages = ['Propylean'],   # Chose the same as "name"
-  version = '00.00.02',      
+  version = '00.00.03',      
   license='MIT',       
   description = 'The open-source analytics package for chemical process industries.', 
   long_description=long_description,
