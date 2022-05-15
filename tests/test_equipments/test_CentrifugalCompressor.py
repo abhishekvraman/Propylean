@@ -4,7 +4,7 @@ from propylean.equipments.rotary import CentrifugalCompressor
 from propylean.streams import MaterialStream, EnergyStream
 import propylean.properties as prop
 import pandas as pd
-from unittest.mock import patch
+from propylean.settings import Settings
 
 class test_CentrifugalCompressor(unittest.TestCase):
     @pytest.mark.positive
@@ -34,13 +34,26 @@ class test_CentrifugalCompressor(unittest.TestCase):
     
     @pytest.mark.positive
     @pytest.mark.instantiation
-    def test_CentrifugalCompressor_instantiation_adiabatic_efficiency(self):
+    def test_CentrifugalCompressor_instantiation_efficiency_adiabatic_setting(self):
         compressor = CentrifugalCompressor(tag="compressor_3",
                                             differential_pressure=(10, 'bar'),
-                                            adiabatic_efficiency=0.6)
+                                            efficiency=0.6)
         self.assertEqual(compressor.tag, "compressor_3")
         self.assertEqual(compressor.differential_pressure, prop.Pressure(10, 'bar'))
+        # By defaul setting is adiabatic/isentropic
+        Settings.compressor_process = "isenTROpiC"
+        self.assertEqual(compressor.efficiency, 0.6)
         self.assertEqual(compressor.adiabatic_efficiency, 0.6)
+    
+    @pytest.mark.positive
+    @pytest.mark.instantiation
+    def test_CentrifugalCompressor_instantiation_efficiency_polytropic_setting(self):
+        compressor = CentrifugalCompressor(differential_pressure=(10, 'bar'),
+                                           efficiency=0.6)
+        self.assertEqual(compressor.differential_pressure, prop.Pressure(10, 'bar'))
+        Settings.compressor_process = "polYtROpic"
+        self.assertEqual(compressor.efficiency, 0.6)
+        self.assertEqual(compressor.polytropic_efficiency, 0.6)
     
     @pytest.mark.positive
     @pytest.mark.instantiation
@@ -86,8 +99,7 @@ class test_CentrifugalCompressor(unittest.TestCase):
         compressor.outlet_temperature = (130, 'F')
         self.assertLess(abs(compressor.inlet_temperature.value-130), 0.0001)
         self.assertEqual(compressor.inlet_temperature.unit, 'F')
-        #TODO Correct this. Temperature should increase.
-        self.assertLess(abs(compressor.outlet_temperature.value-250), 0.0001)
+        self.assertGreater(compressor.outlet_temperature.value, compressor.inlet_temperature.value)
         self.assertEqual(compressor.outlet_temperature.unit, 'F')
     
     @pytest.mark.positive
@@ -122,7 +134,7 @@ class test_CentrifugalCompressor(unittest.TestCase):
         self.assertEqual(compressor.inlet_mass_flowrate, inlet_stream.mass_flowrate)
         # Test outlet properties are calculated accordingly.
         self.assertEqual(compressor.outlet_pressure, compressor.inlet_pressure+compressor.differential_pressure)
-        self.assertLess(abs(compressor.inlet_temperature.value - compressor.outlet_temperature.value), 0.001)
+        self.assertLess(compressor.inlet_temperature.value, compressor.outlet_temperature.value)
         self.assertEqual(compressor.inlet_temperature.unit, compressor.outlet_temperature.unit)
         self.assertEqual(compressor.inlet_mass_flowrate, compressor.outlet_mass_flowrate)
 
@@ -142,7 +154,7 @@ class test_CentrifugalCompressor(unittest.TestCase):
         self.assertEqual(compressor.outlet_mass_flowrate, outlet_stream.mass_flowrate)
         # Test intlet properties are calculated accordingly.
         self.assertEqual(compressor.inlet_pressure, compressor.outlet_pressure-compressor.differential_pressure)
-        self.assertLess(abs(compressor.inlet_temperature.value-compressor.outlet_temperature.value),0.0001)
+        self.assertLess(compressor.inlet_temperature.value, compressor.outlet_temperature.value)
         self.assertEqual(compressor.inlet_mass_flowrate, compressor.outlet_mass_flowrate)
 
     @pytest.mark.positive
@@ -162,7 +174,7 @@ class test_CentrifugalCompressor(unittest.TestCase):
         self.assertEqual(compressor.inlet_mass_flowrate, inlet_stream.mass_flowrate)
         # Test outlet properties are calculated accordingly.
         self.assertEqual(compressor.outlet_pressure, compressor.inlet_pressure+compressor.differential_pressure)
-        self.assertEqual(compressor.inlet_temperature, compressor.outlet_temperature)
+        self.assertLess(compressor.inlet_temperature.value, compressor.outlet_temperature.value)
         self.assertEqual(compressor.inlet_mass_flowrate, compressor.outlet_mass_flowrate)
 
     @pytest.mark.positive
@@ -181,7 +193,7 @@ class test_CentrifugalCompressor(unittest.TestCase):
         self.assertEqual(compressor.outlet_mass_flowrate, outlet_stream.mass_flowrate)
         # Test intlet properties are calculated accordingly.
         self.assertEqual(compressor.inlet_pressure, compressor.outlet_pressure-compressor.differential_pressure)
-        self.assertEqual(compressor.inlet_temperature, compressor.outlet_temperature)
+        self.assertLess(compressor.inlet_temperature.value, compressor.outlet_temperature.value)
         self.assertEqual(compressor.inlet_mass_flowrate, compressor.outlet_mass_flowrate)
     
     # TODO Uncomment below when power setting feature is provided.
@@ -294,11 +306,14 @@ class test_CentrifugalCompressor(unittest.TestCase):
         inlet_stream = MaterialStream(mass_flowrate=(1000, 'kg/h'),
                                       pressure=(30, 'bar'),
                                       temperature=(25, 'C'))
+        outlet_stream = MaterialStream()
         inlet_stream.isentropic_exponent = 1.36952
         inlet_stream.Z_g = 0.94024
         inlet_stream.molecular_weight = prop.MolecularWeigth(16.043, 'g/mol')
+        Settings.compressor_process="ADIABATIC"
         compressor.connect_stream(inlet_stream, 'in', stream_governed=True)
-        compressor_head = compressor.adiabatic_head
+        compressor.connect_stream(outlet_stream, 'out', stream_governed=False)
+        compressor_head = compressor.head
         compressor_head.unit = "m"
         self.assertGreater(compressor_head.value, 0)
     
@@ -311,11 +326,14 @@ class test_CentrifugalCompressor(unittest.TestCase):
                                       mass_flowrate=(1000, 'kg/h'),
                                       pressure=(30, 'bar'),
                                       temperature=(25, 'C'))
+        outlet_stream = MaterialStream()
         inlet_stream.isentropic_exponent = 1.36952
         inlet_stream.Z_g = 0.94024
         inlet_stream.molecular_weight = prop.MolecularWeigth(16.043, 'g/mol')
+        Settings.compressor_process="POLYTROPIC"
         compressor.connect_stream(inlet_stream, 'in', stream_governed=True)
-        compressor_head = compressor.polytropic_head
+        compressor.connect_stream(outlet_stream, 'out', stream_governed=False)
+        compressor_head = compressor.head
         compressor_head.unit = "m"
         self.assertGreater(compressor_head.value, 0)
     
