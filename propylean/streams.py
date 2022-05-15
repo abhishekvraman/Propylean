@@ -400,7 +400,7 @@ class MaterialStream(Stream):
     @property
     def Z_l(self):
         self = self._get_stream_object(self)
-        return self._Z_g
+        return self._Z_l
     @Z_l.setter
     def Z_l(self, value):
         if MaterialStream.property_package:

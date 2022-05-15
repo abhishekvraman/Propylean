@@ -1,8 +1,10 @@
 from propylean.generic_equipment_classes import _PressureChangers
 from propylean import streams
 from propylean.settings import Settings
+from propylean.constants import Constants
 import propylean.properties as prop
-import fluids.compressible as compressible_fluid 
+import fluids.compressible as compressible_fluid
+from math import pow
 
 # Start of final classes of pumps.
 class CentrifugalPump(_PressureChangers):
@@ -456,8 +458,7 @@ class CentrifugalCompressor(_PressureChangers):
             value = value
         else:
             value = value/100
-        if (Settings.compressor_process.lower() == "adiabatic" or 
-            Settings.compressor_process.lower() == "isentropic"):
+        if Settings.compressor_process.lower() in ["adiabatic", "isentropic"]:
             self.adiabatic_efficiency = value
         else:
             self.polytropic_efficiency = value
@@ -536,8 +537,28 @@ class CentrifugalCompressor(_PressureChangers):
         return prop.Power(work * self.inlet_mass_flowrate.value / MW.value)
     
     @property
-    def adiabatic_head(self):
-        pass
+    def head(self):
+        if (self._inlet_material_stream_index is None or
+            self._outlet_material_stream_index is None):
+            raise Exception("Head calculations only supported when Compressor is connected to a MaterialStream object.")
+        if Settings.compressor_process.lower() in ["adiabatic", "isentropic"]:
+            isentropic_exponent = self._connected_stream_property_getter(True, "material", "isentropic_exponent")
+            ratio = (isentropic_exponent - 1)/isentropic_exponent
+        else:
+            ratio = (self.polytropic_exponent - 1)/self.polytropic_exponent
+        
+        P1 = self.inlet_pressure
+        P2 = self.outlet_pressure
+        P1.unit = "Pa"
+        P2.unit = "Pa"
+        Zi = self._connected_stream_property_getter(True, "material", "Z_g")
+        Zo = self._connected_stream_property_getter(False, "material", "Z_g")
+        Z = (Zi + Zo)/2
+        T1 = self.inlet_temperature
+        T1.unit = "K"
+        MW = self._connected_stream_property_getter(True, "material", "molecular_weight")
+        head = Z * Constants.R * T1.value * (pow((P2.value/P1.value), ratio) - 1)/(ratio * MW.value)
+        return prop.Length(head)
         
     @property
     def energy_in(self):
