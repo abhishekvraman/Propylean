@@ -1,12 +1,12 @@
-from distutils.core import setup
+from setuptools import setup, find_packages
 # read the contents of your README file
 from pathlib import Path
 this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text()
 setup(
-  name = 'Propylean',       
-  packages = ['Propylean'],   # Chose the same as "name"
-  version = '00.00.03',      
+  name = 'propylean',       
+  packages = find_packages(exclude=("tests",)),
+  version = '00.00.08',      
   license='MIT',       
   description = 'The open-source analytics package for chemical process industries.', 
   long_description=long_description,
@@ -14,7 +14,6 @@ setup(
   author = 'ABHISHEK V RAMAN',                
   author_email = '',      
   url = 'https://github.com/abhishekvraman/Propylean',   # Provide either the link to your github or to your website
-  download_url = 'https://github.com/user/reponame/archive/v_01.tar.gz',    # I explain this later on
   keywords = ['chemical', 'manufacturing', 'hydraulics', 'steady-state', 'process-flow-diagram', 
               'line-sizing', 'control-valves', 'pump-sizing', 'vessel-sizing'],   # Keywords that define your package best
   install_requires=[            
