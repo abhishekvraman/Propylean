@@ -12,13 +12,13 @@ class _PressureChangers(_EquipmentOneInletOutlet):
             PARAMETERS:                
                 pressure_drop or differential_pressure:
                     Required: No
-                    Type: int or float (recommended)
+                    Type: int/float or Pressure(recommended)
                     Acceptable values: Non-negative integer
                     Default value: based on unit    
                     Description: Pressure drop or differential pressure of the equipment.
                 
                 efficiency:
-                     Required: No
+                    Required: No
                     Type: int or float (recommended)
                     Acceptable values: Non-negative integer
                     Default value: based on unit    
@@ -26,7 +26,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
 
                 performance_curve:
                     Required: No
-                    Type: pandas dataframe
+                    Type: pandas DataFrame
                     Acceptable values: Non-negative integer in dataframe with flow and head values.
                     Default value: pandas.DataFrame()    
                     Description: Performance curve of the pump. 
@@ -196,15 +196,28 @@ class _Vessels(_EquipmentMultipleInletOutlet):
         self.HHLL = prop.Length() if 'HHLL' not in inputs else prop.Length(inputs['HHLL'])
 
 #Defining generic class for all types of heat exchangers NEEDS SUPER CLASS WITH MULTI INPUT AND OUTPUT
-class _Exchangers(_EquipmentMultipleInletOutlet):
+class _Exchangers(_EquipmentOneInletOutlet):
     def __init__(self, **inputs) -> None:
         """ 
         DESCRIPTION:
-            Parent class for all equipment which has primary task to be an exchanger
-            of a stream. For e.g. Tanks and reactors.
+            Parent class for all equipment which has primary task to be an 
+            Temperature changer of a stream. For e.g. Heater and Cooler.
         
         PARAMETERS:
-            TODO
+            temperature_change:
+                Required: No
+                    Type: int/float or Temperature(recommended)
+                    Acceptable values: Non-negative integer
+                    Default value: based on unit    
+                    Description: Temperature change of stream in the equipment.
+                                 That is difference between inlet stream and outlet stream.
+                
+            efficiency:
+                Required: No
+                Type: int or float (recommended)
+                Acceptable values: Non-negative integer
+                Default value: based on unit    
+                Description: Efficiency of the equipment.
 
         RETURN VALUE:
             Type: _Exchangers
@@ -215,21 +228,45 @@ class _Exchangers(_EquipmentMultipleInletOutlet):
             Description: 
         
         SAMPLE USE CASES:
-            >>>  class AwesomeReactor(_Vessels):
+            >>>  class AwesomeNewExchanger(_Exchangers):
             >>>     def __init__(**kwargs):
-            >>>         some_property = 20
-                
-    """
-        #Hot side
-        self.hot_side_operating_pressure = None if 'hot_side_operating_pressure' not in inputs else inputs['hot_side_operating_pressure']
-        self.hot_side_flowrate = None if 'hot_side_flowrate' not in inputs else inputs['hot_side_flowrate']
-        self.hot_side_inlet_temp = None if 'hot_side_inlet_temp' not in inputs else inputs['hot_side_inlet_temp']
-        self.hot_side_outlet_temp = None if 'hot_side_outlet_temp' not in inputs else inputs['hot_side_outlet_temp']
-        self.hot_side_pressure_drop = None if 'hot_side_pressure_drop' not in inputs else inputs['hot_side_pressure_drop']
-        #Cold Side
-        self.cold_side_operating_pressure = None if 'cold_side_operating_pressure' not in inputs else inputs['cold_side_operating_pressure']
-        self.cold_stream_flowrate = None if 'cold_stream_flowrate' not in inputs else inputs['cold_stream_flowrate']
-        self.cold_side_inlet_temp = None if 'cold_side_inlet_temp' not in inputs else inputs['cold_side_inlet_temp']
-        self.cold_side_outlet_temp = None if 'cold_side_outlet_temp' not in inputs else inputs['cold_side_outlet_temp']
-        self.cold_side_pressure_drop = None if 'cold_side_pressure_drop' not in inputs else inputs['cold_side_pressure_drop']
- 
+            >>>         some_property = 20 
+        """
+        super().__init__(**inputs)
+        self.temperature_change = prop.Temperature(0, 'K') if "temperature_change" not in inputs\
+                                                               else inputs["temperature_change"] 
+        if "energy_in" in inputs:
+            self.energy_in = inputs["energy_in"]
+        if "energy_out" in inputs:
+            self.energy_out = inputs["energy_out"]
+        self._efficiency = 100 if 'efficiency' not in inputs else inputs['efficiency']
+    
+    @property
+    def temperature_change(self):
+        self = self._get_equipment_object(self)
+        return self._temperature_change
+    @temperature_change.setter
+    def temperature_change(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Temperature)
+        if unit is None:
+            unit = self._temperature_change.unit
+        
+        self._temperature_change = prop.Temperature(value, unit)
+        
+        self._update_equipment_object(self)
+    
+    @property
+    def efficiency(self):
+        self = self._get_equipment_object(self)
+        return self._efficiency
+    @efficiency.setter
+    def efficiency(self, value):
+        self = self._get_equipment_object(self)
+        if value < 0:
+            raise Exception("Please enter a positive value for efficiency")
+        elif value <= 1:
+            self._efficiency = value
+        else:
+            self._efficiency = value/100
+        self._update_equipment_object(self)

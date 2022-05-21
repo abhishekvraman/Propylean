@@ -256,6 +256,7 @@ class PositiveDisplacementPump(_PressureChangers):
         self._NPSHr = prop.Length()
         if "NPSHr" in inputs:
             self.NPSHr = inputs['NPSHr']
+        del self.energy_out
 
 
         PositiveDisplacementPump.items.append(self)
@@ -413,6 +414,7 @@ class CentrifugalCompressor(_PressureChangers):
         super().__init__( **inputs)
         self.adiabatic_efficiency = 0.7 if 'efficiency' not in inputs else inputs['efficiency']
         self.polytropic_exponent = 1.4 if 'polytropic_exponent' not in inputs else inputs['polytropic_exponent']
+        del self.energy_out
         CentrifugalCompressor.items.append(self)
     
     def __repr__(self):
@@ -605,13 +607,14 @@ class Expander(_PressureChangers):
     def __init__(self, **inputs) -> None:
         self._index = len(Expander.items)
         super().__init__( **inputs)
+        del self.energy_in
         Expander.items.append(self)
     
     def __repr__(self):
         return "Expander with tag: " + self.tag
     def __hash__(self):
         return hash(self.__repr__())
-    
+
     @classmethod
     def list_objects(cls):
         return cls.items
