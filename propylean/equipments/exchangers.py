@@ -34,6 +34,24 @@ class AirCooler(_Exchangers):
         return hash(self.__repr__())
     
     @property
+    def temperature_change(self):
+        self = self._get_equipment_object(self)
+        value = -1 * self._temperature_change.value
+        return prop.Temperature(value, self._temperature_change.unit)
+    @temperature_change.setter
+    def temperature_change(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Temperature)
+        if unit is None:
+            unit = self._temperature_change.unit
+        self._temperature_change = prop.Temperature(-1 * value, unit)
+        print(self._temperature_change)
+        self._outlet_temperature =  self._inlet_temperature + self._temperature_change
+        print(self._outlet_temperature)
+        print(self._inlet_temperature)
+        self._update_equipment_object(self)
+
+    @property
     def fan_power(self):
         self = self._get_equipment_object(self)
         return self._fan_power
@@ -92,6 +110,8 @@ class ElectricHeater(_Exchangers):
     def __init__(self, **inputs) -> None:
         self._index = len(ElectricHeater.items)
         super().__init__( **inputs)
+        self.power = prop.Power() if "power" not in inputs else inputs["power"]
+        del self.energy_out
         ElectricHeater.items.append(self)
     
     def __repr__(self):
@@ -99,6 +119,55 @@ class ElectricHeater(_Exchangers):
     def __hash__(self):
         return hash(self.__repr__())
     
+    def connect_stream(self, 
+                       stream_object=None, 
+                       direction=None, 
+                       stream_tag=None, 
+                       stream_type=None,
+                       stream_governed=True):
+        if ((stream_object is not None and 
+            isinstance(stream_object, streams.EnergyStream)) or
+            stream_type in ['energy', 'power', 'e', 'p']):
+            direction = 'in'
+            stream_governed = False
+        return super().connect_stream(direction=direction, 
+                                      stream_object=stream_object, 
+                                      stream_tag=stream_tag, 
+                                      stream_type=stream_type,
+                                      stream_governed=stream_governed)
+    
+    def disconnect_stream(self, stream_object=None, direction=None, stream_tag=None, stream_type=None):
+        if ((stream_object is not None and 
+            isinstance(stream_object, streams.EnergyStream)) or
+            stream_type in ['energy', 'power', 'e', 'p']):
+            direction = 'in'
+        return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
+
+    @property
+    def power(self):
+        self = self._get_equipment_object(self)
+        return self._power
+    @power.setter
+    def power(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
+        if unit is None:
+            unit = self._power.unit         
+        self._power = prop.Power(value, unit)
+        self._update_equipment_object(self) 
+
+    @property
+    def energy_in(self):
+        return self.power
+    @energy_in.setter
+    def energy_in(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
+        if unit is None:
+            unit = self.energy_in.unit
+        self._energy_in = prop.Power(value, unit)
+        self._update_equipment_object(self)
+
     @classmethod
     def list_objects(cls):
         return cls.items

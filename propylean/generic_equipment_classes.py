@@ -204,13 +204,21 @@ class _Exchangers(_EquipmentOneInletOutlet):
             Temperature changer of a stream. For e.g. Heater and Cooler.
         
         PARAMETERS:
-            temperature_change:
+            temperature_decrease:
                 Required: No
                     Type: int/float or Temperature(recommended)
                     Acceptable values: Non-negative integer
                     Default value: based on unit    
-                    Description: Temperature change of stream in the equipment.
-                                 That is difference between inlet stream and outlet stream.
+                    Description: Temperature decrease of stream in the equipment.
+                                 That is decrease from inlet stream to outlet stream.
+            
+            temperature_increase:
+                Required: No
+                    Type: int/float or Temperature(recommended)
+                    Acceptable values: Non-negative integer
+                    Default value: based on unit    
+                    Description: Temperature increase of stream in the equipment.
+                                 That is increase from inlet stream to outlet stream.
                 
             efficiency:
                 Required: No
@@ -233,29 +241,19 @@ class _Exchangers(_EquipmentOneInletOutlet):
             >>>         some_property = 20 
         """
         super().__init__(**inputs)
-        self.temperature_change = prop.Temperature(0, 'K') if "temperature_change" not in inputs\
-                                                               else inputs["temperature_change"] 
+        if ("temperature_increase" not in inputs and
+            "temperature_decrease" not in inputs):
+            self.temperature_increase = prop.Temperature(0, 'K')
+        elif "temperature_increase" in inputs:
+            self.temperature_increase = inputs["temperature_increase"]
+        else:
+            self.temperature_decrease = inputs["temperature_decrease"] 
         if "energy_in" in inputs:
             self.energy_in = inputs["energy_in"]
         if "energy_out" in inputs:
             self.energy_out = inputs["energy_out"]
         self._efficiency = 100 if 'efficiency' not in inputs else inputs['efficiency']
-    
-    @property
-    def temperature_change(self):
-        self = self._get_equipment_object(self)
-        return self._temperature_change
-    @temperature_change.setter
-    def temperature_change(self, value):
-        self = self._get_equipment_object(self)
-        value, unit = self._tuple_property_value_unit_returner(value, prop.Temperature)
-        if unit is None:
-            unit = self._temperature_change.unit
         
-        self._temperature_change = prop.Temperature(value, unit)
-        
-        self._update_equipment_object(self)
-    
     @property
     def efficiency(self):
         self = self._get_equipment_object(self)

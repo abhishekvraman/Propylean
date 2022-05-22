@@ -29,7 +29,7 @@ class test_AirCooler(unittest.TestCase):
         air_cooler = AirCooler()
         self.assertIsNotNone(air_cooler.tag)
         self.assertEqual(air_cooler.pressure_drop, prop.Pressure(0))
-        self.assertEqual(air_cooler.temperature_change, prop.Temperature(0))
+        self.assertEqual(air_cooler.temperature_decrease, prop.Temperature(0))
     
     @pytest.mark.positive
     @pytest.mark.instantiation
@@ -44,13 +44,19 @@ class test_AirCooler(unittest.TestCase):
     
     @pytest.mark.positive
     @pytest.mark.instantiation
-    def test_AirCooler_instantiation_temperature_change(self):
+    def test_AirCooler_instantiation_temperature_decrease(self):
         air_cooler = AirCooler(pressure_drop=(1, 'bar'),
                                efficiency=0.6,
-                               temperature_change=(40, "C"))
+                               temperature_decrease=(40, "C"))
         self.assertEqual(air_cooler.pressure_drop, prop.Pressure(1, 'bar'))
         self.assertEqual(air_cooler.efficiency, 0.6)
-        self.assertEqual(air_cooler.temperature_change, prop.Temperature(40, "C"))
+        self.assertEqual(air_cooler.temperature_decrease, prop.Temperature(40, "C"))
+    
+    @pytest.mark.positive
+    @pytest.mark.instantiation
+    def test_AirCooler_instantiation_fan_power(self):
+        air_cooler = AirCooler(fan_power = (20, 'kW'))
+        self.assertEqual(air_cooler.fan_power, prop.Power(20, 'kW'))
         
     @pytest.mark.positive
     def test_AirCooler_representation(self):
@@ -76,7 +82,7 @@ class test_AirCooler(unittest.TestCase):
     @pytest.mark.positive
     def test_AirCooler_setting_inlet_temperature(self):
         air_cooler = AirCooler(tag="air_cooler_8",
-                               temperature_change=(40, 'C'))
+                               temperature_decrease=(40, 'C'))
         air_cooler.inlet_temperature = (100, 'C')
         self.assertEqual(air_cooler.inlet_temperature, prop.Temperature(100, 'C'))
         self.assertEqual(air_cooler.outlet_temperature, prop.Temperature(60, 'C'))
@@ -84,11 +90,11 @@ class test_AirCooler(unittest.TestCase):
     @pytest.mark.positive
     def test_AirCooler_setting_outlet_temperature(self):
         air_cooler = AirCooler(tag="air_cooler_9",
-                               temperature_change=(100, 'F'))
+                               temperature_decrease=(100, 'F'))
         air_cooler.outlet_temperature = (230, 'F')
-        self.assertLess(abs(air_cooler.inlet_temperature.value-230), 0.0001)
+        self.assertLess(abs(air_cooler.inlet_temperature.value-330), 0.0001)
         self.assertEqual(air_cooler.inlet_temperature.unit, 'F')
-        self.assertLess(abs(air_cooler.inlet_temperature.value-130), 0.0001)
+        self.assertLess(abs(air_cooler.outlet_temperature.value-230), 0.0001)
         self.assertEqual(air_cooler.outlet_temperature.unit, 'F')
     
     @pytest.mark.positive
@@ -109,11 +115,11 @@ class test_AirCooler(unittest.TestCase):
     def test_AirCooler_connection_with_material_stream_inlet_stream_governed(self):
         air_cooler = AirCooler(tag="air_cooler_12",
                                pressure_drop=(1, 'bar'),
-                               temperature_change=prop.Temperature(298, 'K'))
+                               temperature_decrease=prop.Temperature(25, 'K'))
         inlet_stream = MaterialStream(tag="Inlet_air_cooler_12",
                                       mass_flowrate=(1000, 'kg/h'),
                                       pressure=(30, 'bar'),
-                                      temperature=(10, 'C'))
+                                      temperature=(50, 'C'))
         # Test connection is made.
         self.assertTrue(air_cooler.connect_stream(inlet_stream, 'in', stream_governed=True))
         # Test inlet properties of air_cooler are equal to inlet stream's.
@@ -122,7 +128,7 @@ class test_AirCooler(unittest.TestCase):
         self.assertEqual(air_cooler.inlet_mass_flowrate, inlet_stream.mass_flowrate)
         # Test outlet properties are calculated accordingly.
         self.assertEqual(air_cooler.outlet_pressure, air_cooler.inlet_pressure-air_cooler.pressure_drop)
-        self.assertEqual(air_cooler.inlet_temperature.value - 10, 
+        self.assertEqual(air_cooler.inlet_temperature.value - 25, 
                          air_cooler.outlet_temperature.value)
         self.assertEqual(air_cooler.inlet_temperature.unit, air_cooler.outlet_temperature.unit)
         self.assertEqual(air_cooler.inlet_mass_flowrate, air_cooler.outlet_mass_flowrate)
@@ -131,7 +137,7 @@ class test_AirCooler(unittest.TestCase):
     def test_AirCooler_connection_with_material_stream_outlet_stream_governed(self):
         air_cooler = AirCooler(tag="air_cooler_13",
                                pressure_drop=(10, 'bar'),
-                               temperature_change=prop.Temperature(298, 'K'))
+                               temperature_decrease=prop.Temperature(25, 'F'))
         outlet_stream = MaterialStream(tag="Outlet_air_cooler_13",
                                       mass_flowrate=(1000, 'kg/h'),
                                       pressure=(30, 'bar'),
@@ -145,14 +151,14 @@ class test_AirCooler(unittest.TestCase):
         # Test intlet properties are calculated accordingly.
         self.assertEqual(air_cooler.inlet_pressure, air_cooler.outlet_pressure+air_cooler.pressure_drop)
         self.assertEqual(air_cooler.inlet_temperature.value, 
-                         air_cooler.outlet_temperature.value + 10)
+                         air_cooler.outlet_temperature.value + 25)
         self.assertEqual(air_cooler.inlet_mass_flowrate, air_cooler.outlet_mass_flowrate)
 
     @pytest.mark.positive
     def test_AirCooler_connection_with_material_stream_inlet_equipment_governed(self):
         air_cooler = AirCooler(tag="air_cooler_14",
                                pressure_drop=(1, 'bar'),
-                               temperature_change=(10, "C"))
+                               temperature_decrease=(10, "C"))
 
         air_cooler.inlet_pressure = (30, 'bar')
         air_cooler.inlet_mass_flowrate = (1000, 'kg/h')
@@ -174,7 +180,7 @@ class test_AirCooler(unittest.TestCase):
     def test_AirCooler_connection_with_material_stream_outlet_equipment_governed(self):
         air_cooler = AirCooler(tag="air_cooler_15",
                                pressure_drop=(1, 'bar'),
-                               temperature_change=(10, "C"))
+                               temperature_decrease=(10, "C"))
         air_cooler.outlet_pressure = (130, 'bar')
         air_cooler.outlet_mass_flowrate = (1000, 'kg/h')
         air_cooler.outlet_temperature = (30, 'C')
@@ -187,7 +193,7 @@ class test_AirCooler(unittest.TestCase):
         self.assertEqual(air_cooler.outlet_mass_flowrate, outlet_stream.mass_flowrate)
         # Test intlet properties are calculated accordingly.
         self.assertEqual(air_cooler.inlet_pressure, air_cooler.outlet_pressure+air_cooler.pressure_drop)
-        self.assertLess(air_cooler.inlet_temperature.value, 40)
+        self.assertEqual(air_cooler.inlet_temperature.value, 40)
         self.assertEqual(air_cooler.inlet_mass_flowrate, air_cooler.outlet_mass_flowrate)
     
     # TODO Uncomment below when power setting feature is provided.

@@ -98,7 +98,8 @@ class test_FlowMeter(unittest.TestCase):
         self.assertTrue(flow_meter.connect_stream(inlet_stream, 'in', stream_governed=True))
         # Test inlet properties of flow_meter are equal to inlet stream's.
         self.assertEqual(flow_meter.inlet_pressure, inlet_stream.pressure)
-        self.assertEqual(flow_meter.inlet_temperature, inlet_stream.temperature)
+        self.assertAlmostEqual(flow_meter.inlet_temperature.value, inlet_stream.temperature.value, 3)
+        self.assertEqual(flow_meter.inlet_temperature.unit, inlet_stream.temperature.unit)
         self.assertEqual(flow_meter.inlet_mass_flowrate, inlet_stream.mass_flowrate)
         # Test outlet properties are calculated accordingly.
         self.assertEqual(flow_meter.outlet_pressure, flow_meter.inlet_pressure - flow_meter.pressure_drop)
@@ -118,7 +119,8 @@ class test_FlowMeter(unittest.TestCase):
         self.assertTrue(flow_meter.connect_stream(outlet_stream, 'out', stream_governed=True))
         # Test outlet properties of flow_meter are equal to outlet stream's.
         self.assertEqual(flow_meter.outlet_pressure, outlet_stream.pressure)
-        self.assertEqual(flow_meter.outlet_temperature, outlet_stream.temperature)
+        self.assertAlmostEqual(flow_meter.outlet_temperature.value, outlet_stream.temperature.value, 3)
+        self.assertEqual(flow_meter.outlet_temperature.unit, outlet_stream.temperature.unit)
         self.assertEqual(flow_meter.outlet_mass_flowrate, outlet_stream.mass_flowrate)
         # Test intlet properties are calculated accordingly.
         self.assertEqual(flow_meter.inlet_pressure, flow_meter.outlet_pressure + flow_meter.pressure_drop)

@@ -201,16 +201,20 @@ class Temperature(_Property):
     def __add__(self, other):
         old_unit = self.unit
         self.unit = other.unit
-        self.value = self.value + other.value
+        addition = self.value + other.value
+        addition = Temperature(addition, other.unit)
         self.unit = old_unit
-        return self
+        addition.unit = old_unit
+        return addition
     
     def __sub__(self, other):
         old_unit = self.unit
         self.unit = other.unit
-        self.value = self.value + other.value
+        subtraction = self.value - other.value
+        subtraction = Temperature(subtraction, other.unit)
         self.unit = old_unit
-        return self
+        subtraction.unit = old_unit
+        return subtraction
         
 class MassFlowRate(_Property):
     def __init__(self, value=0, unit='kg/s'):

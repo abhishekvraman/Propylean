@@ -423,7 +423,7 @@ class CentrifugalCompressor(_PressureChangers):
         return hash(self.__repr__())
     
     @property
-    def temperature_change(self):
+    def temperature_increase(self):
         self = self._get_equipment_object(self)
         k = self.polytropic_exponent
         if (self._inlet_material_stream_index is not None or
@@ -442,6 +442,7 @@ class CentrifugalCompressor(_PressureChangers):
         value = prop.Temperature(compressible_fluid.isentropic_T_rise_compression(T1.value, P1.value, P2.value, k, eta))
         value = value - T1
         value.unit = self.inlet_temperature.unit
+        print("temp change: ", value)
         return value
 
     @property
