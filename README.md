@@ -23,4 +23,6 @@ When published in PyPi, user will be able to download using pip or directly from
 Pip command:
 `pip install propylean`
 
-
+## Getting Started and Documentation
+To get started with Propylean, have a look at the getting started documenation.
+https://github.com/abhishekvraman/Propylean/wiki/Getting-started-with-Propylean
