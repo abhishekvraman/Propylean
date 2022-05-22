@@ -97,7 +97,8 @@ class test_ControlValve(unittest.TestCase):
         self.assertTrue(cv.connect_stream(inlet_stream, 'in', stream_governed=True))
         # Test inlet properties of cv are equal to inlet stream's.
         self.assertEqual(cv.inlet_pressure, inlet_stream.pressure)
-        self.assertEqual(cv.inlet_temperature, inlet_stream.temperature)
+        self.assertAlmostEqual(cv.inlet_temperature.value, inlet_stream.temperature.value, 3)
+        self.assertEqual(cv.inlet_temperature.unit, inlet_stream.temperature.unit)
         self.assertEqual(cv.inlet_mass_flowrate, inlet_stream.mass_flowrate)
         # Test outlet properties are calculated accordingly.
         self.assertEqual(cv.outlet_pressure, cv.inlet_pressure - cv.pressure_drop)
@@ -117,7 +118,8 @@ class test_ControlValve(unittest.TestCase):
         self.assertTrue(cv.connect_stream(outlet_stream, 'out', stream_governed=True))
         # Test outlet properties of cv are equal to outlet stream's.
         self.assertEqual(cv.outlet_pressure, outlet_stream.pressure)
-        self.assertEqual(cv.outlet_temperature, outlet_stream.temperature)
+        self.assertAlmostEqual(cv.outlet_temperature.value, outlet_stream.temperature.value, 3)
+        self.assertEqual(cv.outlet_temperature.unit, outlet_stream.temperature.unit)
         self.assertEqual(cv.outlet_mass_flowrate, outlet_stream.mass_flowrate)
         # Test intlet properties are calculated accordingly.
         self.assertEqual(cv.inlet_pressure, cv.outlet_pressure + cv.pressure_drop)

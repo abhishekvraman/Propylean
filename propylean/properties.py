@@ -199,18 +199,22 @@ class Temperature(_Property):
                                '''.format(unit))
 
     def __add__(self, other):
-        kelvin_self = Temperature(self.value, self.unit)
-        kelvin_self.unit = other.unit = 'K'
-        sum = Temperature(kelvin_self.value + other.value, 'K')
-        sum.unit = self.unit # Converting back to original unit of first.
-        return sum 
+        old_unit = self.unit
+        self.unit = other.unit
+        addition = self.value + other.value
+        addition = Temperature(addition, other.unit)
+        self.unit = old_unit
+        addition.unit = old_unit
+        return addition
     
     def __sub__(self, other):
-        kelvin_self = Temperature(self.value, self.unit)
-        kelvin_self.unit = other.unit = 'K'
-        subtraction = Temperature(kelvin_self.value - other.value, 'K')
-        subtraction.unit = self.unit # Converting back to original unit of first.
-        return subtraction 
+        old_unit = self.unit
+        self.unit = other.unit
+        subtraction = self.value - other.value
+        subtraction = Temperature(subtraction, other.unit)
+        self.unit = old_unit
+        subtraction.unit = old_unit
+        return subtraction
         
 class MassFlowRate(_Property):
     def __init__(self, value=0, unit='kg/s'):

@@ -121,7 +121,8 @@ class test_CentrifugalPump(unittest.TestCase):
         self.assertTrue(pump.connect_stream(inlet_stream, 'in', stream_governed=True))
         # Test inlet properties of pump are equal to inlet stream's.
         self.assertEqual(pump.inlet_pressure, inlet_stream.pressure)
-        self.assertEqual(pump.inlet_temperature, inlet_stream.temperature)
+        self.assertAlmostEqual(pump.inlet_temperature.value, inlet_stream.temperature.value, 2)
+        self.assertEqual(pump.inlet_temperature.unit, inlet_stream.temperature.unit)
         self.assertEqual(pump.inlet_mass_flowrate, inlet_stream.mass_flowrate)
         # Test outlet properties are calculated accordingly.
         self.assertEqual(pump.outlet_pressure, pump.inlet_pressure+pump.differential_pressure)
@@ -141,7 +142,8 @@ class test_CentrifugalPump(unittest.TestCase):
         self.assertTrue(pump.connect_stream(outlet_stream, 'out', stream_governed=True))
         # Test outlet properties of pump are equal to outlet stream's.
         self.assertEqual(pump.outlet_pressure, outlet_stream.pressure)
-        self.assertEqual(pump.outlet_temperature, outlet_stream.temperature)
+        self.assertAlmostEqual(pump.outlet_temperature.value, outlet_stream.temperature.value, 2)
+        self.assertEqual(pump.outlet_temperature.unit, outlet_stream.temperature.unit)
         self.assertEqual(pump.outlet_mass_flowrate, outlet_stream.mass_flowrate)
         # Test intlet properties are calculated accordingly.
         self.assertEqual(pump.inlet_pressure, pump.outlet_pressure-pump.differential_pressure)

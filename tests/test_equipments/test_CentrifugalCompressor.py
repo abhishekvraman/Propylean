@@ -99,7 +99,8 @@ class test_CentrifugalCompressor(unittest.TestCase):
         compressor.outlet_temperature = (130, 'F')
         self.assertLess(abs(compressor.inlet_temperature.value-130), 0.0001)
         self.assertEqual(compressor.inlet_temperature.unit, 'F')
-        self.assertGreater(compressor.outlet_temperature.value, compressor.inlet_temperature.value)
+        self.assertAlmostEqual(compressor.outlet_temperature.value, compressor.inlet_temperature.value, 3)
+        self.assertEqual(compressor.outlet_temperature.unit, compressor.inlet_temperature.unit, 3)
         self.assertEqual(compressor.outlet_temperature.unit, 'F')
     
     @pytest.mark.positive
@@ -150,7 +151,8 @@ class test_CentrifugalCompressor(unittest.TestCase):
         self.assertTrue(compressor.connect_stream(outlet_stream, 'out', stream_governed=True))
         # Test outlet properties of compressor are equal to outlet stream's.
         self.assertEqual(compressor.outlet_pressure, outlet_stream.pressure)
-        self.assertEqual(compressor.outlet_temperature, outlet_stream.temperature)
+        self.assertAlmostEqual(compressor.outlet_temperature.value, outlet_stream.temperature.value, 3)
+        self.assertEqual(compressor.outlet_temperature.unit, outlet_stream.temperature.unit)
         self.assertEqual(compressor.outlet_mass_flowrate, outlet_stream.mass_flowrate)
         # Test intlet properties are calculated accordingly.
         self.assertEqual(compressor.inlet_pressure, compressor.outlet_pressure-compressor.differential_pressure)
@@ -208,7 +210,7 @@ class test_CentrifugalCompressor(unittest.TestCase):
     #     self.assertEqual(compressor.energy_in, compressor_power.amount)
     #     self.assertEqual(compressor.power, compressor_power.unit)
 
-    pytest.mark.positive
+    @pytest.mark.positive
     def test_CentrifugalCompressor_connection_with_energy_stream_inlet_equipment_governed(self):
         compressor = CentrifugalCompressor(tag="compressor_17",
                                differential_pressure=(10, 'bar'))
@@ -220,7 +222,7 @@ class test_CentrifugalCompressor(unittest.TestCase):
         compressor_inlet.Z_g = 0.94024
         compressor_inlet.molecular_weight = prop.MolecularWeigth(16.043, 'g/mol')
         # Test connection is made.
-        self.assertTrue(compressor.connect_stream(compressor_inlet, "in", stream_governed=True))
+        self.assertTrue(compressor.connect_stream(compressor_inlet, "in", stream_governed=False))
         self.assertTrue(compressor.connect_stream(compressor_power))
         # Test inlet properties of compressor are equal to outlet stream's.
         self.assertAlmostEqual(compressor.power.value, compressor_power.amount.value)
