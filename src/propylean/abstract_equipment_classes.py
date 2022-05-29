@@ -1,4 +1,3 @@
-from sre_constants import ANY
 import propylean.properties as prop
 from propylean import streams
 
@@ -67,13 +66,13 @@ class _EquipmentOneInletOutlet(object):
         self._pressure_drop = prop.Pressure(0)
         self._inlet_pressure = prop.Pressure()
         self._outlet_pressure = prop.Pressure()
-        self.design_pressure = prop.Pressure()
+        self._design_pressure = prop.Pressure()
         
         #Temperature properties
         self._temperature_increase = prop.Temperature(0, 'K')
         self._inlet_temperature = prop.Temperature()
         self._outlet_temperature = prop.Temperature()
-        self.design_temperature = prop.Temperature()
+        self._design_temperature = prop.Temperature()
 
         #Inlet and outlet material and energy streams
         self._inlet_material_stream_tag = None
@@ -151,7 +150,20 @@ class _EquipmentOneInletOutlet(object):
         self._pressure_drop = prop.Pressure(value, unit)
         self._outlet_pressure =  self._inlet_pressure - self._pressure_drop
         self._update_equipment_object(self)
-        
+    
+    @property
+    def design_pressure(self):
+        self = self._get_equipment_object(self)
+        return self._design_pressure
+    @design_pressure.setter
+    def design_pressure(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Pressure)
+        if unit is None:
+            unit = self._design_pressure.unit
+        self._design_pressure = prop.Pressure(value, unit)
+        self._update_equipment_object(self)
+
     @property
     def inlet_temperature(self):
         self = self._get_equipment_object(self)
@@ -207,6 +219,19 @@ class _EquipmentOneInletOutlet(object):
         elif isinstance(value, int) or isinstance(value, float):
             value = prop.Temperature(-1 * value, self._temperature_increase.unit)
         self.temperature_increase = value
+    
+    @property
+    def design_temperature(self):
+        self = self._get_equipment_object(self)
+        return self._design_pressure
+    @design_temperature.setter
+    def design_temperature(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Temperature)
+        if unit is None:
+            unit = self._design_temperature.unit
+        self._design_temperature = prop.Temperature(value, unit)
+        self._update_equipment_object(self)
 
     @property
     def inlet_mass_flowrate(self):
@@ -880,4 +905,4 @@ class _EquipmentOneInletOutlet(object):
 #Defining generic base class for all equipments with multiple inlet and outlet. TODO !!!!!!       
 class _EquipmentMultipleInletOutlet:
     def __init__(self) -> None:
-        self._inlet_pressure.value = list()
+        pass

@@ -104,7 +104,6 @@ class AirCooler(_Exchangers):
             direction = 'in'
         return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
 
-
 class ElectricHeater(_Exchangers):
     items = []
     def __init__(self, **inputs) -> None:

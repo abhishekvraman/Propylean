@@ -18,10 +18,13 @@ Vision of Propylean is to:
 - Inculcate coding/programing skills in manufacturing engineers
 
 ## Installation and Requirements
-When published in PyPi, user will be able to download using pip or directly from PyPi website. 
+To download use below command or download the wheel file from PyPi page.
 
 Pip command:
 `pip install propylean`
+
+PyPi page:
+https://pypi.org/project/propylean/
 
 ## Getting Started and Documentation
 To get started with Propylean, have a look at the getting started documenation.

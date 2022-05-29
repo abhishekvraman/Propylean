@@ -1,9 +1,8 @@
-from propylean.generic_equipment_classes import _Vessels
+from propylean.generic_equipment_classes import _VerticalVessels, _HorizontalVessels
 from propylean.generic_equipment_classes import _EquipmentOneInletOutlet
 from propylean.settings import Settings
 from propylean.constants import Constants
 from propylean import properties as prop
-from propylean import streams
 from math import pi
 
 # PipeSegment Class
@@ -433,7 +432,15 @@ class PipeSegment(_EquipmentOneInletOutlet):
         return cls.items
 
 # Start of final classes of vessels
-class VerticalSeparator(_Vessels):
+class VerticalStorage(_VerticalVessels):
+    def __init__(self, **inputs) -> None:
+        super().__init__(**inputs)
+
+class HorizontalStorage(_HorizontalVessels):
+    def __init__(self, **inputs) -> None:
+        super().__init__(**inputs)
+
+class VerticalSeparator(_VerticalVessels):
     items = []
     def __init__(self, **inputs) -> None:
         self._index = len(VerticalSeparator.items)
@@ -449,7 +456,7 @@ class VerticalSeparator(_Vessels):
     def list_objects(cls):
         return cls.items
 
-class HorizontalSeparator(_Vessels):
+class HorizontalSeparator(_HorizontalVessels):
     items = []
     def __init__(self, **inputs) -> None:
         self._index = len(HorizontalSeparator.items)
@@ -465,7 +472,7 @@ class HorizontalSeparator(_Vessels):
     def list_objects(cls):
         return cls.items
 
-class Column(_Vessels):
+class Column(_VerticalVessels):
     items = []
     def __init__(self, **inputs) -> None:
         self._index = len(Column.items)
@@ -481,7 +488,7 @@ class Column(_Vessels):
     def list_objects(cls):
         return cls.items
 
-class Tank(_Vessels):
+class Tank(_VerticalVessels):
     items = []
     def __init__(self, **inputs) -> None:
         self._index = len(Tank.items)

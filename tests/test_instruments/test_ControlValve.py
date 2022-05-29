@@ -1,9 +1,8 @@
 import pytest
 import unittest
-from propylean.instruments import ControlValve
+from propylean.instruments.control import ControlValve
 from propylean.streams import MaterialStream
 import propylean.properties as prop
-from typing import OrderedDict
 
 class test_ControlValve(unittest.TestCase):
     @pytest.mark.positive

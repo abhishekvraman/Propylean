@@ -21,7 +21,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
                     Required: No
                     Type: int or float (recommended)
                     Acceptable values: Non-negative integer
-                    Default value: based on unit    
+                    Default value: 100%    
                     Description: Efficiency of the equipment.
 
                 performance_curve:
@@ -141,7 +141,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         self._update_equipment_object(self)  
     
 #Defining generic class for all types of vessels.  NEEDS SUPER CLASS WITH MULTI INPUT AND OUTPUT 
-class _Vessels(_EquipmentMultipleInletOutlet):
+class _Vessels(_EquipmentMultipleInletOutlet, _EquipmentOneInletOutlet):
     def __init__(self, **inputs) -> None:
         """ 
         DESCRIPTION:
@@ -151,21 +151,35 @@ class _Vessels(_EquipmentMultipleInletOutlet):
         PARAMETERS:
             ID:
                 Required: No
-                Type: int or float (recommended)
+                Type: int or float or Length(recommended)
                 Acceptable values: Non-negative integer
                 Default value: based on unit    
                 Description: Internal diameter of the vessel.
             
-            length:
+            OD:
                 Required: No
-                Type: int or float (recommended)
+                Type: int or float or Length(recommended)
                 Acceptable values: Non-negative integer
                 Default value: based on unit    
-                Description: Length of the vessel.
+                Description: Outer diameter of the vessel.
+
+            thickness:
+                Required: No
+                Type: int or float or Length(recommended)
+                Acceptable values: Non-negative integer
+                Default value: based on unit    
+                Description: thickness of the vessel.
+            
+            length:
+                Required: No
+                Type: int or float or Length(recommended)
+                Acceptable values: Non-negative integer
+                Default value: based on unit    
+                Description: tan-line length of the vessel.
             
             LLL, LLLL, HLL, NLL and HHLL:
                 Required: No
-                Type: int or float (recommended)
+                Type: int or float or Length(recommended)
                 Acceptable values: Non-negative integer
                 Default value: based on unit    
                 Description: Low Liquid Level(LLL), Low-Low Liquid Level(LLLL), High Liquid Level(HLL),
@@ -186,7 +200,21 @@ class _Vessels(_EquipmentMultipleInletOutlet):
                 
     """
         super().__init__(**inputs)
-        self.ID = prop.Length() if 'ID' not in inputs else prop.Length(inputs['ID'])
+        self.operating_pressure = prop.Pressure()
+        self.operating_temperature = prop.Temperature()
+        if ('ID' in inputs and inputs['ID'] is not None):
+                self.ID = inputs['ID']
+                if 'OD' in inputs and inputs['OD'] is not None:
+                    self.OD = inputs['OD']
+                elif 'thickness' in inputs and inputs['thickness'] is not None:
+                    self.thickness = inputs['thickness']
+        elif ('OD' in inputs and 'thickness' in inputs):
+            self.OD = inputs['OD']
+            self.ID = inputs['thickness']
+            self.ID = self.OD - self.ID
+        else:
+            raise Exception('Define atleast ID or OD with thickness to define a pipe segment object') 
+            
         self.length = prop.Length() if 'length' not in inputs else prop.Length(inputs['length'])
         
         self.LLLL = prop.Length() if 'LLLL' not in inputs else prop.Length(inputs['LLLL'])
@@ -195,6 +223,147 @@ class _Vessels(_EquipmentMultipleInletOutlet):
         self.HLL = prop.Length() if 'HLL' not in inputs else prop.Length(inputs['HLL'])
         self.HHLL = prop.Length() if 'HHLL' not in inputs else prop.Length(inputs['HHLL'])
 
+    @property
+    def ID(self):
+        self = self._get_equipment_object(self)
+        return self._ID
+    @ID.setter
+    def ID(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
+        if unit is None:
+            unit = self._ID.unit
+        self._ID = prop.Length(value, unit)
+        self._update_equipment_object(self)
+    
+    @property
+    def OD(self):
+        self = self._get_equipment_object(self)
+        return self._OD
+    @OD.setter
+    def OD(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
+        if unit is None:
+            unit = self._OD.unit
+        self._OD =prop.Length(value, unit)
+        self._update_equipment_object(self)
+
+    @property
+    def thickness(self):
+        self = self._get_equipment_object(self)
+        # if self._OD - self._ID <= prop.Length(0):
+        #     raise Exception("ID is not less than OD! Change ID or OD or thickness.")
+        return self._OD - self._ID
+    @thickness.setter
+    def thickness(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
+        if unit is None:
+            unit = self.thickness
+        self._OD = self._ID + prop.Length(value, unit)
+        self._update_equipment_object(self)
+
+    @property
+    def length(self):
+        self = self._get_equipment_object(self)
+        return self._length
+    @length.setter
+    def length(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
+        if unit is None:
+            unit = self._length.unit
+        self._length = prop.Length(value, unit)
+        self._update_equipment_object(self)
+    
+    @property
+    def LLLL(self):
+        self = self._get_equipment_object(self)
+        return self._LLLL
+    @LLLL.setter
+    def LLLL(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
+        if unit is None:
+            unit = self._LLLL.unit
+        self._LLLL = prop.Length(value, unit)
+        self._update_equipment_object(self)
+    
+    @property
+    def LLL(self):
+        self = self._get_equipment_object(self)
+        return self._LLL
+    @LLL.setter
+    def LLL(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
+        if unit is None:
+            unit = self._LLL.unit
+        self._LLL = prop.Length(value, unit)
+        self._update_equipment_object(self)
+    
+    @property
+    def NLL(self):
+        self = self._get_equipment_object(self)
+        return self._NLL
+    @NLL.setter
+    def NLL(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
+        if unit is None:
+            unit = self._NLL.unit
+        self._NLL = prop.Length(value, unit)
+        self._update_equipment_object(self)
+    
+    @property
+    def HLL(self):
+        self = self._get_equipment_object(self)
+        return self._HLL
+    @HLL.setter
+    def HLL(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
+        if unit is None:
+            unit = self._HLL.unit
+        self._HLL = prop.Length(value, unit)
+        self._update_equipment_object(self)
+    
+    @property
+    def HHLL(self):
+        self = self._get_equipment_object(self)
+        return self._HHLL
+    @HLL.setter
+    def HHLL(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
+        if unit is None:
+            unit = self._HHLL.unit
+        self._HHLL = prop.Length(value, unit)
+        self._update_equipment_object(self)
+    
+    @property
+    def operating_pressure(self):
+        return self.outlet_pressure
+    @operating_pressure.setter
+    def operating_pressure(self, value):
+        self.outlet_pressure = value
+    
+    @property
+    def operating_temperature(self):
+        return self.operating_temperature
+    @operating_temperature.setter
+    def operating_temperature(self, value):
+        self.outlet_temperature = value
+
+class _VerticalVessels(_Vessels):
+    def __init__(self, **inputs) -> None:
+        super().__init__(**inputs)
+
+class _HorizontalVessels(_Vessels):
+    def __init__(self, **inputs) -> None:
+        super().__init__(**inputs)
+  
 #Defining generic class for all types of heat exchangers NEEDS SUPER CLASS WITH MULTI INPUT AND OUTPUT
 class _Exchangers(_EquipmentOneInletOutlet):
     def __init__(self, **inputs) -> None:

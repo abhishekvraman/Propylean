@@ -1,10 +1,8 @@
 import pytest
 import unittest
-from propylean.instruments import FlowMeter
+from propylean.instruments.measurement import FlowMeter
 from propylean.streams import MaterialStream, EnergyStream
 import propylean.properties as prop
-import pandas as pd
-from unittest.mock import patch
 
 class test_FlowMeter(unittest.TestCase):
     @pytest.mark.positive
