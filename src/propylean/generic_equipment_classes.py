@@ -371,13 +371,15 @@ class _Vessels(_EquipmentMultipleInletOutlet, _EquipmentOneInletOutlet):
     @operating_temperature.setter
     def operating_temperature(self, value):
         self.outlet_temperature = value
+    
+    @property
+    def vessel_volume(self):
+        value = pi * self.ID.value * self.ID.value * self.length.value
+        return prop.Volume(value, "m^3")
 
 class _VerticalVessels(_Vessels):
     def __init__(self, **inputs) -> None:
-        super().__init__(**inputs)
-    
-    @property
-    def volume(self):
+        super().__init__(**inputs)    
 
 
 class _HorizontalVessels(_Vessels):

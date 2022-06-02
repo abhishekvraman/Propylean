@@ -366,7 +366,7 @@ class VolumetricFlowRate(_Property):
                                You selected '{}'.
                                '''.format(unit))
 
-class Volumetric(_Property):
+class Volume(_Property):
     def __init__(self, value = 1, unit= 'm^3'):
         super().__init__(value,unit)
         self.unit = unit
