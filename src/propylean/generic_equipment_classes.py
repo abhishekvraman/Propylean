@@ -1,6 +1,7 @@
 from propylean.abstract_equipment_classes import _EquipmentOneInletOutlet, _EquipmentMultipleInletOutlet
 import propylean.properties as prop
 import pandas as pd
+from math import pi
 #Defining generic class for all types of pressure changers like Pumps, Compressors and Expanders
 class _PressureChangers(_EquipmentOneInletOutlet):
     def __init__(self,**inputs) -> None:
@@ -223,6 +224,8 @@ class _Vessels(_EquipmentMultipleInletOutlet, _EquipmentOneInletOutlet):
         self.HLL = prop.Length() if 'HLL' not in inputs else prop.Length(inputs['HLL'])
         self.HHLL = prop.Length() if 'HHLL' not in inputs else prop.Length(inputs['HHLL'])
 
+        self.head_type = "ellipsoidal" if "head_type" not in inputs else inputs["ellipsoidal"]
+
     @property
     def ID(self):
         self = self._get_equipment_object(self)
@@ -333,13 +336,26 @@ class _Vessels(_EquipmentMultipleInletOutlet, _EquipmentOneInletOutlet):
     def HHLL(self):
         self = self._get_equipment_object(self)
         return self._HHLL
-    @HLL.setter
+    @HHLL.setter
     def HHLL(self, value):
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
         if unit is None:
             unit = self._HHLL.unit
         self._HHLL = prop.Length(value, unit)
+        self._update_equipment_object(self)
+    
+    @property
+    def head_type(self):
+        self = self._get_equipment_object(self)
+        return self._head_type
+    @head_type.setter
+    def head_type(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
+        if unit is None:
+            unit = self._head_type.unit
+        self._head_type = prop.Length(value, unit)
         self._update_equipment_object(self)
     
     @property
@@ -359,6 +375,10 @@ class _Vessels(_EquipmentMultipleInletOutlet, _EquipmentOneInletOutlet):
 class _VerticalVessels(_Vessels):
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
+    
+    @property
+    def volume(self):
+
 
 class _HorizontalVessels(_Vessels):
     def __init__(self, **inputs) -> None:

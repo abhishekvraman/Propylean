@@ -366,6 +366,32 @@ class VolumetricFlowRate(_Property):
                                You selected '{}'.
                                '''.format(unit))
 
+class Volumetric(_Property):
+    def __init__(self, value = 1, unit= 'm^3'):
+        super().__init__(value,unit)
+        self.unit = unit
+    @_Property.unit.setter
+    def unit(self, unit):
+        try:
+            conversion_factors = {'ft^3': 35.3146,
+                                'cm^3': 1000000,
+                                'gal': 264.172,
+                                'lit': 1000,
+                                'm^3': 1
+                                }
+            self._value =  conversion_factors[unit] * self._value / conversion_factors[self._unit]
+            self._unit = unit
+        except:
+            raise Exception('''Selected unit is not supported or a correct unit of Volumetric Flow Rate.
+                               Following are the supported units:
+                               1. m^3 for cubic meter
+                               2. ft^3 for cubic feet
+                               3. cm^3 for cubic centimeter
+                               4. gal for US Gallons
+                               5. lit for Liters
+                               You selected '{}'.
+                               '''.format(unit))
+
 class Density(_Property):
     def __init__(self, value = 0, unit= 'kg/m^3'):
         super().__init__(value, unit)
