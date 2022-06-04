@@ -217,7 +217,7 @@ class Temperature(_Property):
         return subtraction
         
 class MassFlowRate(_Property):
-    def __init__(self, value=0, unit='kg'):
+    def __init__(self, value=0, unit='kg/s'):
         super().__init__(value, unit)
         self.unit = unit
     
@@ -259,7 +259,7 @@ class MassFlowRate(_Property):
         return super().__add__(other)
 
 class Mass(_Property):
-    def __init__(self, value=0, unit='kg/s'):
+    def __init__(self, value=0, unit='kg'):
         super().__init__(value, unit)
         self.unit = unit
     

@@ -29,3 +29,27 @@ https://pypi.org/project/propylean/
 ## Getting Started and Documentation
 To get started with Propylean, have a look at the getting started documenation.
 https://github.com/abhishekvraman/Propylean/wiki/Getting-started-with-Propylean
+
+## Supported objects that can be imported:
+
+* equipments.rotary
+    1. CentrifugalPump
+    2. PositiveDisplacementPump
+    3. CentrifugalCompressor
+* equipments.static
+    1. PipeSegment
+* equipments.exchangers
+    1. AirCooler
+    2. ElectricHeater
+* instruments
+    1. ControlValve
+    2. FlowMeter
+* streams
+    1. MaterialStream
+    2. EnergyStream
+* properties
+    1. Pressure
+    2. Temperature
+    3. MassFlowRate
+    4. Components (Molecular components)
+    5. And many more..

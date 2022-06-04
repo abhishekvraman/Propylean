@@ -45,10 +45,7 @@ class AirCooler(_Exchangers):
         if unit is None:
             unit = self._temperature_change.unit
         self._temperature_change = prop.Temperature(-1 * value, unit)
-        print(self._temperature_change)
         self._outlet_temperature =  self._inlet_temperature + self._temperature_change
-        print(self._outlet_temperature)
-        print(self._inlet_temperature)
         self._update_equipment_object(self)
 
     @property
