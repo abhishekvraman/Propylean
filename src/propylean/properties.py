@@ -217,7 +217,7 @@ class Temperature(_Property):
         return subtraction
         
 class MassFlowRate(_Property):
-    def __init__(self, value=0, unit='kg/s'):
+    def __init__(self, value=0, unit='kg'):
         super().__init__(value, unit)
         self.unit = unit
     
@@ -257,6 +257,35 @@ class MassFlowRate(_Property):
     
     def __add__(self, other):
         return super().__add__(other)
+
+class Mass(_Property):
+    def __init__(self, value=0, unit='kg/s'):
+        super().__init__(value, unit)
+        self.unit = unit
+    
+    @_Property.unit.setter
+    def unit(self, unit):
+        try:
+            conversion_factors = {'g': 1000,
+                                'lb': 2.204,
+                                'ton': 0.001,
+                                'kg': 1
+                                }
+            self._value =  conversion_factors[unit] * self._value / conversion_factors[self._unit]
+            self._unit = unit
+        except:
+            raise Exception('''Selected unit is not supported or a correct unit of Mass Flow Rate.
+                               Supported units are:
+                               1. kg for kilogram 
+                               2. g for gram
+                               3. lb for pound
+                               4. ton for metric ton
+                               You selected '{}'.
+                               '''.format(unit))
+    
+    def __add__(self, other):
+        return super().__add__(other)
+
 
 class MolecularWeigth(_Property):
     def __init__(self, value = 0, unit= 'g/mol'):
@@ -367,7 +396,7 @@ class VolumetricFlowRate(_Property):
                                '''.format(unit))
 
 class Volume(_Property):
-    def __init__(self, value = 1, unit= 'm^3'):
+    def __init__(self, value = 0, unit= 'm^3'):
         super().__init__(value,unit)
         self.unit = unit
     @_Property.unit.setter

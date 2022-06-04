@@ -1,7 +1,8 @@
+from cmath import sqrt
 from propylean.abstract_equipment_classes import _EquipmentOneInletOutlet, _EquipmentMultipleInletOutlet
 import propylean.properties as prop
 import pandas as pd
-from math import pi
+from math import pi, sqrt
 #Defining generic class for all types of pressure changers like Pumps, Compressors and Expanders
 class _PressureChangers(_EquipmentOneInletOutlet):
     def __init__(self,**inputs) -> None:
@@ -154,41 +155,84 @@ class _Vessels(_EquipmentMultipleInletOutlet, _EquipmentOneInletOutlet):
                 Required: No
                 Type: int or float or Length(recommended)
                 Acceptable values: Non-negative integer
-                Default value: based on unit    
+                Default value: 0 m   
                 Description: Internal diameter of the vessel.
             
             OD:
                 Required: No
                 Type: int or float or Length(recommended)
                 Acceptable values: Non-negative integer
-                Default value: based on unit    
+                Default value: 0 m    
                 Description: Outer diameter of the vessel.
 
             thickness:
                 Required: No
                 Type: int or float or Length(recommended)
                 Acceptable values: Non-negative integer
-                Default value: based on unit    
+                Default value: 0 m    
                 Description: thickness of the vessel.
             
             length:
                 Required: No
                 Type: int or float or Length(recommended)
                 Acceptable values: Non-negative integer
-                Default value: based on unit    
+                Default value: 0 m   
                 Description: tan-line length of the vessel.
             
             LLL, LLLL, HLL, NLL and HHLL:
                 Required: No
                 Type: int or float or Length(recommended)
                 Acceptable values: Non-negative integer
-                Default value: based on unit    
+                Default value: 0 m    
                 Description: Low Liquid Level(LLL), Low-Low Liquid Level(LLLL), High Liquid Level(HLL),
                              Normal Liquid Level(NLL), and High-high Liquid Level.
-
+            
+            head_type:
+                Required: No
+                Type: String
+                Acceptable values: ["hemispherical", "elliptical", "torispherical"]
+                Default value: elliptical    
+                Description: Type of head for the vessel.
+            
+            main_fluid:
+                Required: No
+                Type: String
+                Acceptable values: ["liquid", "gas"]
+                Default value: liquid    
+                Description: Type of head for the vessel.
+            
         RETURN VALUE:
             Type: _Vessels
             Description: object with all _EquipmentOneInletOutlet and other vessel related properties.
+        
+        PROPERTIES:
+            operating_pressure:
+                Type: int or float or Pressure(recommended)  
+                Acceptable values: Any
+                Default value: 101325 Pa  
+                Description: Operating pressure of the vessel. operating_pressure is
+                             considered equal to outlet_pressure and can be considered as
+                             alias of each other. Setting or getting one effects the other.
+            
+            operating_temperature:
+                Type: int or float or Pressure(recommended)   
+                Acceptable values: Any
+                Default value: 298 K 
+                Description: Operating temperature of the vessel. operating_temperature is
+                             considered equal to outlet_temperature and can be considered as
+                             alias of each other. Setting or getting one effects the other.
+
+            vessel_volume:
+                Type: int or float or Volume(recommended)   
+                Acceptable values: Any
+                Default value: 0 m^3 
+                Description:Total volumetric space of the vessel including heads.
+            
+            liquid_level:
+                Type: int or float or Length(recommended)
+                Acceptable values: Non-negative integer
+                Default value: 0 m   
+                Description: liquid level of the vessel.
         
         ERROR RAISED:
             Type:
@@ -224,7 +268,8 @@ class _Vessels(_EquipmentMultipleInletOutlet, _EquipmentOneInletOutlet):
         self.HLL = prop.Length() if 'HLL' not in inputs else prop.Length(inputs['HLL'])
         self.HHLL = prop.Length() if 'HHLL' not in inputs else prop.Length(inputs['HHLL'])
 
-        self.head_type = "ellipsoidal" if "head_type" not in inputs else inputs["ellipsoidal"]
+        self.head_type = "elliptical" if "head_type" not in inputs else inputs["head_type"]
+        self.main_fluid = "liquid" if "main_fluid" not in inputs else inputs["main_fluid"]
 
     @property
     def ID(self):
@@ -352,10 +397,17 @@ class _Vessels(_EquipmentMultipleInletOutlet, _EquipmentOneInletOutlet):
     @head_type.setter
     def head_type(self, value):
         self = self._get_equipment_object(self)
-        value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
-        if unit is None:
-            unit = self._head_type.unit
-        self._head_type = prop.Length(value, unit)
+        self._head_type = value
+        self._update_equipment_object(self)
+    
+    @property
+    def main_fluid(self):
+        self = self._get_equipment_object(self)
+        return self._main_fluid
+    @main_fluid.setter
+    def main_fluid(self, value):
+        self = self._get_equipment_object(self)
+        self._main_fluid = value
         self._update_equipment_object(self)
     
     @property
@@ -374,17 +426,110 @@ class _Vessels(_EquipmentMultipleInletOutlet, _EquipmentOneInletOutlet):
     
     @property
     def vessel_volume(self):
-        value = pi * self.ID.value * self.ID.value * self.length.value
-        return prop.Volume(value, "m^3")
+        cylinder_volume = pi * self.ID.value * self.ID.value * self.length.value
+        head_volume = 0
+        if self.head_type == "hemispherical":
+            head_volume = 4 * pi * (self.ID.value ** 3) / 3
+        elif self.head_type == "elliptical":
+            head_volume = pi * (self.ID.value ** 3) / 12
+        elif self.head_type == "torispherical":
+            Rc = (self.ID + self.thickness).value
+            Rk = 3 * self.thickness.value
+            z = Rc - sqrt((Rc - Rk)**2 - (self.OD.value/2 - self.thickness.value - Rk)**2)
+            head_volume = 0.9 * 4 * pi * Rc * Rc * z / 3 
+        return prop.Volume(cylinder_volume + head_volume, "m^3")
 
+    @property
+    def liquid_level(self):
+        self = self._get_equipment_object(self)
+        return self._liquid_level
+    @liquid_level.setter
+    def liquid_level(self, value):
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
+        if unit is None:
+            unit = self._liquid_level.unit
+        self._liquid_level = prop.Length(value, unit)
+        self._update_equipment_object(self)
+
+    def _get_head_volume():
+        raise Exception("Implemented in child class.")
+    
+    def _get_cylinder_volume():
+        raise Exception("Implemented in child class.")
+
+    def _get_liquid_volume(self):
+        head_volume = self._get_head_volume()
+        cylinder_volume = self._get_cylinder_volume()
+        return prop.Volume(cylinder_volume + head_volume, "m^3")
+
+    def inventory(self, type="volume"):
+        if self.main_fluid == "gas":
+            if type == "volume":
+                liquid_volume = self._get_liquid_volume()
+                mass = self.vessel_volume - liquid_volume
+                return prop.Mass(mass)
+            else:
+                is_inlet = False if self._inlet_material_stream_index is None else True
+                density = self._connected_stream_property_getter(is_inlet, "material", "density_g")
+                return prop.Mass(self.inventory().value * density) 
+        else:
+            if type == "volume":
+                return self._get_liquid_volume()
+            else:
+                is_inlet = False if self._inlet_material_stream_index is None else True
+                density = self._connected_stream_property_getter(is_inlet, "material", "density_l")
+                mass = self._get_liquid_volume().value * density.value
+    
 class _VerticalVessels(_Vessels):
     def __init__(self, **inputs) -> None:
-        super().__init__(**inputs)    
+        super().__init__(**inputs)
+    
+    def _get_head_volume(self):
+        head_volume = 0
+        if self.head_type == "hemispherical":
+            head_volume = 4 * pi * (self.ID.value ** 3) / 3
+        elif self.head_type == "elliptical":
+            head_volume = pi * (self.ID.value ** 3) / 12
+        elif self.head_type == "torispherical":
+            Rc = (self.ID + self.thickness).value
+            Rk = 3 * self.thickness.value
+            z = Rc - sqrt((Rc - Rk)**2 - (self.OD.value/2 - self.thickness.value - Rk)**2)
+            head_volume = 0.9 * 4 * pi * Rc * Rc * z / 3
+        return prop.Volume(head_volume) 
+
+    def _get_cylinder_volume(self):
+        volume = pi * self.ID**2 * self.liquid_level
+        return prop.Volume(volume)
 
 
 class _HorizontalVessels(_Vessels):
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
+    
+    def _get_head_volume(self):
+        C = 0
+        if self.head_type == "hemispherical":
+            C = 1
+        elif self.head_type == "elliptical":
+            C = 0.5
+        elif self.head_type == "torispherical":
+            Rk = 3 * self.thickness.value
+            t_by_Dext = self.thickness/self.OD
+            C = 0.30939 + 1.7197 * (Rk - 0.06 * self.OD.value)/self.ID - 0.16116 * t_by_Dext + 0.98997 * t_by_Dext**2
+        head_volume = self._get_head_volume_by_type(C)
+        return prop.Volume(head_volume) 
+    
+    def _get_head_volume_by_type(self, C):
+        head_volume = (self.ID.value ** 3) * pi 
+        H_by_ID = self.liquid_level / self.ID
+        head_volume *= 3 * H_by_ID**2 - 2 * H_by_ID**3
+        head_volume /= 12
+        head_volume *= C
+
+    def _get_cylinder_volume(self):
+        volume = 0
+        return prop.Volume(volume)
   
 #Defining generic class for all types of heat exchangers NEEDS SUPER CLASS WITH MULTI INPUT AND OUTPUT
 class _Exchangers(_EquipmentOneInletOutlet):

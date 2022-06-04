@@ -382,7 +382,31 @@ class CentrifugalCompressor(_PressureChangers):
             Final class for creating objects to represent a Centrifugal Compressors.
         
         PARAMETERS:
-            Read _PressureChangers class for more arguments for this class           
+            Read _PressureChangers class for more arguments for this class  
+            efficiency:
+                Required: No
+                Type: int or float (recommended)
+                Acceptable values: Non-negative values
+                Default value: 1.4
+                Description: Efficiency of the compressor. Efficency can be set as
+                             adiabatic/isentropic or polytropic efficiency.
+            
+            adiabatic_efficiency:
+                Required: No
+                Type: int or float (recommended)
+                Acceptable values: Non-negative values
+                Default value: 0.7
+                Description: Efficiency of the compressor considering adiabatic/isentropic
+                             compression.
+            
+            polytropic_efficiency:
+                Required: No
+                Type: int or float (recommended)
+                Acceptable values: Non-negative values
+                Default value: 0.7
+                Description: Efficiency of the compressor considering polytropic
+                             compression.
+
             polytropic_exponent:
                 Required: No
                 Type: int or float (recommended)
@@ -442,13 +466,12 @@ class CentrifugalCompressor(_PressureChangers):
         value = prop.Temperature(compressible_fluid.isentropic_T_rise_compression(T1.value, P1.value, P2.value, k, eta))
         value = value - T1
         value.unit = self.inlet_temperature.unit
-        print("temp change: ", value)
         return value
 
     @property
     def efficiency(self):
         self = self._get_equipment_object(self)
-        if Settings.compressor_process == "Polytropic":
+        if Settings.compression_process == "Polytropic":
             return self.polytropic_efficiency
         else:
             return self.adiabatic_efficiency
