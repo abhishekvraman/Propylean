@@ -2,7 +2,7 @@ from cmath import sqrt
 from propylean.abstract_equipment_classes import _EquipmentOneInletOutlet, _EquipmentMultipleInletOutlet
 import propylean.properties as prop
 import pandas as pd
-from math import pi, sqrt
+from math import pi, sqrt, acos
 #Defining generic class for all types of pressure changers like Pumps, Compressors and Expanders
 class _PressureChangers(_EquipmentOneInletOutlet):
     def __init__(self,**inputs) -> None:
@@ -461,14 +461,14 @@ class _Vessels(_EquipmentMultipleInletOutlet, _EquipmentOneInletOutlet):
     def _get_liquid_volume(self):
         head_volume = self._get_head_volume()
         cylinder_volume = self._get_cylinder_volume()
-        return prop.Volume(cylinder_volume + head_volume, "m^3")
+        return prop.Volume(cylinder_volume + 2 * head_volume, "m^3")
 
     def inventory(self, type="volume"):
         if self.main_fluid == "gas":
             if type == "volume":
                 liquid_volume = self._get_liquid_volume()
-                mass = self.vessel_volume - liquid_volume
-                return prop.Mass(mass)
+                gas_volume = self.vessel_volume - liquid_volume
+                return gas_volume 
             else:
                 is_inlet = False if self._inlet_material_stream_index is None else True
                 density = self._connected_stream_property_getter(is_inlet, "material", "density_g")
@@ -502,7 +502,6 @@ class _VerticalVessels(_Vessels):
         volume = pi * self.ID**2 * self.liquid_level
         return prop.Volume(volume)
 
-
 class _HorizontalVessels(_Vessels):
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
@@ -529,6 +528,13 @@ class _HorizontalVessels(_Vessels):
 
     def _get_cylinder_volume(self):
         volume = 0
+        # alpha = cos-1(1-H/R)
+        R = self.ID.value / 2
+        H = self.liquid_level.value
+        L = self.length
+        radians = 1 - H / R
+        alpha = acos(radians)
+        volume = L * ((R ** 2) * alpha - (R - H) * sqrt(2*R*H - H*H))
         return prop.Volume(volume)
   
 #Defining generic class for all types of heat exchangers NEEDS SUPER CLASS WITH MULTI INPUT AND OUTPUT
