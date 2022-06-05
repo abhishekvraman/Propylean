@@ -435,10 +435,16 @@ class PipeSegment(_EquipmentOneInletOutlet):
 class VerticalStorage(_VerticalVessels):
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
+    
+    def __repr__(self):
+        return "Vertical Storage with tag: " + self.tag
 
 class HorizontalStorage(_HorizontalVessels):
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
+    
+    def __repr__(self):
+        return "Horizontal Storage with tag: " + self.tag
 
 class VerticalSeparator(_VerticalVessels):
     items = []

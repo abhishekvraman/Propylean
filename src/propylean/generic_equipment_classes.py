@@ -143,7 +143,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         self._update_equipment_object(self)  
     
 #Defining generic class for all types of vessels.  NEEDS SUPER CLASS WITH MULTI INPUT AND OUTPUT 
-class _Vessels(_EquipmentMultipleInletOutlet, _EquipmentOneInletOutlet):
+class _Vessels(_EquipmentOneInletOutlet):
     def __init__(self, **inputs) -> None:
         """ 
         DESCRIPTION:
@@ -257,8 +257,6 @@ class _Vessels(_EquipmentMultipleInletOutlet, _EquipmentOneInletOutlet):
             self.OD = inputs['OD']
             self.ID = inputs['thickness']
             self.ID = self.OD - self.ID
-        else:
-            raise Exception('Define atleast ID or OD with thickness to define a pipe segment object') 
             
         self.length = prop.Length() if 'length' not in inputs else prop.Length(inputs['length'])
         
