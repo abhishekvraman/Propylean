@@ -1,4 +1,4 @@
-from propylean.generic_equipment_classes import _PressureChangers
+from propylean.equipments.generic_equipment_classes import _PressureChangers
 from propylean import streams
 from propylean.settings import Settings
 from propylean.constants import Constants

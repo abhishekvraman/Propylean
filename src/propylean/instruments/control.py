@@ -1,6 +1,6 @@
 from propylean import streams
 import propylean.properties as prop
-from propylean.generic_equipment_classes import _EquipmentOneInletOutlet
+from propylean.equipments.generic_equipment_classes import _EquipmentOneInletOutlet
 from propylean.settings import Settings
 from propylean.constants import Constants
 from fluids import control_valve as cv_calculations

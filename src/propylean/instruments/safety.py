@@ -1,4 +1,4 @@
-from propylean.generic_equipment_classes import _EquipmentOneInletOutlet
+from propylean.equipments.generic_equipment_classes import _EquipmentOneInletOutlet
 
 class PressureSafetyValve(_EquipmentOneInletOutlet):
     items = []

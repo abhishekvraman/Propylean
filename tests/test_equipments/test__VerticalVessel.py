@@ -1,6 +1,6 @@
 import pytest
 import unittest
-from propylean.generic_equipment_classes import _VerticalVessels
+from propylean.equipments.generic_equipment_classes import _VerticalVessels
 from propylean.streams import MaterialStream, EnergyStream
 import propylean.properties as prop
 

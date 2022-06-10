@@ -1,4 +1,4 @@
-from propylean.generic_equipment_classes import _Exchangers
+from propylean.equipments.generic_equipment_classes import _Exchangers
 from propylean import streams
 from propylean import properties as prop
 
