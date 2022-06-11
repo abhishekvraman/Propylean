@@ -3,7 +3,7 @@ from propylean.equipments.abstract_equipment_classes import _EquipmentOneInletOu
 import propylean.properties as prop
 import pandas as pd
 from math import pi, sqrt, acos
-#Defining generic class for all types of pressure changers like Pumps, Compressors and Expanders
+#Defining generic class for all types of pressure changers like Pumps, Compressors and Expanders.
 class _PressureChangers(_EquipmentOneInletOutlet):
     def __init__(self,**inputs) -> None:
         """ 
@@ -142,7 +142,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         self._power = prop.Power(value, unit)
         self._update_equipment_object(self)  
     
-#Defining generic class for all types of vessels.  NEEDS SUPER CLASS WITH MULTI INPUT AND OUTPUT 
+#Defining generic class for all types of vessels. 
 class _Vessels(_EquipmentOneInletOutlet):
     def __init__(self, **inputs) -> None:
         """ 
@@ -422,7 +422,12 @@ class _Vessels(_EquipmentOneInletOutlet):
         self = self._get_equipment_object(self)
         self._head_type = value
         self._update_equipment_object(self)
-    
+    @head_type.deleter
+    def head_type(self):
+        self = self._get_equipment_object(self)
+        del self._head_type
+        self._update_equipment_object(self)
+
     @property
     def main_fluid(self):
         self = self._get_equipment_object(self)
@@ -530,6 +535,7 @@ class _HorizontalVessels(_Vessels):
         super().__init__(**inputs)
     
     def _get_head_volume(self):
+        self = self._get_equipment_object(self)
         C = 0
         if self.head_type == "hemispherical":
             C = 1
@@ -543,6 +549,7 @@ class _HorizontalVessels(_Vessels):
         return prop.Volume(head_volume) 
     
     def _get_head_volume_by_type(self, C):
+        self = self._get_equipment_object(self)
         head_volume = (self.ID.value ** 3) * pi 
         H_by_ID = self.liquid_level / self.ID
         head_volume *= 3 * H_by_ID**2 - 2 * H_by_ID**3
@@ -551,6 +558,7 @@ class _HorizontalVessels(_Vessels):
         return prop.Volume(head_volume)
 
     def _get_cylinder_volume(self):
+        self = self._get_equipment_object(self)
         volume = 0
         # alpha = cos-1(1-H/R)
         R = self.ID.value / 2
@@ -560,7 +568,60 @@ class _HorizontalVessels(_Vessels):
         alpha = acos(radians)
         volume = L * ((R ** 2) * alpha - (R - H) * sqrt(2*R*H - H*H))
         return prop.Volume(volume)
-  
+
+class _SphericalVessels(_Vessels):
+    def __init__(self, **inputs) -> None:
+        super().__init__(**inputs)
+        del self.head_type
+    
+    @property
+    def vessel_volume(self):
+        self = self._get_equipment_object(self)
+        volume = 2 * self._get_hemisphere_volume(D, D/2)
+        return prop.Volume(volume)
+    def _get_liquid_volume(self):
+        self = self._get_equipment_object(self)
+        H = self.liquid_level.value
+        D = self.ID.value
+        if H <= D/2:
+            volume = self._get_hemisphere_volume(D, H)
+        else:
+            volume = self._get_hemisphere_volume(D, D/2)
+            volume -=  self._get_hemisphere_volume(D, H)
+        return prop.Volume(volume)
+    
+    def _get_hemisphere_volume(self, D, H):
+        return pi * H**2 *(1.5 * D - H) / 3
+
+class _Blanketing(_EquipmentOneInletOutlet):
+    def __init__(self, **inputs) -> None:
+        inputs["tag"] += "_blanketing" 
+        super().__init__(**inputs)
+        del self.energy_in
+        del self.energy_out
+    
+    @property
+    def pressure_drop(self):
+        return prop.Pressure(0)
+    @pressure_drop.setter
+    def pressure_drop(self, value):
+        raise Exception("Pressure drop setting for blanketing is not allowed as it is an intermittent process.")
+    
+    @property
+    def temperature_increase(self):
+        return prop.Temperature(0, "K")
+    @temperature_increase.setter
+    def temperature_increase(self, value):
+        raise Exception("Temperature increase setting for blanketing is not allowed as it is an intermittent process.")
+        
+    @property
+    def temperature_decrease(self):
+        return prop.Temperature(0, "K")
+    @temperature_decrease.setter
+    def temperature_decrease(self, value):
+        raise Exception("Temperature decrease setting for blanketing is not allowed as it is an intermittent process.")
+        
+
 #Defining generic class for all types of heat exchangers NEEDS SUPER CLASS WITH MULTI INPUT AND OUTPUT
 class _Exchangers(_EquipmentOneInletOutlet):
     def __init__(self, **inputs) -> None:

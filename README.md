@@ -1,5 +1,5 @@
 # Propylean
-#### The open-source analytics package for chemical process industries
+#### The open-source analytics and calculation package for chemical process industries.
 
 ## What is Propylean
 Propylean name is derived from words Process/Production + Python + lean programming/manufacturing.
