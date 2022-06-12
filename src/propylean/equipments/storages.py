@@ -80,3 +80,7 @@ class AirReciever(_VerticalVessels):
     @main_fluid.setter
     def main_fluid(self, value):
         raise Exception("Setting property 'main_fluid' is not allowed for AirReciever.")
+
+class HotOilExpansionVessel(_HorizontalVessels):
+    def __init__(self, **inputs) -> None:
+        super().__init__(**inputs)

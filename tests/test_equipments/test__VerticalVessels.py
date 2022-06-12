@@ -2,6 +2,7 @@ import pytest
 import unittest
 from propylean.equipments.generic_equipment_classes import _VerticalVessels
 from propylean.streams import MaterialStream, EnergyStream
+from propylean.constants import Constants
 import propylean.properties as prop
 
 class test__VerticalVessels(unittest.TestCase):
@@ -16,10 +17,13 @@ class test__VerticalVessels(unittest.TestCase):
     @pytest.mark.positive
     @pytest.mark.instantiation
     def test__VerticalVessels_instantiation_tag_and_pressure_drop(self):
-        vertical_vessel = _VerticalVessels(tag="vertical_vessel_2",
-                          pressure_drop=prop.Pressure(100, 'bar'))
+        vertical_vessel = _VerticalVessels(tag="vertical_vessel_2")
+        vertical_vessel.operating_pressure = prop.Pressure(10, "bar")
         self.assertEqual(vertical_vessel.tag, "vertical_vessel_2")
-        self.assertEqual(vertical_vessel.pressure_drop, prop.Pressure(100, 'bar'))
+        self.assertEqual(vertical_vessel.operating_pressure, prop.Pressure(10, 'bar'))
+        self.assertEqual(vertical_vessel.outlet_pressure, prop.Pressure(10, 'bar'))
+        self.assertEqual(vertical_vessel.inlet_pressure, prop.Pressure(10, 'bar'))
+        self.assertEqual(vertical_vessel.pressure_drop, prop.Pressure(0, 'bar'))
     
     @pytest.mark.positive
     @pytest.mark.instantiation
@@ -29,6 +33,60 @@ class test__VerticalVessels(unittest.TestCase):
         self.assertEqual(vertical_vessel.pressure_drop, prop.Pressure(0))
         self.assertEqual(vertical_vessel.pressure_drop, prop.Pressure(0))
     
+    @pytest.mark.positive
+    @pytest.mark.length_setting
+    def test__VerticalVessels_instantiation_vessel_dimensions_arguments(self):
+        vertical_vessel = _VerticalVessels(ID = (4, "m"),
+                                               OD = 6,
+                                               length=prop.Length(10))
+
+        self.assertEqual(vertical_vessel.ID, prop.Length(4, "m"))
+        self.assertEqual(vertical_vessel.OD, prop.Length(6, "m"))
+        self.assertEqual(vertical_vessel.thickness, prop.Length(2, "m"))
+        self.assertEqual(vertical_vessel.length, prop.Length(10, "m"))
+
+        Vertical_vessel = _VerticalVessels(thickness = (2, "m"),
+                                               OD = 6,
+                                               length=prop.Length(10))
+        self.assertEqual(Vertical_vessel.ID, prop.Length(4, "m"))
+        self.assertEqual(Vertical_vessel.OD, prop.Length(6, "m"))
+        self.assertEqual(Vertical_vessel.thickness, prop.Length(2, "m"))
+        self.assertEqual(Vertical_vessel.length, prop.Length(10, "m"))
+
+    @pytest.mark.positive
+    @pytest.mark.length_setting
+    def test__VerticalVessels_instantiation_level_settings_arguments(self):
+        vertical_vessel = _VerticalVessels(LLLL=(10, "inch"),
+                                             LLL=(20, "inch"),
+                                             NLL=prop.Length(30, "inch"),
+                                             HLL=prop.Length(40, "inch"),
+                                             HHLL=(50, "inch"))
+
+        self.assertEqual(vertical_vessel.LLLL, prop.Length(10, "inch"))
+        self.assertEqual(vertical_vessel.LLL, prop.Length(20, "inch"))
+        self.assertEqual(vertical_vessel.NLL, prop.Length(30, "inch"))
+        self.assertEqual(vertical_vessel.HLL, prop.Length(40, "inch"))
+        self.assertEqual(vertical_vessel.HHLL, prop.Length(50, "inch"))
+    
+    @pytest.mark.positive
+    @pytest.mark.head_type
+    def test__VerticalVessels_instantiation_head_type_argument(self):
+        for head_type in Constants.HEAD_TYPES:
+            Vertical_vessel = _VerticalVessels(ID = (4, "m"),
+                                                OD = 6,
+                                                length=prop.Length(10),
+                                                head_type=head_type)
+            self.assertEqual(Vertical_vessel.head_type, head_type)
+    
+    @pytest.mark.positive
+    @pytest.mark.main_fluid
+    def test__VerticalVessels_instantiation_main_fluid_argument(self):
+        for main_fluid in ["liquid", "gas"]:
+            Vertical_vessel = _VerticalVessels(ID = (4, "m"),
+                                                OD = 6,
+                                                length=prop.Length(10),
+                                                main_fluid=main_fluid)
+            self.assertEqual(Vertical_vessel.main_fluid, main_fluid)
     
     @pytest.mark.positive
     def test__VerticalVessels_setting_inlet_pressure(self):
@@ -37,6 +95,7 @@ class test__VerticalVessels(unittest.TestCase):
         vertical_vessel.inlet_pressure = (30, 'bar')
         self.assertEqual(vertical_vessel.inlet_pressure, prop.Pressure(30, 'bar'))
         self.assertEqual(vertical_vessel.outlet_pressure, prop.Pressure(29.9, 'bar'))
+        self.assertEqual(vertical_vessel.operating_pressure, prop.Pressure(29.9, 'bar'))
     
     @pytest.mark.positive
     def test__VerticalVessels_setting_outlet_pressure(self):
@@ -44,7 +103,7 @@ class test__VerticalVessels(unittest.TestCase):
                           pressure_drop=(0.1, 'bar'))
         vertical_vessel.outlet_pressure = (20, 'bar')
         self.assertEqual(vertical_vessel.inlet_pressure, prop.Pressure(20.1, 'bar'))
-        self.assertEqual(vertical_vessel.outlet_pressure, prop.Pressure(20, 'bar'))
+        self.assertEqual(vertical_vessel.operating_pressure, prop.Pressure(20, 'bar'))
     
     @pytest.mark.positive
     def test__VerticalVessels_setting_inlet_temperature(self):
@@ -52,7 +111,7 @@ class test__VerticalVessels(unittest.TestCase):
                           pressure_drop=(0.1, 'bar'))
         vertical_vessel.inlet_temperature = (50, 'C')
         self.assertEqual(vertical_vessel.inlet_temperature, prop.Temperature(50, 'C'))
-        self.assertEqual(vertical_vessel.outlet_temperature, prop.Temperature(50, 'C'))
+        self.assertEqual(vertical_vessel.operating_temperature, prop.Temperature(50, 'C'))
     
     @pytest.mark.positive
     def test__VerticalVessels_setting_outlet_temperature(self):
@@ -61,8 +120,8 @@ class test__VerticalVessels(unittest.TestCase):
         vertical_vessel.outlet_temperature = (130, 'F')
         self.assertLess(abs(vertical_vessel.inlet_temperature.value-130), 0.0001)
         self.assertEqual(vertical_vessel.inlet_temperature.unit, 'F')
-        self.assertLess(abs(vertical_vessel.outlet_temperature.value-130), 0.0001)
-        self.assertEqual(vertical_vessel.outlet_temperature.unit, 'F')
+        self.assertLess(abs(vertical_vessel.operating_temperature.value-130), 0.0001)
+        self.assertEqual(vertical_vessel.operating_temperature.unit, 'F')
     
     @pytest.mark.positive
     def test__VerticalVessels_setting_inlet_mass_flowrate(self):
@@ -232,3 +291,130 @@ class test__VerticalVessels(unittest.TestCase):
         self.assertIsNone(vertical_vessel._outlet_material_stream_tag)
         self.assertIsNone(inlet_stream._to_equipment_tag)
         self.assertIsNone(outlet_stream._from_equipment_tag)
+    
+    @pytest.mark.positive
+    @pytest.mark.liquid_level
+    def test__VerticalVessels_liquid_level(self):
+        Vertical_vessel = _VerticalVessels(tag="Vertical_vessel_21",
+                                               NLL=(20, "m"))
+        self.assertEqual(Vertical_vessel.NLL, Vertical_vessel.liquid_level)
+    
+    @pytest.mark.positive
+    @pytest.mark.vessel_volume
+    def test__VerticalVessels_volume_calculations_elliptical(self):
+        """ Filled Volume	m3	18.43
+            Total Volume	m3	142.4
+            Diameter, D 4000 mm
+            Straight Length, L 10000 mm
+            Inside Dish Depth, a 1000 mm
+            Level, H 1800 mm
+        """
+        Vertical_vessel = _VerticalVessels(tag="Vertical_vessel_22",
+                                               ID=(4, "m"), length=(10, "m"),
+                                               head_type="elliptical")
+        Vertical_vessel.liquid_level = prop.Length(1800, "mm")
+        Vertical_vessel.main_fluid = "liquid"
+
+        expected_vessel_volume = prop.Volume(142.4, "m^3")
+        expected_liquid_volume = prop.Volume(61.97)
+        self.assertAlmostEqual(Vertical_vessel.vessel_volume.value,
+                               expected_vessel_volume.value)
+        self.assertEqual(Vertical_vessel.vessel_volume.unit,
+                               expected_vessel_volume.unit)
+
+        self.assertAlmostEqual(Vertical_vessel.inventory.value,
+                               expected_liquid_volume.value)
+        self.assertEqual(Vertical_vessel.inventory.unit,
+                               expected_liquid_volume.unit)       
+
+    @pytest.mark.positive
+    @pytest.mark.vessel_volume
+    def test__VerticalVessels_volume_calculations_torispherical(self):
+        """ ASME F&D/ Torispherical	f = 1	k = 0.06
+            Standard F&D	f = 1	k = 0.75" to 2"
+            80:10 F&D	f = 0.8	k = 0.1
+            Filled Volume	m3	19.29
+            Total Volume	m3	136.0
+            Inside Dish Depth (a)	mm	677.4
+            Dish Radius (fD)	mm	4000
+            Knuckle Radius (kD)	mm	240.0
+            Diameter, D 4000 mm
+            Straight Length, L 10000 mm
+            Level, H 1800 mm
+            f, Dish Radius parameter
+            1.0
+            k, Knuckle Radius parameter
+            0.06
+        """
+        Vertical_vessel = _VerticalVessels(tag="Vertical_vessel_23",
+                                               ID=(4, "m"), length=(10, "m"),
+                                               head_type="torispherical")
+        Vertical_vessel.liquid_level = prop.Length(1800, "mm")
+        Vertical_vessel.main_fluid = "liquid"
+
+        expected_vessel_volume = prop.Volume(142.4, "m^3")
+        expected_liquid_volume = prop.Volume(61.97)
+        self.assertAlmostEqual(Vertical_vessel.vessel_volume.value,
+                               expected_vessel_volume.value)
+        self.assertEqual(Vertical_vessel.vessel_volume.unit,
+                               expected_vessel_volume.unit)
+
+        self.assertAlmostEqual(Vertical_vessel.inventory.value,
+                               expected_liquid_volume.value)
+        self.assertEqual(Vertical_vessel.inventory.unit,
+                               expected_liquid_volume.unit)       
+
+    @pytest.mark.positive
+    @pytest.mark.vessel_volume
+    def test__VerticalVessels_volume_calculations_hemispherical(self):
+        """ Filled Volume	m3	14.25
+            Total Volume	m3	159.2
+            Diameter, D 4000 mm
+            Straight Length, L 10000 mm
+            Inside Dish Depth, a 1000 mm
+            Level, H 1800 mm
+        """
+        Vertical_vessel = _VerticalVessels(tag="Vertical_vessel_24",
+                                               ID=(4, "m"), length=(10, "m"),
+                                               head_type="hemispherical")
+        Vertical_vessel.liquid_level = prop.Length(1800, "mm")
+        Vertical_vessel.main_fluid = "liquid"
+
+        expected_vessel_volume = prop.Volume(142.4, "m^3")
+        expected_liquid_volume = prop.Volume(61.97)
+        self.assertAlmostEqual(Vertical_vessel.vessel_volume.value,
+                               expected_vessel_volume.value)
+        self.assertEqual(Vertical_vessel.vessel_volume.unit,
+                               expected_vessel_volume.unit)
+
+        self.assertAlmostEqual(Vertical_vessel.inventory.value,
+                               expected_liquid_volume.value)
+        self.assertEqual(Vertical_vessel.inventory.unit,
+                               expected_liquid_volume.unit)
+
+    @pytest.mark.vessel_volume
+    def test__VerticalVessels_volume_calculations_flat(self):
+        """ Filled Volume	m3	22.62
+            Total Volume	m3	125.7
+            Diameter, D 4000 mm
+            Straight Length, L 10000 mm
+            Inside Dish Depth, a 1000 mm
+            Level, H 1800 mm
+        """
+        Vertical_vessel = _VerticalVessels(tag="Vertical_vessel_25",
+                                               ID=(4, "m"), length=(10, "m"),
+                                               head_type="flat")
+        Vertical_vessel.liquid_level = prop.Length(1800, "mm")
+        Vertical_vessel.main_fluid = "liquid"
+
+        expected_vessel_volume = prop.Volume(142.4, "m^3")
+        expected_liquid_volume = prop.Volume(61.97)
+        self.assertAlmostEqual(Vertical_vessel.vessel_volume.value,
+                               expected_vessel_volume.value)
+        self.assertEqual(Vertical_vessel.vessel_volume.unit,
+                               expected_vessel_volume.unit)
+
+        self.assertAlmostEqual(Vertical_vessel.inventory.value,
+                               expected_liquid_volume.value)
+        self.assertEqual(Vertical_vessel.inventory.unit,
+                               expected_liquid_volume.unit)       

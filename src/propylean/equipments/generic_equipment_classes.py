@@ -1,6 +1,7 @@
 from cmath import sqrt
 from propylean.equipments.abstract_equipment_classes import _EquipmentOneInletOutlet, _EquipmentMultipleInletOutlet
 import propylean.properties as prop
+from propylean.constants import Constants 
 import pandas as pd
 from math import pi, sqrt, acos
 #Defining generic class for all types of pressure changers like Pumps, Compressors and Expanders.
@@ -190,7 +191,7 @@ class _Vessels(_EquipmentOneInletOutlet):
             head_type:
                 Required: No
                 Type: String
-                Acceptable values: ["hemispherical", "elliptical", "torispherical", "flat"]
+                Acceptable values: {head_types}
                 Default value: elliptical    
                 Description: Type of head for the vessel.
             
@@ -199,7 +200,7 @@ class _Vessels(_EquipmentOneInletOutlet):
                 Type: String
                 Acceptable values: ["liquid", "gas"]
                 Default value: liquid    
-                Description: Type of head for the vessel.
+                Description: Type of fluid which the vessel stores.
             
         RETURN VALUE:
             Type: _Vessels
@@ -243,8 +244,16 @@ class _Vessels(_EquipmentOneInletOutlet):
             >>>     def __init__(**kwargs):
             >>>         some_property = 20
                 
-    """
+    """.format(head_types=Constants.HEAD_TYPES)
         super().__init__(**inputs)
+        self._ID = prop.Length()
+        self._OD = prop.Length()
+        self._length = prop.Length()
+        self._LLLL = prop.Length()
+        self._LLL = prop.Length()
+        self._NLL = prop.Length()
+        self._HLL = prop.Length()
+        self._HHLL = prop.Length()
         self.operating_pressure = prop.Pressure()
         self.operating_temperature = prop.Temperature()
         if ('ID' in inputs and inputs['ID'] is not None):
@@ -253,18 +262,20 @@ class _Vessels(_EquipmentOneInletOutlet):
                     self.OD = inputs['OD']
                 elif 'thickness' in inputs and inputs['thickness'] is not None:
                     self.thickness = inputs['thickness']
+                
         elif ('OD' in inputs and 'thickness' in inputs):
             self.OD = inputs['OD']
             self.ID = inputs['thickness']
             self.ID = self.OD - self.ID
-            
-        self.length = prop.Length() if 'length' not in inputs else prop.Length(inputs['length'])
         
-        self.LLLL = prop.Length() if 'LLLL' not in inputs else prop.Length(inputs['LLLL'])
-        self.LLL = prop.Length() if 'LLL' not in inputs else prop.Length(inputs['LLL'])
-        self.NLL = prop.Length() if 'NLL' not in inputs else prop.Length(inputs['NLL'])
-        self.HLL = prop.Length() if 'HLL' not in inputs else prop.Length(inputs['HLL'])
-        self.HHLL = prop.Length() if 'HHLL' not in inputs else prop.Length(inputs['HHLL'])
+        self.length = prop.Length() if 'length' not in inputs else inputs['length']
+        
+        self.LLLL = prop.Length() if 'LLLL' not in inputs else inputs['LLLL']
+        self.LLL = prop.Length() if 'LLL' not in inputs else inputs['LLL']
+        self.NLL = prop.Length() if 'NLL' not in inputs else inputs['NLL']
+        self.liquid_level = prop.Length() if 'NLL' not in inputs else inputs['NLL']
+        self.HLL = prop.Length() if 'HLL' not in inputs else inputs['HLL']
+        self.HHLL = prop.Length() if 'HHLL' not in inputs else inputs['HHLL']
 
         self.head_type = "elliptical" if "head_type" not in inputs else inputs["head_type"]
         self.main_fluid = "liquid" if "main_fluid" not in inputs else inputs["main_fluid"]
@@ -321,6 +332,11 @@ class _Vessels(_EquipmentOneInletOutlet):
         if unit is None:
             unit = self._length.unit
         self._length = prop.Length(value, unit)
+        self._update_equipment_object(self)
+    @length.deleter
+    def length(self):
+        self = self._get_equipment_object(self)
+        del self._length
         self._update_equipment_object(self)
     
     @property
@@ -420,6 +436,9 @@ class _Vessels(_EquipmentOneInletOutlet):
     @head_type.setter
     def head_type(self, value):
         self = self._get_equipment_object(self)
+        if value not in Constants.HEAD_TYPES:
+            raise Exception("""Head type '{0}', not supported. Supported types are:\n
+            {1}""".format(value, Constants.HEAD_TYPES))
         self._head_type = value
         self._update_equipment_object(self)
     @head_type.deleter
@@ -447,23 +466,26 @@ class _Vessels(_EquipmentOneInletOutlet):
     
     @property
     def operating_temperature(self):
-        return self.operating_temperature
+        return self.outlet_temperature
     @operating_temperature.setter
     def operating_temperature(self, value):
         self.outlet_temperature = value
     
     @property
     def vessel_volume(self):
-        cylinder_volume = pi * self.ID.value * self.ID.value * self.length.value
+        D = self.ID.value
+        L = self.length.value
+        t = self.thickness.value
+        cylinder_volume = pi * D * D * L
         head_volume = 0
         if self.head_type == "hemispherical":
-            head_volume = 4 * pi * (self.ID.value ** 3) / 3
+            head_volume = 4 * pi * (D ** 3) / 3
         elif self.head_type == "elliptical":
-            head_volume = pi * (self.ID.value ** 3) / 12
+            head_volume = pi * (D ** 3) / 12
         elif self.head_type == "torispherical":
-            Rc = (self.ID + self.thickness).value
-            Rk = 3 * self.thickness.value
-            z = Rc - sqrt((Rc - Rk)**2 - (self.OD.value/2 - self.thickness.value - Rk)**2)
+            Rc = D + t
+            Rk = 3 * t
+            z = Rc - sqrt((Rc - Rk)**2 - (self.OD.value/2 - t - Rk)**2)
             head_volume = 0.9 * 4 * pi * Rc * Rc * z / 3 
         return prop.Volume(cylinder_volume + head_volume, "m^3")
 
@@ -573,10 +595,12 @@ class _SphericalVessels(_Vessels):
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
         del self.head_type
+        del self.length
     
     @property
     def vessel_volume(self):
         self = self._get_equipment_object(self)
+        D = self.ID.value
         volume = 2 * self._get_hemisphere_volume(D, D/2)
         return prop.Volume(volume)
     def _get_liquid_volume(self):

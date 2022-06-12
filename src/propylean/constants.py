@@ -6,3 +6,4 @@ class Constants(object):
                "steel": [13, 10, 57, 37, 2.6, 7.5, 320, 95, 420, 560]}
     REDUCER_Le_BY_D_PLASTIC = {9: 10, 8: 30, 7: 75, 6: 175, 5: 420, 4: 1150}
     REDUCER_Le_BY_D_STEEL = {9: 3, 8: 8, 7: 18, 6: 38, 5: 85, 4: 220}
+    HEAD_TYPES = ["hemispherical", "elliptical", "torispherical", "flat"]
