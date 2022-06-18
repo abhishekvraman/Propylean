@@ -313,19 +313,20 @@ class test__HorizontalVessels(unittest.TestCase):
         horizontal_vessel = _HorizontalVessels(tag="horizontal_vessel_22",
                                                ID=(4, "m"), length=(10, "m"),
                                                head_type="elliptical")
-        horizontal_vessel.liquid_level = prop.Length(1800, "mm")
+        horizontal_vessel.liquid_level = prop.Length(1.8, "m")
         horizontal_vessel.main_fluid = "liquid"
 
         expected_vessel_volume = prop.Volume(142.4, "m^3")
         expected_liquid_volume = prop.Volume(61.97)
         self.assertAlmostEqual(horizontal_vessel.vessel_volume.value,
-                               expected_vessel_volume.value)
+                               expected_vessel_volume.value, 1)
         self.assertEqual(horizontal_vessel.vessel_volume.unit,
                                expected_vessel_volume.unit)
 
-        self.assertAlmostEqual(horizontal_vessel.inventory.value,
-                               expected_liquid_volume.value)
-        self.assertEqual(horizontal_vessel.inventory.unit,
+        calculated_liq_volume = horizontal_vessel.get_inventory()
+        self.assertAlmostEqual(calculated_liq_volume.value,
+                               expected_liquid_volume.value, 2)
+        self.assertEqual(calculated_liq_volume.unit,
                                expected_liquid_volume.unit)       
     
     @pytest.mark.positive
@@ -351,19 +352,20 @@ class test__HorizontalVessels(unittest.TestCase):
         horizontal_vessel = _HorizontalVessels(tag="horizontal_vessel_23",
                                                ID=(4, "m"), length=(10, "m"),
                                                head_type="torispherical")
-        horizontal_vessel.liquid_level = prop.Length(1800, "mm")
+        horizontal_vessel.liquid_level = prop.Length(1.8, "m")
         horizontal_vessel.main_fluid = "liquid"
 
         expected_vessel_volume = prop.Volume(142.4, "m^3")
         expected_liquid_volume = prop.Volume(61.97)
         self.assertAlmostEqual(horizontal_vessel.vessel_volume.value,
-                               expected_vessel_volume.value)
+                               expected_vessel_volume.value, 1)
         self.assertEqual(horizontal_vessel.vessel_volume.unit,
                                expected_vessel_volume.unit)
 
-        self.assertAlmostEqual(horizontal_vessel.inventory.value,
-                               expected_liquid_volume.value)
-        self.assertEqual(horizontal_vessel.inventory.unit,
+        calculated_liq_volume = horizontal_vessel.get_inventory()
+        self.assertAlmostEqual(calculated_liq_volume.value,
+                               expected_liquid_volume.value, 2)
+        self.assertEqual(calculated_liq_volume.unit,
                                expected_liquid_volume.unit)       
 
     @pytest.mark.positive
@@ -379,20 +381,21 @@ class test__HorizontalVessels(unittest.TestCase):
         horizontal_vessel = _HorizontalVessels(tag="horizontal_vessel_24",
                                                ID=(4, "m"), length=(10, "m"),
                                                head_type="hemispherical")
-        horizontal_vessel.liquid_level = prop.Length(1800, "mm")
+        horizontal_vessel.liquid_level = prop.Length(1.8, "m")
         horizontal_vessel.main_fluid = "liquid"
 
-        expected_vessel_volume = prop.Volume(142.4, "m^3")
-        expected_liquid_volume = prop.Volume(61.97)
+        expected_vessel_volume = prop.Volume(159.2, "m^3")
+        expected_liquid_volume = prop.Volume(69.10)
         self.assertAlmostEqual(horizontal_vessel.vessel_volume.value,
-                               expected_vessel_volume.value)
+                               expected_vessel_volume.value, 1)
         self.assertEqual(horizontal_vessel.vessel_volume.unit,
                                expected_vessel_volume.unit)
 
-        self.assertAlmostEqual(horizontal_vessel.inventory.value,
-                               expected_liquid_volume.value)
-        self.assertEqual(horizontal_vessel.inventory.unit,
-                               expected_liquid_volume.unit)
+        calculated_liq_volume = horizontal_vessel.get_inventory()
+        self.assertAlmostEqual(calculated_liq_volume.value,
+                               expected_liquid_volume.value, 2)
+        self.assertEqual(calculated_liq_volume.unit,
+                               expected_liquid_volume.unit) 
 
     @pytest.mark.vessel_volume
     def test__HorizontalVessels_volume_calculations_flat(self):
@@ -406,17 +409,18 @@ class test__HorizontalVessels(unittest.TestCase):
         horizontal_vessel = _HorizontalVessels(tag="horizontal_vessel_25",
                                                ID=(4, "m"), length=(10, "m"),
                                                head_type="flat")
-        horizontal_vessel.liquid_level = prop.Length(1800, "mm")
+        horizontal_vessel.liquid_level = prop.Length(1.8, "m")
         horizontal_vessel.main_fluid = "liquid"
 
-        expected_vessel_volume = prop.Volume(142.4, "m^3")
-        expected_liquid_volume = prop.Volume(61.97)
+        expected_vessel_volume = prop.Volume(125.7, "m^3")
+        expected_liquid_volume = prop.Volume(54.85)
         self.assertAlmostEqual(horizontal_vessel.vessel_volume.value,
-                               expected_vessel_volume.value)
+                               expected_vessel_volume.value, 1)
         self.assertEqual(horizontal_vessel.vessel_volume.unit,
                                expected_vessel_volume.unit)
 
-        self.assertAlmostEqual(horizontal_vessel.inventory.value,
-                               expected_liquid_volume.value)
-        self.assertEqual(horizontal_vessel.inventory.unit,
+        calculated_liq_volume = horizontal_vessel.get_inventory()
+        self.assertAlmostEqual(calculated_liq_volume.value,
+                               expected_liquid_volume.value, 2)
+        self.assertEqual(calculated_liq_volume.unit,
                                expected_liquid_volume.unit)       

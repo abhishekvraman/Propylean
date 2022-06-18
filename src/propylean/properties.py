@@ -43,6 +43,11 @@ class _Property(object):
             other.unit = self.unit
         return type(self)(self.value - other.value, self.unit)
     
+    def __truediv__(self, other):
+        if self.unit!=other.unit:
+            other.unit = self.unit
+        return self.value / other.value
+
     def __eq__(self, other):
         if isinstance(other, type(self)):
             if self.unit != other.unit:

@@ -304,17 +304,18 @@ class test__SphericalVessels(unittest.TestCase):
     def test__SphericalVessels_volume_calculations(self):
         Spherical_vessel = _SphericalVessels(tag="Spherical_vessel_22",
                                                ID=(4, "m"))
-        Spherical_vessel.liquid_level = prop.Length(1800, "mm")
+        Spherical_vessel.liquid_level = prop.Length(1.8, "m")
         Spherical_vessel.main_fluid = "liquid"
 
-        expected_vessel_volume = prop.Volume(142.4, "m^3")
+        expected_vessel_volume = prop.Volume(33.51, "m^3")
         expected_liquid_volume = prop.Volume(61.97)
         self.assertAlmostEqual(Spherical_vessel.vessel_volume.value,
-                               expected_vessel_volume.value)
+                               expected_vessel_volume.value, 1)
         self.assertEqual(Spherical_vessel.vessel_volume.unit,
                                expected_vessel_volume.unit)
 
-        self.assertAlmostEqual(Spherical_vessel.inventory.value,
-                               expected_liquid_volume.value)
-        self.assertEqual(Spherical_vessel.inventory.unit,
+        calculated_liq_volume = Spherical_vessel.get_inventory()
+        self.assertAlmostEqual(calculated_liq_volume.value,
+                               expected_liquid_volume.value, 2)
+        self.assertEqual(calculated_liq_volume.unit,
                                expected_liquid_volume.unit)       

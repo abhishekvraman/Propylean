@@ -476,11 +476,15 @@ class _Vessels(_EquipmentOneInletOutlet):
         D = self.ID.value
         L = self.length.value
         t = self.thickness.value
-        cylinder_volume = pi * D * D * L
+        cylinder_volume = pi * D * D * L / 4
+        # Volume of both heads.
         head_volume = 0
         if self.head_type == "hemispherical":
-            head_volume = 4 * pi * (D ** 3) / 3
+            # Spherical heads are not exact sphere but part of it.
+            # Dish depth = D/2
+            head_volume = pi * (D ** 3) / 6 
         elif self.head_type == "elliptical":
+            # Dish depth = D/4
             head_volume = pi * (D ** 3) / 12
         elif self.head_type == "torispherical":
             Rc = D + t
@@ -502,18 +506,8 @@ class _Vessels(_EquipmentOneInletOutlet):
         self._liquid_level = prop.Length(value, unit)
         self._update_equipment_object(self)
 
-    def _get_head_volume():
-        raise Exception("Implemented in child class.")
-    
-    def _get_cylinder_volume():
-        raise Exception("Implemented in child class.")
-
-    def _get_liquid_volume(self):
-        head_volume = self._get_head_volume()
-        cylinder_volume = self._get_cylinder_volume()
-        return prop.Volume(cylinder_volume + 2 * head_volume, "m^3")
-
-    def inventory(self, type="volume"):
+    def get_inventory(self, type="volume"):
+        self = self._get_equipment_object(self)
         if self.main_fluid == "gas":
             if type == "volume":
                 liquid_volume = self._get_liquid_volume()
@@ -537,10 +531,13 @@ class _VerticalVessels(_Vessels):
     
     def _get_head_volume(self):
         head_volume = 0
+        D = self.ID.value
         if self.head_type == "hemispherical":
-            head_volume = 4 * pi * (self.ID.value ** 3) / 3
+            # Dish depth = D/2
+            head_volume = pi * (D ** 3) / 12
         elif self.head_type == "elliptical":
-            head_volume = pi * (self.ID.value ** 3) / 12
+            # Dish depth = D/4
+            head_volume = pi * (D ** 3) / 24
         elif self.head_type == "torispherical":
             Rc = (self.ID + self.thickness).value
             Rk = 3 * self.thickness.value
@@ -549,8 +546,13 @@ class _VerticalVessels(_Vessels):
         return prop.Volume(head_volume) 
 
     def _get_cylinder_volume(self):
-        volume = pi * self.ID**2 * self.liquid_level
+        volume = pi * self.ID.value**2 * self.liquid_level.value / 4
         return prop.Volume(volume)
+    
+    def _get_liquid_volume(self):
+        head_volume = self._get_head_volume()
+        cylinder_volume = self._get_cylinder_volume()
+        return cylinder_volume + head_volume
 
 class _HorizontalVessels(_Vessels):
     def __init__(self, **inputs) -> None:
@@ -571,13 +573,12 @@ class _HorizontalVessels(_Vessels):
         return prop.Volume(head_volume) 
     
     def _get_head_volume_by_type(self, C):
-        self = self._get_equipment_object(self)
         head_volume = (self.ID.value ** 3) * pi 
         H_by_ID = self.liquid_level / self.ID
         head_volume *= 3 * H_by_ID**2 - 2 * H_by_ID**3
         head_volume /= 12
         head_volume *= C
-        return prop.Volume(head_volume)
+        return head_volume
 
     def _get_cylinder_volume(self):
         self = self._get_equipment_object(self)
@@ -585,11 +586,16 @@ class _HorizontalVessels(_Vessels):
         # alpha = cos-1(1-H/R)
         R = self.ID.value / 2
         H = self.liquid_level.value
-        L = self.length
+        L = self.length.value
         radians = 1 - H / R
         alpha = acos(radians)
         volume = L * ((R ** 2) * alpha - (R - H) * sqrt(2*R*H - H*H))
         return prop.Volume(volume)
+    
+    def _get_liquid_volume(self):
+        head_volume = self._get_head_volume()
+        cylinder_volume = self._get_cylinder_volume()
+        return cylinder_volume + head_volume + head_volume
 
 class _SphericalVessels(_Vessels):
     def __init__(self, **inputs) -> None:
