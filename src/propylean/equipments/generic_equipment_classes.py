@@ -202,6 +202,12 @@ class _Vessels(_EquipmentOneInletOutlet):
                 Default value: liquid    
                 Description: Type of fluid which the vessel stores.
             
+            is_blanketed:
+                Required: No
+                Type: Boolean
+                Default value: False
+                Description: Specifies if the vessel is blanketed or not.
+            
         RETURN VALUE:
             Type: _Vessels
             Description: object with all _EquipmentOneInletOutlet and other vessel related properties.
@@ -254,6 +260,7 @@ class _Vessels(_EquipmentOneInletOutlet):
         self._NLL = prop.Length()
         self._HLL = prop.Length()
         self._HHLL = prop.Length()
+        self.blanketing = None
         self.operating_pressure = prop.Pressure()
         self.operating_temperature = prop.Temperature()
         if ('ID' in inputs and inputs['ID'] is not None):
@@ -279,8 +286,12 @@ class _Vessels(_EquipmentOneInletOutlet):
         self.HLL = prop.Length() if 'HLL' not in inputs else inputs['HLL']
         self.HHLL = prop.Length() if 'HHLL' not in inputs else inputs['HHLL']
 
-        self.head_type = "torispherical" if "head_type" not in inputs else inputs["head_type"]
+        self._head_type = "torispherical" if "head_type" not in inputs else inputs["head_type"]
         self.main_fluid = "liquid" if "main_fluid" not in inputs else inputs["main_fluid"]
+        
+        if "is_blanketed" in inputs and inputs["is_blanketed"]:
+            self.blanketing = _Blanketing(tag=self.tag)
+            self.blanketing.inlet_pressure = self.operating_pressure
 
     @property
     def ID(self):
@@ -469,6 +480,8 @@ class _Vessels(_EquipmentOneInletOutlet):
     @operating_pressure.setter
     def operating_pressure(self, value):
         self.outlet_pressure = value
+        if self.blanketing is not None:
+            self.blanketing.outlet_pressure = value
     
     @property
     def operating_temperature(self):
@@ -476,6 +489,8 @@ class _Vessels(_EquipmentOneInletOutlet):
     @operating_temperature.setter
     def operating_temperature(self, value):
         self.outlet_temperature = value
+        if self.blanketing is not None:
+            self.blanketing.inlet_temperature = value
     
     @property
     def vessel_volume(self):
@@ -636,6 +651,8 @@ class _Blanketing(_EquipmentOneInletOutlet):
         del self.energy_in
         del self.energy_out
     
+    def __repr__(self):
+        return "Blanketing with tag: " + self.tag
     @property
     def pressure_drop(self):
         return prop.Pressure(0)

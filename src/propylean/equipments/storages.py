@@ -6,14 +6,12 @@ from propylean import properties as prop
 
 class VerticalStorage(_VerticalVessels):
     def __init__(self, **inputs) -> None:
-        super().__init__(**inputs)
-        if "is_blanketed" in inputs and inputs["is_blanketed"]:
-            self.blanketing = _Blanketing(tag=self.tag)
-
+        super().__init__(**inputs)                    
         VerticalStorage.items.append(self)
     
     def __repr__(self):
         return "Vertical Storage with tag: " + self.tag
+
 
 class Bullet(_HorizontalVessels):
     def __init__(self, **inputs) -> None:
@@ -23,7 +21,7 @@ class Bullet(_HorizontalVessels):
         Bullet.items.append(self)
     
     def __repr__(self):
-        return "Horizontal Storage with tag: " + self.tag
+        return "Bullet with tag: " + self.tag
 
 class Tank(_VerticalVessels):
     items = []
