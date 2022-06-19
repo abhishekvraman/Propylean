@@ -95,7 +95,7 @@ class test__VerticalVessels(unittest.TestCase):
         vertical_vessel.inlet_pressure = (30, 'bar')
         self.assertEqual(vertical_vessel.inlet_pressure, prop.Pressure(30, 'bar'))
         self.assertEqual(vertical_vessel.outlet_pressure, prop.Pressure(29.9, 'bar'))
-        self.assertEqual(vertical_vessel.operating_pressure, prop.Pressure(29.9, 'bar'))
+        self.assertEqual(vertical_vessel.operating_pressure, prop.Pressure(30, 'bar'))
     
     @pytest.mark.positive
     def test__VerticalVessels_setting_outlet_pressure(self):
@@ -103,7 +103,7 @@ class test__VerticalVessels(unittest.TestCase):
                           pressure_drop=(0.1, 'bar'))
         vertical_vessel.outlet_pressure = (20, 'bar')
         self.assertEqual(vertical_vessel.inlet_pressure, prop.Pressure(20.1, 'bar'))
-        self.assertEqual(vertical_vessel.operating_pressure, prop.Pressure(20, 'bar'))
+        self.assertEqual(vertical_vessel.operating_pressure, prop.Pressure(20.1, 'bar'))
     
     @pytest.mark.positive
     def test__VerticalVessels_setting_inlet_temperature(self):

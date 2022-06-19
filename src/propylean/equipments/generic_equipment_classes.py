@@ -1,9 +1,10 @@
 from cmath import sqrt
 from propylean.equipments.abstract_equipment_classes import _EquipmentOneInletOutlet, _EquipmentMultipleInletOutlet
 import propylean.properties as prop
-from propylean.constants import Constants 
+from propylean.constants import Constants
 import pandas as pd
 from math import pi, sqrt, acos
+
 #Defining generic class for all types of pressure changers like Pumps, Compressors and Expanders.
 class _PressureChangers(_EquipmentOneInletOutlet):
     def __init__(self,**inputs) -> None:
@@ -287,7 +288,6 @@ class _Vessels(_EquipmentOneInletOutlet):
         self.HHLL = prop.Length() if 'HHLL' not in inputs else inputs['HHLL']
 
         self._head_type = "torispherical" if "head_type" not in inputs else inputs["head_type"]
-        self.main_fluid = "liquid" if "main_fluid" not in inputs else inputs["main_fluid"]
         
         if "is_blanketed" in inputs and inputs["is_blanketed"]:
             self.blanketing = _Blanketing(tag=self.tag)
@@ -475,20 +475,47 @@ class _Vessels(_EquipmentOneInletOutlet):
         self._update_equipment_object(self)
 
     @property
+    def pressure_drop(self):
+        g = Constants.g
+        self = self._get_equipment_object(self)
+        if ((self._inlet_energy_stream_index is not None or
+             self._outlet_energy_stream_index is not None) and 
+             self.main_fluid == "liquid"):
+            is_inlet = False if self._inlet_material_stream_index is None else True
+            density = self._connected_stream_property_getter(is_inlet, "material", "density")
+            density.unit = "kg/m^3"
+            pd = density.vaule * g * self.liquid_level.value
+            return prop.Pressure(pd)
+        return self._pressure_drop
+    @pressure_drop.setter
+    def pressure_drop(self, value):
+        if ((self._inlet_energy_stream_index is not None or
+             self._outlet_energy_stream_index is not None) and 
+             self.main_fluid == "liquid"):
+            raise Exception("Pressure drop cannot be set for vessels with main fluid as liquid.")
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Pressure)
+        if unit is None:
+            unit = self._pressure_drop.unit
+        self._pressure_drop = prop.Pressure(value, unit)
+        self._outlet_pressure =  self._inlet_pressure - self._pressure_drop
+        self._update_equipment_object(self)
+               
+    @property
     def operating_pressure(self):
-        return self.outlet_pressure
+        return self.inlet_pressure
     @operating_pressure.setter
     def operating_pressure(self, value):
-        self.outlet_pressure = value
+        self.inlet_pressure = value
         if self.blanketing is not None:
-            self.blanketing.outlet_pressure = value
+            self.blanketing.inlet_pressure = value
     
     @property
     def operating_temperature(self):
-        return self.outlet_temperature
+        return self.inlet_temperature
     @operating_temperature.setter
     def operating_temperature(self, value):
-        self.outlet_temperature = value
+        self.inlet_temperature = value
         if self.blanketing is not None:
             self.blanketing.inlet_temperature = value
     

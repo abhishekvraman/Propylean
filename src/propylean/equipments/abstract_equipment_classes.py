@@ -89,6 +89,7 @@ class _EquipmentOneInletOutlet(object):
         self._energy_out = prop.Power()
 
         #Other Porperties
+        self.main_fluid = "liquid" if "main_fluid" not in inputs else inputs["main_fluid"]
         self._is_disconnection = False
 
         if 'pressure_drop' in inputs:

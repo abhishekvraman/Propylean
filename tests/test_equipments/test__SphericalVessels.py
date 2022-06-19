@@ -82,7 +82,7 @@ class test__SphericalVessels(unittest.TestCase):
         Spherical_vessel.inlet_pressure = (30, 'bar')
         self.assertEqual(Spherical_vessel.inlet_pressure, prop.Pressure(30, 'bar'))
         self.assertEqual(Spherical_vessel.outlet_pressure, prop.Pressure(29.9, 'bar'))
-        self.assertEqual(Spherical_vessel.operating_pressure, prop.Pressure(29.9, 'bar'))
+        self.assertEqual(Spherical_vessel.operating_pressure, prop.Pressure(30, 'bar'))
     
     @pytest.mark.positive
     def test__SphericalVessels_setting_outlet_pressure(self):
@@ -90,7 +90,7 @@ class test__SphericalVessels(unittest.TestCase):
                           pressure_drop=(0.1, 'bar'))
         Spherical_vessel.outlet_pressure = (20, 'bar')
         self.assertEqual(Spherical_vessel.inlet_pressure, prop.Pressure(20.1, 'bar'))
-        self.assertEqual(Spherical_vessel.operating_pressure, prop.Pressure(20, 'bar'))
+        self.assertEqual(Spherical_vessel.operating_pressure, prop.Pressure(20.1, 'bar'))
     
     @pytest.mark.positive
     def test__SphericalVessels_setting_inlet_temperature(self):
