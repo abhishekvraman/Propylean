@@ -37,13 +37,11 @@ class test__SphericalVessels(unittest.TestCase):
     @pytest.mark.length_setting
     def test__SphericalVessels_instantiation_vessel_dimensions_arguments(self):
         Spherical_vessel = _SphericalVessels(ID = (4, "m"),
-                                               OD = 6,
-                                               length=prop.Length(10))
+                                               OD = 6)
 
         self.assertEqual(Spherical_vessel.ID, prop.Length(4, "m"))
         self.assertEqual(Spherical_vessel.OD, prop.Length(6, "m"))
         self.assertEqual(Spherical_vessel.thickness, prop.Length(2, "m"))
-        self.assertEqual(Spherical_vessel.length, prop.Length(10, "m"))
 
         Spherical_vessel = _SphericalVessels(thickness = (2, "m"),
                                                OD = 6,
@@ -51,7 +49,6 @@ class test__SphericalVessels(unittest.TestCase):
         self.assertEqual(Spherical_vessel.ID, prop.Length(4, "m"))
         self.assertEqual(Spherical_vessel.OD, prop.Length(6, "m"))
         self.assertEqual(Spherical_vessel.thickness, prop.Length(2, "m"))
-        self.assertEqual(Spherical_vessel.length, prop.Length(10, "m"))
 
     @pytest.mark.positive
     @pytest.mark.length_setting
@@ -67,16 +64,6 @@ class test__SphericalVessels(unittest.TestCase):
         self.assertEqual(Spherical_vessel.NLL, prop.Length(30, "inch"))
         self.assertEqual(Spherical_vessel.HLL, prop.Length(40, "inch"))
         self.assertEqual(Spherical_vessel.HHLL, prop.Length(50, "inch"))
-    
-    @pytest.mark.positive
-    @pytest.mark.head_type
-    def test__SphericalVessels_instantiation_head_type_argument(self):
-        for head_type in Constants.HEAD_TYPES:
-            Spherical_vessel = _SphericalVessels(ID = (4, "m"),
-                                                OD = 6,
-                                                length=prop.Length(10),
-                                                head_type=head_type)
-            self.assertEqual(Spherical_vessel.head_type, head_type)
     
     @pytest.mark.positive
     @pytest.mark.main_fluid
@@ -308,7 +295,7 @@ class test__SphericalVessels(unittest.TestCase):
         Spherical_vessel.main_fluid = "liquid"
 
         expected_vessel_volume = prop.Volume(33.51, "m^3")
-        expected_liquid_volume = prop.Volume(61.97)
+        expected_liquid_volume = prop.Volume(14.25)
         self.assertAlmostEqual(Spherical_vessel.vessel_volume.value,
                                expected_vessel_volume.value, 1)
         self.assertEqual(Spherical_vessel.vessel_volume.unit,

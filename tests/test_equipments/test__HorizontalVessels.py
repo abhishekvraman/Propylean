@@ -355,8 +355,8 @@ class test__HorizontalVessels(unittest.TestCase):
         horizontal_vessel.liquid_level = prop.Length(1.8, "m")
         horizontal_vessel.main_fluid = "liquid"
 
-        expected_vessel_volume = prop.Volume(142.4, "m^3")
-        expected_liquid_volume = prop.Volume(61.97)
+        expected_vessel_volume = prop.Volume(158.93, "m^3")
+        expected_liquid_volume = prop.Volume(57.95)
         self.assertAlmostEqual(horizontal_vessel.vessel_volume.value,
                                expected_vessel_volume.value, 1)
         self.assertEqual(horizontal_vessel.vessel_volume.unit,
@@ -364,7 +364,7 @@ class test__HorizontalVessels(unittest.TestCase):
 
         calculated_liq_volume = horizontal_vessel.get_inventory()
         self.assertAlmostEqual(calculated_liq_volume.value,
-                               expected_liquid_volume.value, 2)
+                               expected_liquid_volume.value, 1)
         self.assertEqual(calculated_liq_volume.unit,
                                expected_liquid_volume.unit)       
 

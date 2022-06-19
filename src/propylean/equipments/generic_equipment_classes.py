@@ -262,6 +262,8 @@ class _Vessels(_EquipmentOneInletOutlet):
                     self.OD = inputs['OD']
                 elif 'thickness' in inputs and inputs['thickness'] is not None:
                     self.thickness = inputs['thickness']
+                else:
+                    self.thickness = self.calculate_thickness()
                 
         elif ('OD' in inputs and 'thickness' in inputs):
             self.OD = inputs['OD']
@@ -277,7 +279,7 @@ class _Vessels(_EquipmentOneInletOutlet):
         self.HLL = prop.Length() if 'HLL' not in inputs else inputs['HLL']
         self.HHLL = prop.Length() if 'HHLL' not in inputs else inputs['HHLL']
 
-        self.head_type = "elliptical" if "head_type" not in inputs else inputs["head_type"]
+        self.head_type = "torispherical" if "head_type" not in inputs else inputs["head_type"]
         self.main_fluid = "liquid" if "main_fluid" not in inputs else inputs["main_fluid"]
 
     @property
@@ -320,6 +322,10 @@ class _Vessels(_EquipmentOneInletOutlet):
             unit = self.thickness
         self._OD = self._ID + prop.Length(value, unit)
         self._update_equipment_object(self)
+    
+    def calculate_thickness(self):
+        #TODO: Update calculations based on design pressure.
+        return prop.Length(0.01)
 
     @property
     def length(self):
@@ -568,7 +574,7 @@ class _HorizontalVessels(_Vessels):
         elif self.head_type == "torispherical":
             Rk = 3 * self.thickness.value
             t_by_Dext = self.thickness/self.OD
-            C = 0.30939 + 1.7197 * (Rk - 0.06 * self.OD.value)/self.ID - 0.16116 * t_by_Dext + 0.98997 * t_by_Dext**2
+            C = 0.30939 + 1.7197 * (Rk - 0.06 * self.OD.value)/self.ID.value - 0.16116 * t_by_Dext + 0.98997 * t_by_Dext**2
         head_volume = self._get_head_volume_by_type(C)
         return prop.Volume(head_volume) 
     

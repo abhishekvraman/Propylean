@@ -302,12 +302,12 @@ class test__VerticalVessels(unittest.TestCase):
     @pytest.mark.positive
     @pytest.mark.vessel_volume
     def test__VerticalVessels_volume_calculations_elliptical(self):
-        """ Filled Volume	m3		58.64
+        """ Filled Volume	m3		46.08
             Total Volume	m3	142.4
             Diameter, D 4000 mm
             Straight Length, L 10000 mm
             Inside Dish Depth, a 1000 mm
-            Level, H 1800 mm
+            Level, H 3000 mm
         """
         Vertical_vessel = _VerticalVessels(tag="Vertical_vessel_22",
                                                ID=(4, "m"), length=(10, "m"),
@@ -316,7 +316,7 @@ class test__VerticalVessels(unittest.TestCase):
         Vertical_vessel.main_fluid = "liquid"
 
         expected_vessel_volume = prop.Volume(142.4, "m^3")
-        expected_liquid_volume = prop.Volume(58.64)
+        expected_liquid_volume = prop.Volume(46.08)
         self.assertAlmostEqual(Vertical_vessel.vessel_volume.value,
                                expected_vessel_volume.value, 1)
         self.assertEqual(Vertical_vessel.vessel_volume.unit,
@@ -338,7 +338,7 @@ class test__VerticalVessels(unittest.TestCase):
             Total Volume	m3	136.0
             Inside Dish Depth (a)	mm	677.4
             Dish Radius (fD)	mm	4000
-            Knuckle Radius (kD)	mm	240.0
+            Knuckle Radius (kD)	mm	300.0
             Diameter, D 4000 mm
             Straight Length, L 10000 mm
             Level, H 1800 mm
@@ -353,8 +353,8 @@ class test__VerticalVessels(unittest.TestCase):
         Vertical_vessel.liquid_level = prop.Length(3, "m")
         Vertical_vessel.main_fluid = "liquid"
 
-        expected_vessel_volume = prop.Volume(142.4, "m^3")
-        expected_liquid_volume = prop.Volume(61.97)
+        expected_vessel_volume = prop.Volume(158.93, "m^3")
+        expected_liquid_volume = prop.Volume(70.97)
         self.assertAlmostEqual(Vertical_vessel.vessel_volume.value,
                                expected_vessel_volume.value, 1)
         self.assertEqual(Vertical_vessel.vessel_volume.unit,
