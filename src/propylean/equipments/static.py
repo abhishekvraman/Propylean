@@ -429,6 +429,10 @@ class PipeSegment(_EquipmentOneInletOutlet):
     def list_objects(cls):
         return cls.items
 
-class Filter(_EquipmentOneInletOutlet):
+class Strainers(_EquipmentOneInletOutlet):
+    def __init__(self, **inputs) -> None:
+        super().__init__(**inputs)
+        
+class Filters(_EquipmentOneInletOutlet):
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)

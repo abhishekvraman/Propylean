@@ -291,7 +291,6 @@ class Mass(_Property):
     def __add__(self, other):
         return super().__add__(other)
 
-
 class MolecularWeigth(_Property):
     def __init__(self, value = 0, unit= 'g/mol'):
         super().__init__(value, unit)

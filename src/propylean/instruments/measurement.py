@@ -1,6 +1,5 @@
 from propylean.equipments.generic_equipment_classes import _EquipmentOneInletOutlet
 
-
 class FlowMeter(_EquipmentOneInletOutlet):
     items = []
     def __init__(self, **inputs) -> None:
@@ -18,4 +17,3 @@ class FlowMeter(_EquipmentOneInletOutlet):
     @classmethod
     def list_objects(cls):
         return cls.items
-# End of final classes of Piping and instruments

@@ -12,7 +12,6 @@ class VerticalStorage(_VerticalVessels):
     def __repr__(self):
         return "Vertical Storage with tag: " + self.tag
 
-
 class Bullet(_HorizontalVessels):
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
@@ -80,5 +79,9 @@ class AirReciever(_VerticalVessels):
         raise Exception("Setting property 'main_fluid' is not allowed for AirReciever.")
 
 class HotOilExpansionVessel(_HorizontalVessels):
+    def __init__(self, **inputs) -> None:
+        super().__init__(**inputs)
+
+class FlareKOD(_HorizontalVessels):
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
