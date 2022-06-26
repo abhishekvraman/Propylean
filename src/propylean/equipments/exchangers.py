@@ -1,4 +1,4 @@
-from propylean.generic_equipment_classes import _Exchangers
+from propylean.equipments.generic_equipment_classes import _Exchangers
 from propylean import streams
 from propylean import properties as prop
 
@@ -45,10 +45,7 @@ class AirCooler(_Exchangers):
         if unit is None:
             unit = self._temperature_change.unit
         self._temperature_change = prop.Temperature(-1 * value, unit)
-        print(self._temperature_change)
         self._outlet_temperature =  self._inlet_temperature + self._temperature_change
-        print(self._outlet_temperature)
-        print(self._inlet_temperature)
         self._update_equipment_object(self)
 
     @property
@@ -103,7 +100,6 @@ class AirCooler(_Exchangers):
             stream_type in ['energy', 'power', 'e', 'p']):
             direction = 'in'
         return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
-
 
 class ElectricHeater(_Exchangers):
     items = []

@@ -1,12 +1,9 @@
-from propylean.generic_equipment_classes import _Vessels
-from propylean.generic_equipment_classes import _EquipmentOneInletOutlet
+from propylean.equipments.generic_equipment_classes import _EquipmentOneInletOutlet
 from propylean.settings import Settings
 from propylean.constants import Constants
 from propylean import properties as prop
-from propylean import streams
 from math import pi
 
-# PipeSegment Class
 class PipeSegment(_EquipmentOneInletOutlet):
     items = []
     def __init__(self, **inputs) -> None:
@@ -432,68 +429,10 @@ class PipeSegment(_EquipmentOneInletOutlet):
     def list_objects(cls):
         return cls.items
 
-# Start of final classes of vessels
-class VerticalSeparator(_Vessels):
-    items = []
+class Strainers(_EquipmentOneInletOutlet):
     def __init__(self, **inputs) -> None:
-        self._index = len(VerticalSeparator.items)
-        super().__init__( **inputs)
-        VerticalSeparator.items.append(self)
-    
-    def __repr__(self):
-        return "Vertical Separator with tag: " + self.tag   
-    def __hash__(self):
-        return hash(self.__repr__())
-
-    @classmethod
-    def list_objects(cls):
-        return cls.items
-
-class HorizontalSeparator(_Vessels):
-    items = []
+        super().__init__(**inputs)
+        
+class Filters(_EquipmentOneInletOutlet):
     def __init__(self, **inputs) -> None:
-        self._index = len(HorizontalSeparator.items)
-        super().__init__( **inputs)
-        HorizontalSeparator.items.append(self)
-    
-    def __repr__(self):
-        return "Horizontal Separator with tag: " + self.tag   
-    def __hash__(self):
-        return hash(self.__repr__())
-
-    @classmethod
-    def list_objects(cls):
-        return cls.items
-
-class Column(_Vessels):
-    items = []
-    def __init__(self, **inputs) -> None:
-        self._index = len(Column.items)
-        super().__init__( **inputs)
-        Column.items.append(self)
-    
-    def __repr__(self):
-        return "Column with tag: " + self.tag   
-    def __hash__(self):
-        return hash(self.__repr__())
-    
-    @classmethod
-    def list_objects(cls):
-        return cls.items
-
-class Tank(_Vessels):
-    items = []
-    def __init__(self, **inputs) -> None:
-        self._index = len(Tank.items)
-        super().__init__( **inputs)
-        Tank.items.append(self)
-    
-    def __repr__(self):
-        return "Tank with tag: " + self.tag   
-    def __hash__(self):
-        return hash(self.__repr__())
-    
-    @classmethod
-    def list_objects(cls):
-        return cls.items
-# End of final classes of vessels
+        super().__init__(**inputs)

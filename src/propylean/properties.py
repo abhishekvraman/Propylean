@@ -43,6 +43,11 @@ class _Property(object):
             other.unit = self.unit
         return type(self)(self.value - other.value, self.unit)
     
+    def __truediv__(self, other):
+        if self.unit!=other.unit:
+            other.unit = self.unit
+        return self.value / other.value
+
     def __eq__(self, other):
         if isinstance(other, type(self)):
             if self.unit != other.unit:
@@ -258,6 +263,34 @@ class MassFlowRate(_Property):
     def __add__(self, other):
         return super().__add__(other)
 
+class Mass(_Property):
+    def __init__(self, value=0, unit='kg'):
+        super().__init__(value, unit)
+        self.unit = unit
+    
+    @_Property.unit.setter
+    def unit(self, unit):
+        try:
+            conversion_factors = {'g': 1000,
+                                'lb': 2.204,
+                                'ton': 0.001,
+                                'kg': 1
+                                }
+            self._value =  conversion_factors[unit] * self._value / conversion_factors[self._unit]
+            self._unit = unit
+        except:
+            raise Exception('''Selected unit is not supported or a correct unit of Mass Flow Rate.
+                               Supported units are:
+                               1. kg for kilogram 
+                               2. g for gram
+                               3. lb for pound
+                               4. ton for metric ton
+                               You selected '{}'.
+                               '''.format(unit))
+    
+    def __add__(self, other):
+        return super().__add__(other)
+
 class MolecularWeigth(_Property):
     def __init__(self, value = 0, unit= 'g/mol'):
         super().__init__(value, unit)
@@ -363,6 +396,32 @@ class VolumetricFlowRate(_Property):
                                15. lit/min for Liters per minute
                                16. lit/h for Liters per hour
                                17. lit/d  for Liters per day
+                               You selected '{}'.
+                               '''.format(unit))
+
+class Volume(_Property):
+    def __init__(self, value = 0, unit= 'm^3'):
+        super().__init__(value,unit)
+        self.unit = unit
+    @_Property.unit.setter
+    def unit(self, unit):
+        try:
+            conversion_factors = {'ft^3': 35.3146,
+                                'cm^3': 1000000,
+                                'gal': 264.172,
+                                'lit': 1000,
+                                'm^3': 1
+                                }
+            self._value =  conversion_factors[unit] * self._value / conversion_factors[self._unit]
+            self._unit = unit
+        except:
+            raise Exception('''Selected unit is not supported or a correct unit of Volumetric Flow Rate.
+                               Following are the supported units:
+                               1. m^3 for cubic meter
+                               2. ft^3 for cubic feet
+                               3. cm^3 for cubic centimeter
+                               4. gal for US Gallons
+                               5. lit for Liters
                                You selected '{}'.
                                '''.format(unit))
 
