@@ -262,6 +262,7 @@ class _Vessels(_EquipmentOneInletOutlet):
         self._HLL = prop.Length()
         self._HHLL = prop.Length()
         self.blanketing = None
+        self._material = 1
         self.operating_pressure = prop.Pressure()
         self.operating_temperature = prop.Temperature()
         if ('ID' in inputs and inputs['ID'] is not None):
@@ -462,6 +463,24 @@ class _Vessels(_EquipmentOneInletOutlet):
     def head_type(self):
         self = self._get_equipment_object(self)
         del self._head_type
+        self._update_equipment_object(self)
+
+    @property
+    def material(self):
+        self = self._get_equipment_object(self)
+        return self._material
+    @material.setter
+    def material(self, value):
+        self = self._get_equipment_object(self)
+        materials = '''\nSegment material can be of following types and in range of numbers below:
+                    1. Raw Steel
+                    2. Carbon Steel
+                    3. Cast Iron
+                    4. Stainless Steel
+                    ''' 
+        if value not in range(1, 6):
+            raise Exception(materials)
+        self._material = value
         self._update_equipment_object(self)
 
     @property
