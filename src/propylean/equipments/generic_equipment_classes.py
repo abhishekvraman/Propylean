@@ -1,4 +1,3 @@
-from cmath import sqrt
 from propylean.equipments.abstract_equipment_classes import _EquipmentOneInletOutlet, _EquipmentMultipleInletOutlet
 import propylean.properties as prop
 from propylean.constants import Constants

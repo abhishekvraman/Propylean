@@ -3,7 +3,8 @@
 
 ## What is Propylean
 Propylean name is derived from words Process/Production + Python + lean programming/manufacturing.
-Propylean is a Python library which will help engineers simulate production plants focusing on chemical and related process industries using only Python environments. 
+Propylean is a Python library which will help engineers analyse production plants focusing on chemical and related process industries using only Python environments.
+Supports for general calculations like hydraulics, vessel sizing and other process engineering calculations is provided and constantly updated.
 By coupling this library with available data analysis/machine learning frameworks, engineers will be able to enhace operations of their plants. Ultimate aspiration of this project is to enable process industries transit to zero carbon operation.
 
 ## Objective
@@ -38,6 +39,11 @@ https://github.com/abhishekvraman/Propylean/wiki/Getting-started-with-Propylean
     3. CentrifugalCompressor
 * equipments.static
     1. PipeSegment
+* equipments.storage
+    1. VerticalStorage
+    2. Bullet
+    3. Tank
+    4. Sphere
 * equipments.exchangers
     1. AirCooler
     2. ElectricHeater
@@ -52,4 +58,13 @@ https://github.com/abhishekvraman/Propylean/wiki/Getting-started-with-Propylean
     2. Temperature
     3. MassFlowRate
     4. Components (Molecular components)
-    5. And many more..
+    5. Length
+    6. Time
+    7. Mass
+    8. MolecularWeigth
+    9. MolarFlowRate
+    10. VolumetricFlowRate
+    11. Volume, Density
+    12. DViscosity
+    13. Power
+    14. Frequency
