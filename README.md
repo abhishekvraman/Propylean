@@ -5,7 +5,7 @@
 Propylean name is derived from words Process/Production + Python + lean programming/manufacturing.
 Propylean is a Python library which will help engineers analyse production plants focusing on chemical and related process industries using only Python environments.
 Supports for general calculations like hydraulics, vessel sizing and other process engineering calculations is provided and constantly updated.
-By coupling this library with available data analysis/machine learning frameworks, engineers will be able to enhace operations of their plants. Ultimate aspiration of this project is to enable process industries transit to zero carbon operation.
+By coupling this library with available data analysis/machine learning frameworks, engineers will be able to enhance operations of their plants. Ultimate aspiration of this project is to enable process industries transit to zero carbon operation.
 
 ## Objective
 To increase the utilization of open-source software and analytics tools in the chemical and related industries.
@@ -15,6 +15,7 @@ Vision of Propylean is to:
 - Enable chemical and related industries to use analytics and ML frameworks
 - Improve operational agility and efficiency of the plant
 - Be a cheap simulation-software alternative for small manufacturers
+- One-stop shop for all process engineering calculations
 - Help the industry transition to Net-Zero emissions
 - Inculcate coding/programing skills in manufacturing engineers
 
