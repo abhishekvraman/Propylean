@@ -240,6 +240,25 @@ class _Vessels(_EquipmentOneInletOutlet):
                 Acceptable values: Non-negative integer
                 Default value: 0 m   
                 Description: liquid level of the vessel.
+            
+        METHODS:
+            get_inventory(type="volume")
+            DESCRIPTION:
+                Function to get the inventory in the vessel.
+        
+            PARAMETERS:
+                type:
+                    Type: String
+                    Acceptable values: "volume" or "mass"
+                    Default value: "volume"  
+                    Description: The type of inventory to be calculated.
+                                 "volume" calculates volumetic inventroy and
+                                 "mass" calculates mass inventory of corresponding
+                                  volumetic inventory based on density of liquid.
+                                  Property main_fluid should be set for vessesl 
+                                  containging liquid.
+                                
+
         
         ERROR RAISED:
             Type:

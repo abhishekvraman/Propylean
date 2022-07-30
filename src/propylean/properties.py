@@ -1,8 +1,9 @@
+import pandas as pd
 class _Property(object):
-    def __init__(self, value=None, unit=None, df=None):
+    def __init__(self, value=None, unit=None, time_series=None):
         self._value = value
         self._unit = unit
-        self._df = df
+        self._time_series = time_series
     def __eq__(self, other):
         if (isinstance(other, _Property) and
             self.value == other.value and
@@ -24,11 +25,28 @@ class _Property(object):
         self._unit = unit
     
     @property
-    def df(self):
-        return self._df
-    @df.setter
-    def df(self, df):
-        self._df = df
+    def time_series(self):
+        return self._time_series
+    @time_series.setter
+    def time_series(self, time_series):
+        if not isinstance(time_series, (pd.Series | dict | pd.DataFrame)):
+            raise Exception("""Incorrect type used for setting time_series.
+            Should be pandas.Series or pandas.DataFrame or dictionary.""")
+
+        if isinstance(time_series, dict):
+            time_series = pd.Series(data=time_series, index=list(time_series.keys()))
+        elif isinstance(time_series, pd.DataFrame):
+            if len(time_series.columns) == 1:
+                time_series = time_series[time_series.columns[0]]
+            elif len(time_series.columns) == 2:
+                time_index = time_series[time_series.columns[0]]
+                data = time_series[time_series.columns[1]]
+                time_series = pd.Series(data=data, index=time_index)
+            else:
+                raise Exception("""Incorrect number of columns provided in DataFrame.
+                Should be either one with index as time-series or two with first column as time-series and second as property data.""")
+
+        self._time_series = time_series
 
     def __repr__(self) -> str:
         return str(self.value) + ' ' + self.unit
