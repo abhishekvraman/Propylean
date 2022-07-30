@@ -217,3 +217,44 @@ def test_property_different_not_equal():
     t = properties.Temperature()
     m = properties.MassFlowRate()
     assert not t==m
+
+@pytest.mark.positive
+@pytest.mark.time_series
+def test_propert_time_series_passed_series():
+    p = properties._Property()
+    idx = pd.date_range("2018-01-01", periods=5, freq="H")
+    ts = pd.Series(range(len(idx)), index=idx)
+    p.time_series = ts
+    assert ts.equals(p.time_series)
+    assert p.time_series.equals(ts)
+
+@pytest.mark.positive
+@pytest.mark.time_series
+def test_propert_time_series_passed_dataframe():
+    p = properties._Property()
+    idx = pd.date_range("2018-01-01", periods=5, freq="H")
+    ts = pd.DataFrame(range(len(idx)), index=idx)
+    p.time_series = ts
+    assert ts[0].equals(p.time_series)
+    assert p.time_series.equals(ts[0])
+
+    ts_2 = pd.DataFrame({0:idx, 1:range(len(idx))})
+
+    p.time_series = ts_2
+    
+    assert ts[0].equals(p.time_series)
+    assert p.time_series.equals(ts[0])
+
+@pytest.mark.positive
+@pytest.mark.time_series
+def test_propert_time_series_passed_dict():
+    p = properties._Property()
+    idx = pd.date_range("2018-01-01", periods=5, freq="H")
+    ts = pd.Series(range(len(idx)), index=idx)
+
+    data_dict = {}
+    for i in range(len(idx)):
+        data_dict[idx[i]] = i
+    p.time_series = data_dict
+    assert ts.equals(p.time_series)
+    assert p.time_series.equals(ts)

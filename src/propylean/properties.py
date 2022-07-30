@@ -36,12 +36,13 @@ class _Property(object):
         if isinstance(time_series, dict):
             time_series = pd.Series(data=time_series, index=list(time_series.keys()))
         elif isinstance(time_series, pd.DataFrame):
-            if len(time_series.columns) == 1:
-                time_series = time_series[time_series.columns[0]]
-            elif len(time_series.columns) == 2:
+            if len(time_series.columns) == 2:
                 time_index = time_series[time_series.columns[0]]
                 data = time_series[time_series.columns[1]]
-                time_series = pd.Series(data=data, index=time_index)
+                time_series = pd.DataFrame(data=list(data), index=time_index)
+
+            if len(time_series.columns) == 1:
+                time_series = time_series[time_series.columns[0]]
             else:
                 raise Exception("""Incorrect number of columns provided in DataFrame.
                 Should be either one with index as time-series or two with first column as time-series and second as property data.""")
