@@ -69,3 +69,5 @@ https://github.com/abhishekvraman/Propylean/wiki/Getting-started-with-Propylean
     12. DViscosity
     13. Power
     14. Frequency
+
+    [![Propylean](https://github.com/abhishekvraman/Propylean/actions/workflows/python-package.yml/badge.svg?branch=main)](https://github.com/abhishekvraman/Propylean/actions/workflows/python-package.yml)
