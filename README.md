@@ -1,3 +1,4 @@
+[![Propylean](https://github.com/abhishekvraman/Propylean/actions/workflows/python-package.yml/badge.svg?branch=main)](https://github.com/abhishekvraman/Propylean/actions/workflows/python-package.yml)
 # Propylean
 #### The open-source analytics and calculation package for chemical process industries.
 
@@ -65,9 +66,8 @@ https://github.com/abhishekvraman/Propylean/wiki/Getting-started-with-Propylean
     8. MolecularWeigth
     9. MolarFlowRate
     10. VolumetricFlowRate
-    11. Volume, Density
-    12. DViscosity
-    13. Power
-    14. Frequency
-
-    [![Propylean](https://github.com/abhishekvraman/Propylean/actions/workflows/python-package.yml/badge.svg?branch=main)](https://github.com/abhishekvraman/Propylean/actions/workflows/python-package.yml)
+    11. Volume
+    12. Density
+    13. DViscosity
+    14. Power
+    15. Frequency
