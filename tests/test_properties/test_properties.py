@@ -3,6 +3,7 @@ import pandas as pd
 
 from propylean import properties
 
+@pytest.mark.positive
 def test_Length_instantiation_conversion():
     l = properties.Length()
     assert l.value == 0
@@ -13,9 +14,13 @@ def test_Length_instantiation_conversion():
     l = properties.Length(value = 1000, unit='foot')
     l.unit = 'yard'
     assert (l.value - 333.333333) < 0.00001
+
+@pytest.mark.negative
+def test_Length_incorrect_instantiation():
     with pytest.raises(Exception):
         l = properties.Length(10, 'nauticle miles')
 
+@pytest.mark.positive
 def test_Time_instantiation_conversion():
     t = properties.Time()
     assert t.value == 0
@@ -26,9 +31,13 @@ def test_Time_instantiation_conversion():
     t = properties.Time(value = 1, unit='year')
     t.unit = 'month'
     assert (t.value - 12) < 0.00001
+    
+@pytest.mark.negative
+def test_Time_incorrect_instantiation():
     with pytest.raises(Exception):
-        t = properties.Time(10, 'decade')
+            t = properties.Time(10, 'decade')
 
+@pytest.mark.positive
 def test_Pressure_instantiation_conversion():
     pressure = properties.Pressure(value=101325)
     assert pressure.value == 101325
@@ -40,12 +49,16 @@ def test_Pressure_instantiation_conversion():
     pressure.value = 100 #changed to 100 psi
     pressure.unit = 'mm Hg' # changed unit to see new value
     assert abs(pressure.value - 5171.5) < 1 
+    
+@pytest.mark.negative
+def test_Pressure_incorrect_instantiation_conversion():
     with pytest.raises(Exception):
         pressure = properties.Pressure(value=101325, unit = 'K')
     with pytest.raises(Exception):
         pressure = properties.Pressure(value=101325)
         pressure.unit = 'atmosphere'
 
+@pytest.mark.positive
 def test_Temperature_instantiation_conversion():
     temp = properties.Temperature(value=300)
     assert temp.value == 300
@@ -62,6 +75,9 @@ def test_Temperature_instantiation_conversion():
     temp = properties.Temperature(value=2000, unit='R')
     temp.unit = 'C'
     assert abs(temp.value - 837.9611) < 0.0001
+   
+@pytest.mark.negative
+def test_Temperature_incorrect_instantiation_conversion():
     with pytest.raises(Exception):
         temp = properties.Temperature(value=300, unit='Pa')
 
@@ -69,6 +85,7 @@ def test_Temperature_instantiation_conversion():
         temp = properties.Temperature(value=300)
         temp.unit = 'Pa'
 
+@pytest.mark.positive
 def test_MassFlowRate_instantiation_conversion():
     mfr = properties.MassFlowRate(value=10)
     mfr.unit = 'g/s'
@@ -84,6 +101,8 @@ def test_MassFlowRate_instantiation_conversion():
     mfr.unit = 'kg/h' # changed unit to see new value
     assert abs(mfr.value - 4166.68) < 0.1
 
+@pytest.mark.negative
+def test_MassFlowRate_incorrect_instantiatio_conversion():
     with pytest.raises(Exception):
         mfr = properties.MassFlowRate(value=10, unit='Mg/h')
     
@@ -91,6 +110,7 @@ def test_MassFlowRate_instantiation_conversion():
         mfr = properties.MassFlowRate(value=10)
         mfr.unit = 'lb/mn'
 
+@pytest.mark.positive
 def test_MolarFlowRate_instantiation_conversion():
     mfr = properties.MolarFlowRate(value=10)
     assert mfr.value == 10
@@ -103,6 +123,8 @@ def test_MolarFlowRate_instantiation_conversion():
     mfr.unit = 'lbmol/min' # changed unit to see new value
     assert abs(mfr.value - 9.18593/60) < 0.5
 
+@pytest.mark.negative
+def test_MolarFlowRate_incorrect_instantiation_conversion():
     with pytest.raises(Exception):
         mfr = properties.MolarFlowRate(value=10, unit='gmol/h')
     
@@ -110,6 +132,7 @@ def test_MolarFlowRate_instantiation_conversion():
         mfr = properties.MolarFlowRate(value=10)
         mfr.unit = 'lb/mn'
 
+@pytest.mark.positive
 def test_VolumeFlowRate_instantiation_conversion():
     vf = properties.VolumetricFlowRate(10)
     assert vf.value == 10
@@ -121,6 +144,8 @@ def test_VolumeFlowRate_instantiation_conversion():
     vf.unit = 'ft^3/d'
     assert abs(vf.value-84.7553) < 0.01
 
+@pytest.mark.negative
+def test_VolumeFlowRate_incorrect_instantiation_conversion():
     with pytest.raises(Exception):
         vf = properties.VolumetricFlowRate(value=10, unit='gmol/h')
     
@@ -128,6 +153,7 @@ def test_VolumeFlowRate_instantiation_conversion():
         vf = properties.VolumetricFlowRate(value=10)
         vf.unit = 'pints per day'
 
+@pytest.mark.positive
 def test_Power_instantiation_conversion():
     power = properties.Power()
     assert power.value == 0
@@ -144,12 +170,18 @@ def test_Power_instantiation_conversion():
     assert abs(power.value - 34121416.331279) <0.0001
     power.unit = 'hp'
     assert abs(power.value - 13596.21617304) <0.0001
-    with pytest.raises(Exception):
-        power.unit = 'Barrels of oil per day'
 
     power = properties.Power(25000000, 'cal/s')
     power.unit = 'GWh/d'
     assert abs(power.value - 2.5120) <0.0001
+
+@pytest.mark.negative
+def test_Power_instantiation_conversion():
+    with pytest.raises(Exception):
+        power = properties.Power(10000000, 'Barrels of oil per day')
+    with pytest.raises(Exception):
+        power = properties.Power(value=10000000)
+        power.unit = 'Barrels of oil per day'
 
 @pytest.mark.positive
 def test_property_density():
