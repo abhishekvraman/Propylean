@@ -20,6 +20,28 @@ def test_Length_incorrect_instantiation():
     with pytest.raises(Exception):
         l = properties.Length(10, 'nauticle miles')
 
+@pytest.mark.negative
+def test_Length_incorrect_type_to_value():
+    with pytest.raises(Exception) as exp:
+        properties.Length([10])
+    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    with pytest.raises(Exception) as exp:
+        l = properties.Length()
+        l.value = []
+    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+
+
+@pytest.mark.negative
+def test_Length_incorrect_type_to_unit():
+    with pytest.raises(Exception) as exp:
+        properties.Length(10, 10)
+    assert "Incorrect type '<class 'int'>' provided to 'unit'. Should be '<class 'str'>'." in str(exp)
+    
+    with pytest.raises(Exception) as exp:
+        l = properties.Length()
+        l.unit = 10
+    assert "Incorrect type '<class 'int'>' provided to 'unit'. Should be '<class 'str'>'." in str(exp)
+
 @pytest.mark.positive
 def test_Time_instantiation_conversion():
     t = properties.Time()
@@ -36,6 +58,26 @@ def test_Time_instantiation_conversion():
 def test_Time_incorrect_instantiation():
     with pytest.raises(Exception):
             t = properties.Time(10, 'decade')
+
+@pytest.mark.negative
+def test_Time_incorrect_type_to_value():
+    with pytest.raises(Exception) as exp:
+        properties.Time([10])
+    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    with pytest.raises(Exception) as exp:
+        l = properties.Time()
+        l.value = []
+    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+
+@pytest.mark.negative
+def test_Time_incorrect_type_to_unit():
+    with pytest.raises(Exception) as exp:
+        properties.Time(10, 10)
+    assert "Incorrect type '<class 'int'>' provided to 'unit'. Should be '<class 'str'>'." in str(exp)
+    with pytest.raises(Exception) as exp:
+        l = properties.Time()
+        l.unit = 10
+    assert "Incorrect type '<class 'int'>' provided to 'unit'. Should be '<class 'str'>'." in str(exp)
 
 @pytest.mark.positive
 def test_Pressure_instantiation_conversion():
@@ -57,6 +99,27 @@ def test_Pressure_incorrect_instantiation_conversion():
     with pytest.raises(Exception):
         pressure = properties.Pressure(value=101325)
         pressure.unit = 'atmosphere'
+
+@pytest.mark.negative
+def test_Pressure_incorrect_type_to_value():
+    with pytest.raises(Exception) as exp:
+        properties.Pressure([10])
+    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    with pytest.raises(Exception) as exp:
+        l = properties.Pressure()
+        l.value = []
+    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+
+@pytest.mark.negative
+def test_Pressure_incorrect_type_to_unit():
+    with pytest.raises(Exception) as exp:
+        properties.Pressure(10, 10)
+    assert "Incorrect type '<class 'int'>' provided to 'unit'. Should be '<class 'str'>'." in str(exp)
+
+    with pytest.raises(Exception) as exp:
+        l = properties.Length()
+        l.unit = 10
+    assert "Incorrect type '<class 'int'>' provided to 'unit'. Should be '<class 'str'>'." in str(exp)
 
 @pytest.mark.positive
 def test_Temperature_instantiation_conversion():
@@ -85,6 +148,26 @@ def test_Temperature_incorrect_instantiation_conversion():
         temp = properties.Temperature(value=300)
         temp.unit = 'Pa'
 
+@pytest.mark.negative
+def test_Temperature_incorrect_type_to_value():
+    with pytest.raises(Exception) as exp:
+        properties.Temperature([10])
+    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    with pytest.raises(Exception) as exp:
+        l = properties.Temperature()
+        l.value = []
+    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+
+@pytest.mark.negative
+def test_Temperature_incorrect_type_to_unit():
+    with pytest.raises(Exception) as exp:
+        properties.Temperature(10, 10)
+    assert "Incorrect type '<class 'int'>' provided to 'unit'. Should be '<class 'str'>'." in str(exp)
+    with pytest.raises(Exception) as exp:
+        l = properties.Temperature()
+        l.unit = 10
+    assert "Incorrect type '<class 'int'>' provided to 'unit'. Should be '<class 'str'>'." in str(exp)
+
 @pytest.mark.positive
 def test_MassFlowRate_instantiation_conversion():
     mfr = properties.MassFlowRate(value=10)
@@ -110,6 +193,27 @@ def test_MassFlowRate_incorrect_instantiatio_conversion():
         mfr = properties.MassFlowRate(value=10)
         mfr.unit = 'lb/mn'
 
+@pytest.mark.negative
+def test_MassFlowRate_incorrect_type_to_value():
+    with pytest.raises(Exception) as exp:
+        properties.MassFlowRate([10])
+    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    with pytest.raises(Exception) as exp:
+        l = properties.MassFlowRate()
+        l.value = []
+    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+
+@pytest.mark.negative
+def test_MassFlowRate_incorrect_type_to_unit():
+    with pytest.raises(Exception) as exp:
+        properties.MassFlowRate(10, 10)
+    assert "Incorrect type '<class 'int'>' provided to 'unit'. Should be '<class 'str'>'." in str(exp)
+
+    with pytest.raises(Exception) as exp:
+        l = properties.MassFlowRate()
+        l.unit = 10
+    assert "Incorrect type '<class 'int'>' provided to 'unit'. Should be '<class 'str'>'." in str(exp)
+
 @pytest.mark.positive
 def test_MolarFlowRate_instantiation_conversion():
     mfr = properties.MolarFlowRate(value=10)
@@ -132,6 +236,27 @@ def test_MolarFlowRate_incorrect_instantiation_conversion():
         mfr = properties.MolarFlowRate(value=10)
         mfr.unit = 'lb/mn'
 
+@pytest.mark.negative
+def test_MolarFlowRate_incorrect_type_to_value():
+    with pytest.raises(Exception) as exp:
+        properties.MolarFlowRate([10])
+    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    with pytest.raises(Exception) as exp:
+        l = properties.MolarFlowRate()
+        l.value = []
+    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+
+@pytest.mark.negative
+def test_MolarFlowRate_incorrect_type_to_unit():
+    with pytest.raises(Exception) as exp:
+        properties.MolarFlowRate(10, 10)
+    assert "Incorrect type '<class 'int'>' provided to 'unit'. Should be '<class 'str'>'." in str(exp)
+
+    with pytest.raises(Exception) as exp:
+        l = properties.Length()
+        l.unit = 10
+    assert "Incorrect type '<class 'int'>' provided to 'unit'. Should be '<class 'str'>'." in str(exp)
+
 @pytest.mark.positive
 def test_VolumeFlowRate_instantiation_conversion():
     vf = properties.VolumetricFlowRate(10)
@@ -152,6 +277,27 @@ def test_VolumeFlowRate_incorrect_instantiation_conversion():
     with pytest.raises(Exception):
         vf = properties.VolumetricFlowRate(value=10)
         vf.unit = 'pints per day'
+
+@pytest.mark.negative
+def test_VolumetricFlowRate_incorrect_type_to_value():
+    with pytest.raises(Exception) as exp:
+        properties.VolumetricFlowRate([10])
+    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    with pytest.raises(Exception) as exp:
+        l = properties.VolumetricFlowRate()
+        l.value = []
+    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+
+@pytest.mark.negative
+def test_VolumetricFlowRate_incorrect_type_to_unit():
+    with pytest.raises(Exception) as exp:
+        properties.VolumetricFlowRate(10, 10)
+    assert "Incorrect type '<class 'int'>' provided to 'unit'. Should be '<class 'str'>'." in str(exp)
+
+    with pytest.raises(Exception) as exp:
+        l = properties.Length()
+        l.unit = 10
+    assert "Incorrect type '<class 'int'>' provided to 'unit'. Should be '<class 'str'>'." in str(exp)
 
 @pytest.mark.positive
 def test_Power_instantiation_conversion():
@@ -183,6 +329,27 @@ def test_Power_instantiation_conversion():
         power = properties.Power(value=10000000)
         power.unit = 'Barrels of oil per day'
 
+@pytest.mark.negative
+def test_Power_incorrect_type_to_value():
+    with pytest.raises(Exception) as exp:
+        properties.Power([10])
+    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    with pytest.raises(Exception) as exp:
+        l = properties.Power()
+        l.value = []
+    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+
+@pytest.mark.negative
+def test_Power_incorrect_type_to_unit():
+    with pytest.raises(Exception) as exp:
+        properties.Power(10, 10)
+    assert "Incorrect type '<class 'int'>' provided to 'unit'. Should be '<class 'str'>'." in str(exp)
+    with pytest.raises(Exception) as exp:
+        l = properties.Power()
+        l.unit = 10
+    assert "Incorrect type '<class 'int'>' provided to 'unit'. Should be '<class 'str'>'." in str(exp)
+
+
 @pytest.mark.positive
 def test_property_density():
     d1 = properties.Density(1000)
@@ -191,6 +358,27 @@ def test_property_density():
     d1.unit = "lbm/ft^3"
     assert abs(d1.value-62.479) < 0.01
 
+@pytest.mark.negative
+def test_Density_incorrect_type_to_value():
+    with pytest.raises(Exception) as exp:
+        properties.Density([10])
+    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    with pytest.raises(Exception) as exp:
+        l = properties.Density()
+        l.value = []
+    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+
+@pytest.mark.negative
+def test_Desnisty_incorrect_type_to_unit():
+    with pytest.raises(Exception) as exp:
+        properties.Density(10, 10)
+    assert "Incorrect type '<class 'int'>' provided to 'unit'. Should be '<class 'str'>'." in str(exp)
+ 
+    with pytest.raises(Exception) as exp:
+        l = properties.Length()
+        l.unit = 10
+    assert "Incorrect type '<class 'int'>' provided to 'unit'. Should be '<class 'str'>'." in str(exp)
+    
 @pytest.mark.positive
 def test_property_dviscosity():
     dv1 = properties.DViscosity(0.000902688)
@@ -198,6 +386,27 @@ def test_property_dviscosity():
     assert dv1.unit == "Pa-s"
     dv1.unit = "cP"
     assert abs(dv1.value-0.902688) < 0.001
+
+@pytest.mark.negative
+def test_DViscosity_incorrect_type_to_value():
+    with pytest.raises(Exception) as exp:
+        properties.DViscosity([10])
+    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    with pytest.raises(Exception) as exp:
+        l = properties.DViscosity()
+        l.value = []
+    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+
+@pytest.mark.negative
+def test_DViscosity_incorrect_type_to_unit():
+    with pytest.raises(Exception) as exp:
+        properties.DViscosity(10, 10)
+    assert "Incorrect type '<class 'int'>' provided to 'unit'. Should be '<class 'str'>'." in str(exp)
+
+    with pytest.raises(Exception) as exp:
+        l = properties.Length()
+        l.unit = 10
+    assert "Incorrect type '<class 'int'>' provided to 'unit'. Should be '<class 'str'>'." in str(exp)
 
 @pytest.mark.addition
 def test_property_addition():
@@ -290,3 +499,10 @@ def test_propert_time_series_passed_dict():
     p.time_series = data_dict
     assert ts.equals(p.time_series)
     assert p.time_series.equals(ts)
+
+@pytest.mark.negative
+def test_time_series_incorrect_type_to_value():
+    with pytest.raises(Exception) as exp:
+        l = properties.Length(10)
+        l.time_series = []
+    assert "Incorrect type '<class 'list'>' provided to 'time_series'. Should be '(<class 'pandas.core.series.Series'>, <class 'pandas.core.frame.DataFrame'>, <class 'dict'>)" in str(exp)

@@ -1,6 +1,14 @@
 import pandas as pd
+from propylean.validators import _Validators
 class _Property(object):
     def __init__(self, value=None, unit=None, time_series=None):
+        if value is not None:
+            _Validators.validate_arg_prop_value_type("value", value, (int, float))
+        if unit is not None:
+            _Validators.validate_arg_prop_value_type("unit", unit, str)
+        if time_series is not None:
+            _Validators.validate_arg_prop_value_type("time_series", time_series, 
+            (pd.Series, pd.DataFrame, dict))
         self._value = value
         self._unit = unit
         self._time_series = time_series
@@ -15,6 +23,7 @@ class _Property(object):
         return self._value
     @value.setter
     def value(self, value):
+        _Validators.validate_arg_prop_value_type("value", value, (int, float))
         self._value = value
     
     @property
@@ -22,6 +31,7 @@ class _Property(object):
         return self._unit
     @unit.setter
     def unit(self, unit):
+        _Validators.validate_arg_prop_value_type("unit", unit, (str))
         self._unit = unit
     
     @property
@@ -29,10 +39,9 @@ class _Property(object):
         return self._time_series
     @time_series.setter
     def time_series(self, time_series):
-        if not isinstance(time_series, (pd.Series | dict | pd.DataFrame)):
-            raise Exception("""Incorrect type used for setting time_series.
-            Should be pandas.Series or pandas.DataFrame or dictionary.""")
-
+        _Validators.validate_arg_prop_value_type("time_series", time_series, 
+            (pd.Series, pd.DataFrame, dict))
+            
         if isinstance(time_series, dict):
             time_series = pd.Series(data=time_series, index=list(time_series.keys()))
         elif isinstance(time_series, pd.DataFrame):
@@ -58,12 +67,12 @@ class _Property(object):
         return type(self)(self.value + other.value, self.unit) 
     
     def __sub__(self, other):
-        if self.unit!=other.unit:
+        if self.unit != other.unit:
             other.unit = self.unit
         return type(self)(self.value - other.value, self.unit)
     
     def __truediv__(self, other):
-        if self.unit!=other.unit:
+        if self.unit != other.unit:
             other.unit = self.unit
         return self.value / other.value
 
@@ -82,6 +91,7 @@ class Length(_Property):
 
     @_Property.unit.setter
     def unit(self, unit):
+        _Validators.validate_arg_prop_value_type("unit", unit, (str))
         try:
             conversion_factors = {
                                 'foot': 1/3.28083,
@@ -118,6 +128,7 @@ class Time(_Property):
 
     @_Property.unit.setter
     def unit(self, unit):
+        _Validators.validate_arg_prop_value_type("unit", unit, (str))
         try:
             conversion_factors = {
                                 'year': (3600*24*30*12),
@@ -152,6 +163,7 @@ class Pressure(_Property):
 
     @_Property.unit.setter
     def unit(self, unit):
+        _Validators.validate_arg_prop_value_type("unit", unit, (str))
         try:
             conversion_factors = {'atm': 101320,
                                 'bar': 100000,
@@ -195,6 +207,7 @@ class Temperature(_Property):
     
     @_Property.unit.setter
     def unit(self, unit):
+        _Validators.validate_arg_prop_value_type("unit", unit, (str))
         if unit in ['K', 'C', 'F', 'R']:
             while unit != self._unit:
                 if self._unit == 'K':
@@ -253,6 +266,7 @@ class MassFlowRate(_Property):
     
     @_Property.unit.setter
     def unit(self, unit):
+        _Validators.validate_arg_prop_value_type("unit", unit, (str))
         try:
             conversion_factors = {'g/s': 1000,
                                 'kg/min': 1/(1/60),
@@ -297,6 +311,7 @@ class Mass(_Property):
     
     @_Property.unit.setter
     def unit(self, unit):
+        _Validators.validate_arg_prop_value_type("unit", unit, (str))
         try:
             conversion_factors = {'g': 1000,
                                 'lb': 2.204,
@@ -326,6 +341,7 @@ class MolecularWeigth(_Property):
         self.unit = unit
     @_Property.unit.setter
     def unit(self, unit):
+        _Validators.validate_arg_prop_value_type("unit", unit, (str))
         try:
             conversion_factors = {
                                   'kg/mol': 0.001,
@@ -350,6 +366,7 @@ class MolarFlowRate(_Property):
     
     @_Property.unit.setter
     def unit(self, unit):
+        _Validators.validate_arg_prop_value_type("unit", unit, (str))
         try:
             conversion_factors = {'lbmol/h': 7.93664,
                                 'mol/min': 1*60,
@@ -387,6 +404,7 @@ class VolumetricFlowRate(_Property):
         self.unit = unit
     @_Property.unit.setter
     def unit(self, unit):
+        _Validators.validate_arg_prop_value_type("unit", unit, (str))
         try:
             conversion_factors = {'ft^3/s': 35.3146,
                                 'cm^3/s': 1000000,
@@ -439,6 +457,7 @@ class Volume(_Property):
         self.unit = unit
     @_Property.unit.setter
     def unit(self, unit):
+        _Validators.validate_arg_prop_value_type("unit", unit, (str))
         try:
             conversion_factors = {'ft^3': 35.3146,
                                 'cm^3': 1000000,
@@ -467,6 +486,7 @@ class Density(_Property):
         self.unit = unit
     @_Property.unit.setter
     def unit(self, unit):
+        _Validators.validate_arg_prop_value_type("unit", unit, (str))
         try:
             conversion_factors = {'g/cm^3': 0.001,
                                 'lbm/ft^3': 0.062479,
@@ -491,6 +511,7 @@ class DViscosity(_Property):
         self.unit = unit
     @_Property.unit.setter
     def unit(self, unit):
+        _Validators.validate_arg_prop_value_type("unit", unit, (str))
         try:
             conversion_factors = {'lb/(ft-s)': 1.4881,
                                 'cP': 1000,
@@ -516,6 +537,7 @@ class Power(_Property):
 
     @_Property.unit.setter
     def unit(self, unit):
+        _Validators.validate_arg_prop_value_type("unit", unit, (str))
         try:
             conversion_factors = {'BTU/h': 0.293071070172222,
                                 'BTU/min': 17.5842642103333,
@@ -576,6 +598,7 @@ class Frequency(_Property):
         self.unit = unit
     @_Property.unit.setter
     def unit(self, unit):
+        _Validators.validate_arg_prop_value_type("unit", unit, (str))
         try:
             conversion_factors = {'/hour': 3600,
                                 '/min': 60,
@@ -596,6 +619,9 @@ class Frequency(_Property):
 
 class Components(object):
     def __init__(self, fractions=None, type="mass"):
+        if fractions is not None:
+            _Validators.validate_arg_prop_value_type("fractions", fractions, (dict))
+        _Validators.validate_arg_prop_value_type("type", type, (str))        
         self.fractions = fractions
         self.type = type
     def __eq__(self, other):
