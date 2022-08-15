@@ -1,6 +1,6 @@
 from thermo import Mixture
 import propylean.properties as prop
-
+from propylean.validators import _Validators
 class Stream(object):
    
     def __init__(self, tag=None, **inputs) -> None:
@@ -14,6 +14,7 @@ class Stream(object):
         return self._tag
     @tag.setter
     def tag(self, value):
+        _Validators.validate_arg_prop_value_type("value", value, (str))
         self = self._get_stream_object(self)
         if value is None:
             value = self._create_stream_tag()
@@ -84,6 +85,7 @@ class EnergyStream (Stream):
         return self._amount
     @amount.setter
     def amount(self, value):
+        _Validators.validate_arg_prop_value_type("value", value, (prop.Power, int, float, tuple))
         self = self._get_stream_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
         if unit is None:
@@ -142,6 +144,7 @@ class MaterialStream(Stream):
         return self._pressure
     @pressure.setter
     def pressure(self, value):
+        _Validators.validate_arg_prop_value_type("value", value, (prop.Pressure, int, float, tuple))
         self = self._get_stream_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Pressure)
         if unit is None:
@@ -155,6 +158,7 @@ class MaterialStream(Stream):
         return self._temperature
     @temperature.setter
     def temperature(self, value):
+        _Validators.validate_arg_prop_value_type("value", value, (prop.Temperature, int, float, tuple))
         self = self._get_stream_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Temperature)
         if unit is None:
@@ -168,6 +172,7 @@ class MaterialStream(Stream):
         return self._mass_flowrate
     @mass_flowrate.setter
     def mass_flowrate(self, value):
+        _Validators.validate_arg_prop_value_type("value", value, (prop.MassFlowRate, int, float, tuple))
         self = self._get_stream_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.MassFlowRate)
         if unit is None:
@@ -194,6 +199,7 @@ class MaterialStream(Stream):
         return self._molecular_weight
     @molecular_weight.setter
     def molecular_weight(self, value):
+        _Validators.validate_arg_prop_value_type("value", value, (prop.MolecularWeigth, int, float, tuple))
         if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
@@ -223,10 +229,10 @@ class MaterialStream(Stream):
         return self._components
     @components.setter
     def components(self, value):
+        _Validators.validate_arg_prop_value_type("value", value, (prop.Components))
         # if MaterialStream().property_package is None:
         #     raise Exception("Property package must be set before setting components.")
-        # if not isinstance(value, DataFrame):
-        #     raise Exception("Compnents should be pandas DataFrame")
+        
         self = self._get_stream_object(self)
         self._components = value
         self._update_properties()
@@ -238,6 +244,7 @@ class MaterialStream(Stream):
         return self._density
     @density.setter
     def density(self, value):
+        _Validators.validate_arg_prop_value_type("value", value, (prop.Density, int, float, tuple))
         if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
@@ -253,6 +260,7 @@ class MaterialStream(Stream):
         return self._density_l
     @density_l.setter
     def density_l(self, value):
+        _Validators.validate_arg_prop_value_type("value", value, (prop.Density, int, float, tuple))
         if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
@@ -268,6 +276,7 @@ class MaterialStream(Stream):
         return self._density_g
     @density_g.setter
     def density_g(self, value):
+        _Validators.validate_arg_prop_value_type("value", value, (prop.Density, int, float, tuple))
         if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
@@ -283,6 +292,7 @@ class MaterialStream(Stream):
         return self._density_s
     @density_s.setter
     def density_s(self, value):
+        _Validators.validate_arg_prop_value_type("value", value, (prop.Density, int, float, tuple))
         if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
@@ -298,6 +308,7 @@ class MaterialStream(Stream):
         return self._d_viscosity
     @d_viscosity.setter
     def d_viscosity(self, value):
+        _Validators.validate_arg_prop_value_type("value", value, (prop.DViscosity, int, float, tuple))
         if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
@@ -313,6 +324,7 @@ class MaterialStream(Stream):
         return self._d_viscosity_l
     @d_viscosity_l.setter
     def d_viscosity_l(self, value):
+        _Validators.validate_arg_prop_value_type("value", value, (prop.DViscosity, int, float, tuple))
         if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
@@ -328,6 +340,7 @@ class MaterialStream(Stream):
         return self._d_viscosity_g
     @d_viscosity_g.setter
     def d_viscosity_g(self, value):
+        _Validators.validate_arg_prop_value_type("value", value, (prop.DViscosity, int, float, tuple))
         if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
@@ -343,6 +356,7 @@ class MaterialStream(Stream):
         return self._isentropic_exponent
     @isentropic_exponent.setter
     def isentropic_exponent(self, value):
+        _Validators.validate_arg_prop_value_type("value", value, (int, float))
         if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
@@ -355,6 +369,7 @@ class MaterialStream(Stream):
         return self._phase
     @phase.setter
     def phase(self, value):
+        _Validators.validate_arg_prop_value_type("value", value, (str))
         if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
@@ -367,6 +382,7 @@ class MaterialStream(Stream):
         return self._Psat
     @Psat.setter
     def Psat(self, value):
+        _Validators.validate_arg_prop_value_type("value", value, (prop.Pressure, int, float, tuple))
         if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
@@ -379,6 +395,7 @@ class MaterialStream(Stream):
         return self._Pc
     @Pc.setter
     def Pc(self, value):
+        _Validators.validate_arg_prop_value_type("value", value, (prop.Pressure, int, float, tuple))
         if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
@@ -391,6 +408,7 @@ class MaterialStream(Stream):
         return self._Z_g
     @Z_g.setter
     def Z_g(self, value):
+        _Validators.validate_arg_prop_value_type("value", value, (int, float))
         if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
@@ -403,6 +421,7 @@ class MaterialStream(Stream):
         return self._Z_l
     @Z_l.setter
     def Z_l(self, value):
+        _Validators.validate_arg_prop_value_type("value", value, (int, float))
         if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
@@ -504,6 +523,8 @@ class MaterialStream(Stream):
 
 #Get stream index function
 def get_stream_index(tag, stream_type=None):
+    if stream_type is not None:
+        _Validators.validate_arg_prop_value_type("stream_type", stream_type, (str))
     if stream_type in ['energy', 'Energy', 'Power','e','E']:
         stream_list = EnergyStream.list_objects()
     elif stream_type in ['material', 'Material', 'mass', 'Mass','m','M']:

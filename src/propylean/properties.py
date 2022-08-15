@@ -2,12 +2,9 @@ import pandas as pd
 from propylean.validators import _Validators
 class _Property(object):
     def __init__(self, value=None, unit=None, time_series=None):
-        if value is not None:
-            _Validators.validate_arg_prop_value_type("value", value, (int, float))
-        if unit is not None:
-            _Validators.validate_arg_prop_value_type("unit", unit, str)
-        if time_series is not None:
-            _Validators.validate_arg_prop_value_type("time_series", time_series, 
+        _Validators.validate_arg_prop_value_type("value", value, (int, float))
+        _Validators.validate_arg_prop_value_type("unit", unit, str)
+        _Validators.validate_arg_prop_value_type("time_series", time_series, 
             (pd.Series, pd.DataFrame, dict))
         self._value = value
         self._unit = unit
