@@ -5,6 +5,7 @@ from propylean.constants import Constants
 import propylean.properties as prop
 import fluids.compressible as compressible_fluid
 from math import pow
+from propylean.validators import _Validators
 
 # Start of final classes of pumps.
 class CentrifugalPump(_PressureChangers):
@@ -161,6 +162,7 @@ class CentrifugalPump(_PressureChangers):
         return self.power
     @energy_in.setter
     def energy_in(self, value):
+        _Validators.validate_arg_prop_value_type("energy_in", value, (prop.Power, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
         if unit is None:
@@ -337,6 +339,7 @@ class PositiveDisplacementPump(_PressureChangers):
         return self.power
     @energy_in.setter
     def energy_in(self, value):
+        _Validators.validate_arg_prop_value_type("energy_in", value, (prop.Power, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
         if unit is None:
@@ -591,6 +594,7 @@ class CentrifugalCompressor(_PressureChangers):
         return self.power
     @energy_in.setter
     def energy_in(self, value):
+        _Validators.validate_arg_prop_value_type("energy_in", value, (prop.Power, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
         if unit is None:

@@ -1,6 +1,7 @@
 from propylean.equipments.generic_equipment_classes import _Exchangers
 from propylean import streams
 from propylean import properties as prop
+from propylean.validators import _Validators
 
 # Start of final classes of heat exchangers
 class ShellnTubeExchanger(_Exchangers):
@@ -66,6 +67,7 @@ class AirCooler(_Exchangers):
         return self.fan_power
     @energy_in.setter
     def energy_in(self, value):
+        _Validators.validate_arg_prop_value_type("energy_in", value, (prop.Power, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
         if unit is None:
@@ -157,6 +159,7 @@ class ElectricHeater(_Exchangers):
         return self.power
     @energy_in.setter
     def energy_in(self, value):
+        _Validators.validate_arg_prop_value_type("energy_in", value, (prop.Power, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
         if unit is None:

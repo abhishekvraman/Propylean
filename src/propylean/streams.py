@@ -14,7 +14,7 @@ class Stream(object):
         return self._tag
     @tag.setter
     def tag(self, value):
-        _Validators.validate_arg_prop_value_type("value", value, (str))
+        _Validators.validate_arg_prop_value_type("tag", value, (str))
         self = self._get_stream_object(self)
         if value is None:
             value = self._create_stream_tag()
@@ -85,7 +85,7 @@ class EnergyStream (Stream):
         return self._amount
     @amount.setter
     def amount(self, value):
-        _Validators.validate_arg_prop_value_type("value", value, (prop.Power, int, float, tuple))
+        _Validators.validate_arg_prop_value_type("amount", value, (prop.Power, int, float, tuple))
         self = self._get_stream_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
         if unit is None:

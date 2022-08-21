@@ -2,6 +2,7 @@ from propylean.equipments.abstract_equipment_classes import _EquipmentOneInletOu
 import propylean.properties as prop
 from propylean.constants import Constants
 import pandas as pd
+from propylean.validators import _Validators
 from math import pi, sqrt, acos
 
 #Defining generic class for all types of pressure changers like Pumps, Compressors and Expanders.
@@ -94,6 +95,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
                              self.pressure_drop.unit)
     @differential_pressure.setter
     def differential_pressure(self, value):
+        _Validators.validate_arg_prop_value_type("differential_pressure", value, (prop.Pressure, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Pressure)
         if unit is None:
@@ -121,6 +123,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         return self._efficiency
     @efficiency.setter
     def efficiency(self, value):
+        _Validators.validate_arg_prop_value_type("efficiency", value, (int, float))
         self = self._get_equipment_object(self)
         if value < 0:
             raise Exception("Please enter a positive value for efficiency")
@@ -136,6 +139,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         return self._power
     @power.setter
     def power(self, value):
+        _Validators.validate_arg_prop_value_type("power", value, (prop.Power, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
         if unit is None:
@@ -526,6 +530,7 @@ class _Vessels(_EquipmentOneInletOutlet):
         return self._pressure_drop
     @pressure_drop.setter
     def pressure_drop(self, value):
+        _Validators.validate_arg_prop_value_type("pressure_drop", value, (prop.Pressure, int, float, tuple))
         if ((self._inlet_energy_stream_index is not None or
              self._outlet_energy_stream_index is not None) and 
              self.main_fluid == "liquid"):

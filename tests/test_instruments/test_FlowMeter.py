@@ -236,3 +236,107 @@ class test_FlowMeter(unittest.TestCase):
         self.assertIsNone(flow_meter._outlet_material_stream_tag)
         self.assertIsNone(inlet_stream._to_equipment_tag)
         self.assertIsNone(outlet_stream._from_equipment_tag)
+
+    @pytest.mark.negative
+    def test_FlowMeter_inlet_pressure_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = FlowMeter()
+            m4.inlet_pressure = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'inlet_pressure'. Should be '(<class 'propylean.properties.Pressure'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))
+
+    @pytest.mark.negative
+    def test_FlowMeter_outlet_pressure_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = FlowMeter()
+            m4.outlet_pressure = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'outlet_pressure'. Should be '(<class 'propylean.properties.Pressure'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp)) 
+
+    @pytest.mark.negative
+    def test_FlowMeter_pressure_drop_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = FlowMeter()
+            m4.pressure_drop = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'pressure_drop'. Should be '(<class 'propylean.properties.Pressure'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))                                    
+
+    @pytest.mark.negative
+    def test_FlowMeter_design_pressure_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = FlowMeter()
+            m4.design_pressure = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'design_pressure'. Should be '(<class 'propylean.properties.Pressure'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp)) 
+
+    @pytest.mark.negative
+    def test_FlowMeter_inlet_temperature_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = FlowMeter()
+            m4.inlet_temperature = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'inlet_temperature'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))
+
+    @pytest.mark.negative
+    def test_FlowMeter_outlet_temperature_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = FlowMeter()
+            m4.outlet_temperature = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'outlet_temperature'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp)) 
+
+    @pytest.mark.negative
+    def test_FlowMeter_temperature_decrease_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = FlowMeter()
+            m4.temperature_decrease = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'temperature_decrease'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp)) 
+
+    @pytest.mark.negative
+    def test_FlowMeter_temperature_increase_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = FlowMeter()
+            m4.temperature_increase = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'temperature_increase'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))                                                      
+
+    @pytest.mark.negative
+    def test_FlowMeter_design_temperature_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = FlowMeter()
+            m4.design_temperature = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'design_temperature'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp)) 
+
+    @pytest.mark.negative
+    def test_FlowMeter_inlet_mass_flowrate_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = FlowMeter()
+            m4.inlet_mass_flowrate = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'inlet_mass_flowrate'. Should be '(<class 'propylean.properties.MassFlowRate'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))                   
+
+    @pytest.mark.negative
+    def test_FlowMeter_outlet_mass_flowrate_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = FlowMeter()
+            m4.outlet_mass_flowrate = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'outlet_mass_flowrate'. Should be '(<class 'propylean.properties.MassFlowRate'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))
+
+    @pytest.mark.negative
+    def test_FlowMeter_energy_in_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = FlowMeter()
+            m4.energy_in = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'energy_in'. Should be '(<class 'propylean.properties.Power'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))      
+
+    @pytest.mark.negative
+    def test_FlowMeter_energy_out_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = FlowMeter()
+            m4.energy_out = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'energy_out'. Should be '(<class 'propylean.properties.Power'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))        
