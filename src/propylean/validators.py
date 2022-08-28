@@ -40,7 +40,7 @@ class _Validators(object):
                 Description: Value of the argument or property.
             correct_values:
                 Required: Yes
-                Type: Tuple
+                Type: Tuple or list
                 Description: Correct values of the argument or property.
         """
         if value not in correct_values:

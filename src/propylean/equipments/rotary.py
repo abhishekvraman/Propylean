@@ -480,6 +480,7 @@ class CentrifugalCompressor(_PressureChangers):
             return self.adiabatic_efficiency
     @efficiency.setter
     def efficiency(self, value):
+        _Validators.validate_arg_prop_value_type("efficiency", value, (int, float))
         self = self._get_equipment_object(self)
         if value < 0:
             raise Exception("Please enter a positive value for efficiency")
@@ -487,12 +488,12 @@ class CentrifugalCompressor(_PressureChangers):
             value = value
         else:
             value = value/100
-        if Settings.compressor_process.lower() in ["adiabatic", "isentropic"]:
+        if Settings.compression_process.lower() in ["adiabatic", "isentropic"]:
             self.adiabatic_efficiency = value
         else:
             self.polytropic_efficiency = value
             
-        super().efficiency(value)
+        self._efficiency = value
 
     @property
     def adiabatic_efficiency(self):

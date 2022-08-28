@@ -44,7 +44,7 @@ class test_CentrifugalPump(unittest.TestCase):
         self.assertEqual(pump.differential_pressure, prop.Pressure(100, 'bar'))
         self.assertEqual(pump.min_flow, prop.VolumetricFlowRate(100, "lit/h"))
         self.assertEqual(pump.NPSHr, prop.Length(4, 'm'))
-        self.assertEqual(pump.efficiency, 70)
+        self.assertEqual(pump.efficiency, 0.70)
     
     @pytest.mark.positive
     @pytest.mark.instantiation
@@ -323,7 +323,7 @@ class test_CentrifugalPump(unittest.TestCase):
         pump_brake_horse_power = pump.power
         pump_brake_horse_power.unit = "kW"
         self.assertAlmostEqual(expected_hydraulic_power.value, pump_hydraulic_power.value, 1)
-        self.assertAlmostEqual(expected_brake_horse_power, pump_brake_horse_power.value, 2)
+        self.assertAlmostEqual(expected_brake_horse_power, pump_brake_horse_power.value, 1)
 
     @pytest.mark.negative
     def test_CentrifugalPump_inlet_pressure_incorrect_type_to_value(self):

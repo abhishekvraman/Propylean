@@ -410,3 +410,101 @@ class test__SphericalVessels(unittest.TestCase):
             m4.energy_out = []
         self.assertIn("Incorrect type '<class 'list'>' provided to 'energy_out'. Should be '(<class 'propylean.properties.Power'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
                       str(exp))
+
+    @pytest.mark.negative
+    def test__SphericalVessels_ID_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            horizontal_vessel = _SphericalVessels(
+                                               ID=[4, "m"], length=(10, "m"),
+                                               head_type="flat")
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'ID'. Should be '(<class 'propylean.properties.Length'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))
+        with pytest.raises(Exception) as exp:
+            m4 = _SphericalVessels()
+            m4.ID = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'ID'. Should be '(<class 'propylean.properties.Length'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))
+
+    @pytest.mark.negative
+    def test__SphericalVessels_length_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            horizontal_vessel = _SphericalVessels(
+                                               ID=(4, "m"), length=[10, "m"],
+                                               head_type="flat")
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'length'. Should be '(<class 'propylean.properties.Length'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))
+        with pytest.raises(Exception) as exp:
+            m4 = _SphericalVessels()
+            m4.length = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'length'. Should be '(<class 'propylean.properties.Length'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))                  
+
+    @pytest.mark.negative
+    def test__SphericalVessels_heayd_type_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            horizontal_vessel = _SphericalVessels(
+                                               ID=(4, "m"), length=(10, "m"),
+                                               head_type=["flat"])
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'head_type'. Should be '<class 'str'>'",
+                      str(exp))
+        with pytest.raises(Exception) as exp:
+            m4 = _SphericalVessels()
+            m4.head_type = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'head_type'. Should be '<class 'str'>'",
+                      str(exp))
+
+    @pytest.mark.negative
+    def test__SphericalVessels_LLLL_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = _SphericalVessels()
+            m4.LLLL = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'LLLL'. Should be '(<class 'propylean.properties.Length'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))                    
+
+    @pytest.mark.negative
+    def test__SphericalVessels_LLL_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = _SphericalVessels()
+            m4.LLL = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'LLL'. Should be '(<class 'propylean.properties.Length'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))                   
+
+    @pytest.mark.negative
+    def test__SphericalVessels_NLL_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = _SphericalVessels()
+            m4.NLL = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'NLL'. Should be '(<class 'propylean.properties.Length'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))                   
+
+    @pytest.mark.negative
+    def test__SphericalVessels_HLL_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = _SphericalVessels()
+            m4.HLL = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'HLL'. Should be '(<class 'propylean.properties.Length'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))                   
+
+    @pytest.mark.negative
+    def test__SphericalVessels_HHLL_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = _SphericalVessels()
+            m4.HHLL = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'HHLL'. Should be '(<class 'propylean.properties.Length'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))   
+
+    @pytest.mark.negative
+    def test__SphericalVessels_operating_temperature_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = _SphericalVessels()
+            m4.operating_temperature = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'operating_temperature'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))  
+
+    @pytest.mark.negative
+    def test__SphericalVessels_operating_pressure_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = _SphericalVessels()
+            m4.operating_pressure = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'operating_pressure'. Should be '(<class 'propylean.properties.Pressure'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))                                                                      

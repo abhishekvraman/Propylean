@@ -27,3 +27,16 @@ class test_EnergyStream(unittest.TestCase):
     def test_EnergyStream_object_representation(self):
         e4 = EnergyStream(tag="Pump_Inlet_Energy_1")
         self.assertEqual("Energy Stream Tag: Pump_Inlet_Energy_1",str(e4))
+
+    @pytest.mark.negative
+    def test_EnergyStream_(self):
+        with pytest.raises(Exception) as exp:
+            e5 = EnergyStream("gggg", [])
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'amount'. Should be '(<class 'propylean.properties.Power'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp)) 
+
+        with pytest.raises(Exception) as exp:
+            e5 = EnergyStream()
+            e5.amount = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'amount'. Should be '(<class 'propylean.properties.Power'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))                  
