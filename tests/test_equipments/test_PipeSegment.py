@@ -480,3 +480,57 @@ class test_PipeSegment(unittest.TestCase):
             m4.energy_out = []
         self.assertIn("Incorrect type '<class 'list'>' provided to 'energy_out'. Should be '(<class 'propylean.properties.Power'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
                       str(exp))
+
+    @pytest.mark.negative
+    def test_PipeSegment_length_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = PipeSegment(segment_type=13, ID=(18, 'mm'), shape=(20, 18))
+            m4.length = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'length'. Should be '(<class 'propylean.properties.Length'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))                  
+
+    @pytest.mark.negative
+    def test_PipeSegment_ID_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = PipeSegment(segment_type=13, ID=[18, 'mm'], shape=(20, 18))
+            
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'ID'. Should be '(<class 'propylean.properties.Length'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))                    
+
+    @pytest.mark.negative
+    def test_PipeSegment_OD_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = PipeSegment(segment_type=13, ID=(18, 'mm'), shape=(20, 18))
+            m4.OD = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'OD'. Should be '(<class 'propylean.properties.Length'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))                  
+
+    @pytest.mark.negative
+    def test_PipeSegment_elevation_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = PipeSegment(segment_type=13, ID=(18, 'mm'), shape=(20, 18))
+            m4.elevation = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'elevation'. Should be '(<class 'propylean.properties.Length'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))                   
+
+    @pytest.mark.negative
+    def test_PipeSegment_segmen_type_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = PipeSegment(segment_type=[13], ID=(18, 'mm'), shape=(20, 18))
+            
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'segment_type'. Should be '<class 'int'>'",
+                      str(exp))  
+        with pytest.raises(Exception) as exp:
+            m4 = PipeSegment(length=(10, "m"), ID=(18, 'mm'), shape=(20, 18))
+            m4.segment_type = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'segment_type'. Should be '<class 'int'>'",
+                      str(exp))                                  
+
+    @pytest.mark.negative
+    def test_PipeSegment_material_incorrect_type_to_value(self):
+         
+        with pytest.raises(Exception) as exp:
+            m4 = PipeSegment(length=(10, "m"), ID=(18, 'mm'), shape=(20, 18))
+            m4.material = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'material'. Should be '<class 'int'>'",
+                      str(exp))                    

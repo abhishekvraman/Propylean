@@ -325,8 +325,8 @@ class _Vessels(_EquipmentOneInletOutlet):
         return self._ID
     @ID.setter
     def ID(self, value):
-        self = self._get_equipment_object(self)
         _Validators.validate_arg_prop_value_type("ID", value, (prop.Length, int, float, tuple))
+        self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
         if unit is None:
             unit = self._ID.unit

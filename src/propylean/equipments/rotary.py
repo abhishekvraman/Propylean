@@ -88,6 +88,7 @@ class CentrifugalPump(_PressureChangers):
         return self._min_flow
     @min_flow.setter
     def min_flow(self, value):
+        _Validators.validate_arg_prop_value_type("min_flow", value, (prop.VolumetricFlowRate, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.VolumetricFlowRate)
         if unit is None:
@@ -101,8 +102,9 @@ class CentrifugalPump(_PressureChangers):
         return self._NPSHr
     @NPSHr.setter
     def NPSHr(self, value):
+        _Validators.validate_arg_prop_value_type("min_flow", value, (prop.Length, int, float, tuple))
         self = self._get_equipment_object(self)
-        value, unit = self._tuple_property_value_unit_returner(value, prop.Pressure)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
         if unit is None:
             unit = self._NPSHr.unit
         self._NPSHr = prop.Length(value, unit)
@@ -289,6 +291,7 @@ class PositiveDisplacementPump(_PressureChangers):
         return self._NPSHr
     @NPSHr.setter
     def NPSHr(self, value):
+        _Validators.validate_arg_prop_value_type("min_flow", value, (prop.Length, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Pressure)
         if unit is None:
@@ -501,6 +504,7 @@ class CentrifugalCompressor(_PressureChangers):
         return self._adiabatic_efficiency
     @adiabatic_efficiency.setter
     def adiabatic_efficiency(self, value):
+        _Validators.validate_arg_prop_value_type("adiabatic_efficiency", value, (int, float))
         self = self._get_equipment_object(self)
         if value ==  None:
             value = 0.7
@@ -523,6 +527,7 @@ class CentrifugalCompressor(_PressureChangers):
 
     @polytropic_efficiency.setter
     def polytropic_efficiency(self, value):
+        _Validators.validate_arg_prop_value_type("polytropic_efficiency", value, (int, float))
         self = self._get_equipment_object(self)
         is_inlet = False if self._intlet_material_stream_index is None else True
         isentropic_exponent = self._connected_stream_property_getter(is_inlet, "material", "isentropic_exponent")
@@ -543,6 +548,7 @@ class CentrifugalCompressor(_PressureChangers):
         return compressible_fluid.polytropic_exponent(k=k, eta_p=self.polytropic_efficiency)
     @polytropic_exponent.setter
     def polytropic_exponent(self, value):
+        _Validators.validate_arg_prop_value_type("polytropic_exponent", value, (int, float))
         self = self._get_equipment_object(self)
         if (self._inlet_material_stream_index is None and
             self._outlet_material_stream_index is None):

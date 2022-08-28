@@ -41,6 +41,7 @@ class AirCooler(_Exchangers):
         return prop.Temperature(value, self._temperature_change.unit)
     @temperature_change.setter
     def temperature_change(self, value):
+        _Validators.validate_arg_prop_value_type("temperature_change", value, (prop.Temperature, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Temperature)
         if unit is None:
@@ -55,6 +56,7 @@ class AirCooler(_Exchangers):
         return self._fan_power
     @fan_power.setter
     def fan_power(self, value):
+        _Validators.validate_arg_prop_value_type("fan_power", value, (prop.Power, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
         if unit is None:
@@ -147,6 +149,7 @@ class ElectricHeater(_Exchangers):
         return self._power
     @power.setter
     def power(self, value):
+        _Validators.validate_arg_prop_value_type("energy_in", value, (prop.Power, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
         if unit is None:
