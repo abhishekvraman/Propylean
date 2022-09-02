@@ -292,7 +292,7 @@ class test_CentrifugalCompressor(unittest.TestCase):
         self.assertTrue(compressor.connect_stream(outlet_stream, 'out', stream_governed=False))
         self.assertTrue(compressor.connect_stream(compressor_power))
         # Test disconnection
-        self.assertTrue(compressor.disconnect_stream(direction="In", stream_type="Material"))
+        self.assertTrue(compressor.disconnect_stream(direction="in", stream_type="Material"))
         self.assertTrue(compressor.disconnect_stream(direction="ouTlet", stream_type="materiaL"))
         self.assertTrue(compressor.disconnect_stream(stream_type="energy"))
         self.assertIsNone(compressor._inlet_material_stream_tag)

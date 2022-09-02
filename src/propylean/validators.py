@@ -27,8 +27,9 @@ class _Validators(object):
     def validate_arg_prop_value_list(cls, arg_prop_name, value, correct_values):
         """
         DESCRIPTION:
-            Function to validate values passed to properties or args is of
-            of correct types.
+            Function to validate values passed to properties or args is 
+            correct from list of values.
+            .
         PARAMETERS:    
             arg_prop_name:
                 Required: Yes
@@ -43,6 +44,39 @@ class _Validators(object):
                 Type: Tuple or list
                 Description: Correct values of the argument or property.
         """
+        if isinstance(value, str):
+            value = value.lower()
         if value not in correct_values:
             raise Exception("""Incorrect value '{0}' provided to '{1}'. Should be among '{2}'.
-            """.format(type(value), arg_prop_name, str(correct_values)))
+            """.format(str(value), arg_prop_name, str(correct_values)))
+
+    @classmethod
+    def validate_arg_prop_value_range(cls, arg_prop_name, value, range):
+        """
+        DESCRIPTION:
+            Function to validate values passed to properties or args is 
+            correct from range of values.
+        PARAMETERS:    
+            arg_prop_name:
+                Required: Yes
+                Type: String  
+                Description: Name of the argument or property.
+            value:
+                Required: Yes
+                Type: Any 
+                Description: Value of the argument or property.
+            range:
+                Required: Yes
+                Type: Tuple or list of length
+                Description: Correct range values of the argument or property.
+                             If Tuple provided, ends are not included.
+                             If list is provided, ends are included.             
+        """
+        if len(range) != 2:
+            raise Exception("Provide start and end value. For e.g (3, 5) or [3, 5]")
+        if isinstance(range, tuple) and (value <= range[0] or value >= range[1]):
+            raise Exception("""Incorrect value '{0}' provided to '{1}'. Should be between '{2}'.
+            """.format(str(value), arg_prop_name, str(range))) 
+        if isinstance(range, list) and (value < range[0] or value > range[1]):
+            raise Exception("""Incorrect value '{0}' provided to '{1}'. Should be between '{2}'.
+            """.format(str(value), arg_prop_name, str(range)))           

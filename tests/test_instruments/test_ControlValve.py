@@ -223,7 +223,7 @@ class test_ControlValve(unittest.TestCase):
         self.assertTrue(cv.connect_stream(outlet_stream, 'out', stream_governed=False))
      
         # Test disconnection
-        self.assertTrue(cv.disconnect_stream(direction="In", stream_type="Material"))
+        self.assertTrue(cv.disconnect_stream(direction="in", stream_type="Material"))
         self.assertTrue(cv.disconnect_stream(direction="ouTlet", stream_type="materiaL"))
         
         self.assertIsNone(cv._inlet_material_stream_tag)

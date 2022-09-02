@@ -272,7 +272,7 @@ class test__SphericalVessels(unittest.TestCase):
         self.assertTrue(Spherical_vessel.connect_stream(outlet_stream, 'out', stream_governed=False))
         
         # Test disconnection
-        self.assertTrue(Spherical_vessel.disconnect_stream(direction="In", stream_type="Material"))
+        self.assertTrue(Spherical_vessel.disconnect_stream(direction="in", stream_type="Material"))
         self.assertTrue(Spherical_vessel.disconnect_stream(direction="ouTlet", stream_type="materiaL"))
         self.assertIsNone(Spherical_vessel._inlet_material_stream_tag)
         self.assertIsNone(Spherical_vessel._outlet_material_stream_tag)
@@ -507,4 +507,18 @@ class test__SphericalVessels(unittest.TestCase):
             m4 = _SphericalVessels()
             m4.operating_pressure = []
         self.assertIn("Incorrect type '<class 'list'>' provided to 'operating_pressure'. Should be '(<class 'propylean.properties.Pressure'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
-                      str(exp))                                                                      
+                      str(exp))   
+
+    @pytest.mark.negative
+    def test__SphericalVessels_heayd_type_incorrect_value(self):
+        with pytest.raises(Exception) as exp:
+            horizontal_vessel = _SphericalVessels(
+                                               ID=(4, "m"), length=(10, "m"),
+                                               head_type="flatop")
+        self.assertIn("Incorrect value \'flatop\' provided to \'head_type\'. Should be among \'[\'hemispherical\', \'elliptical\', \'torispherical\', \'flat\']\'.\\n            ",
+                      str(exp))
+        with pytest.raises(Exception) as exp:
+            m4 = _SphericalVessels()
+            m4.head_type = "flatop"
+        self.assertIn("Incorrect value \'flatop\' provided to \'head_type\'. Should be among \'[\'hemispherical\', \'elliptical\', \'torispherical\', \'flat\']\'.\\n            ",
+                      str(exp))                                                                                      

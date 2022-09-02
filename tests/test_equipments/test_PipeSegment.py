@@ -283,7 +283,7 @@ class test_PipeSegment(unittest.TestCase):
         self.assertTrue(ps.connect_stream(outlet_stream, 'out', stream_governed=False))
         self.assertTrue(ps.connect_stream(ps_power, "out"))
         # Test disconnection
-        self.assertTrue(ps.disconnect_stream(direction="In", stream_type="Material"))
+        self.assertTrue(ps.disconnect_stream(direction="in", stream_type="Material"))
         self.assertTrue(ps.disconnect_stream(direction="ouTlet", stream_type="materiaL"))
         self.assertTrue(ps.disconnect_stream(stream_type="energy", direction="out"))
         self.assertIsNone(ps._inlet_material_stream_tag)

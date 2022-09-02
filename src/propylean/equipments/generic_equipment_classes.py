@@ -313,6 +313,7 @@ class _Vessels(_EquipmentOneInletOutlet):
             self._head_type = "torispherical"  
         else:
             _Validators.validate_arg_prop_value_type("head_type", inputs["head_type"], str)
+            _Validators.validate_arg_prop_value_list("head_type", inputs["head_type"], Constants.HEAD_TYPES)
             self._head_type = inputs["head_type"]
         
         if "is_blanketed" in inputs and inputs["is_blanketed"]:
@@ -488,6 +489,7 @@ class _Vessels(_EquipmentOneInletOutlet):
     @head_type.setter
     def head_type(self, value):
         _Validators.validate_arg_prop_value_type("head_type", value, str)
+        _Validators.validate_arg_prop_value_list("head_type", value, Constants.HEAD_TYPES)
         self = self._get_equipment_object(self)
         if value not in Constants.HEAD_TYPES:
             raise Exception("""Head type '{0}', not supported. Supported types are:\n
@@ -507,6 +509,7 @@ class _Vessels(_EquipmentOneInletOutlet):
     @material.setter
     def material(self, value):
         _Validators.validate_arg_prop_value_type("material", value, int)
+        _Validators.validate_arg_prop_value_range("head_type", value, [1, 4])
         self = self._get_equipment_object(self)
         materials = '''\nSegment material can be of following types and in range of numbers below:
                     1. Raw Steel

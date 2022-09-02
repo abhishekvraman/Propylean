@@ -452,27 +452,24 @@ class _EquipmentOneInletOutlet(object):
             >>> eq1.connect_stream(direction='out', stream_tag='Pump-outlet', stream_type='m')
         """
         if stream_object is not None:
-            _Validators.validate_arg_prop_value_type("inlet_pressure", stream_object, (streams.MaterialStream, streams.EnergyStream))
+            _Validators.validate_arg_prop_value_type("stream_object", stream_object, (streams.MaterialStream, streams.EnergyStream))
             if not (isinstance(stream_object, streams.EnergyStream) or
                     isinstance(stream_object, streams.MaterialStream)):
                     raise Exception("Stream object should be of type EnergyStream or Material Stream not " +
                                     type(stream_object))
             stream_tag = stream_object.tag
             if isinstance(stream_object, streams.MaterialStream):
-                stream_type = 'material'
+                stream_type = 'm'
             elif isinstance(stream_object, streams.EnergyStream):
-                stream_type = 'energy'
+                stream_type = 'e'
         elif not self._is_disconnection and stream_tag is None:
             raise Exception("Either of Stream Object or Stream Tag is required for connection!")
         else:
             _Validators.validate_arg_prop_value_type("stream_tag", stream_tag, (str))
             _Validators.validate_arg_prop_value_type("direction", direction, (str))
+            _Validators.validate_arg_prop_value_list("direction", direction, ['in', 'out', 'inlet', 'outlet'])
             _Validators.validate_arg_prop_value_type("stream_type", stream_type, (str))
-        
-        if stream_type.lower() not in ['material', 'mass', 'm', 'energy', 'power', 'e', 'p']:
-            raise Exception('Incorrect stream_type specified! Provided \"'+stream_type+'\". Can only be "material/mass/m" or "energy/e/power/p"]')
-        if direction.lower() not in ['in', 'inlet', 'out', 'outlet']:
-            raise Exception('Incorrect direction specified! Provided \"'+direction+'\". Can only be ["in", "out", "inlet", "outlet"]')
+            _Validators.validate_arg_prop_value_list("stream_type", stream_type, ['m', 'mass', 'e', 'energy', 'material'])
         
         stream_index = streams.get_stream_index(stream_tag, stream_type)
         is_inlet = True if direction.lower() in ['in', 'inlet'] else False
@@ -556,16 +553,16 @@ class _EquipmentOneInletOutlet(object):
         def define_index_direction(tag):
             " This function is internal function. Not to be used elsewhere."
             if tag == self._inlet_material_stream_tag:
-                stream_type = "material"
+                stream_type = "m"
                 direction = "in"
             elif tag == self._outlet_material_stream_tag:
-                stream_type = "material"
+                stream_type = "m"
                 direction = "out"
             elif tag == self._inlet_energy_stream_tag:
-                stream_type = "energy"
+                stream_type = "e"
                 direction = "in"
             elif tag == self._outlet_energy_stream_tag:
-                stream_type = "energy"
+                stream_type = "e"
                 direction = "out"
             return stream_type, direction
 
@@ -579,6 +576,8 @@ class _EquipmentOneInletOutlet(object):
               stream_type is not None):
               _Validators.validate_arg_prop_value_type("direction", direction, (str))
               _Validators.validate_arg_prop_value_type("stream_type", stream_type, (str))
+              _Validators.validate_arg_prop_value_list("direction", direction, ['in', 'out', 'inlet', 'outlet'])
+              _Validators.validate_arg_prop_value_list("stream_type", stream_type, ['m', 'mass', 'e', 'energy', 'material'])
               stream_tag = self.get_stream_tag(stream_type, direction)
               stream_type, direction = define_index_direction(stream_tag)
         else:

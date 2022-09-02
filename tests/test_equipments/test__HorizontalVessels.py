@@ -286,7 +286,7 @@ class test__HorizontalVessels(unittest.TestCase):
         self.assertTrue(horizontal_vessel.connect_stream(outlet_stream, 'out', stream_governed=False))
         
         # Test disconnection
-        self.assertTrue(horizontal_vessel.disconnect_stream(direction="In", stream_type="Material"))
+        self.assertTrue(horizontal_vessel.disconnect_stream(direction="in", stream_type="Material"))
         self.assertTrue(horizontal_vessel.disconnect_stream(direction="ouTlet", stream_type="materiaL"))
         self.assertIsNone(horizontal_vessel._inlet_material_stream_tag)
         self.assertIsNone(horizontal_vessel._outlet_material_stream_tag)
@@ -570,6 +570,19 @@ class test__HorizontalVessels(unittest.TestCase):
             m4.head_type = []
         self.assertIn("Incorrect type '<class 'list'>' provided to 'head_type'. Should be '<class 'str'>'",
                       str(exp))
+    @pytest.mark.negative
+    def test__HorizontalVessels_heayd_type_incorrect_value(self):
+        with pytest.raises(Exception) as exp:
+            horizontal_vessel = _HorizontalVessels(
+                                               ID=(4, "m"), length=(10, "m"),
+                                               head_type="flatop")
+        self.assertIn("Incorrect value \'flatop\' provided to \'head_type\'. Should be among \'[\'hemispherical\', \'elliptical\', \'torispherical\', \'flat\']\'.\\n            ",
+                      str(exp))
+        with pytest.raises(Exception) as exp:
+            m4 = _HorizontalVessels()
+            m4.head_type = "flatop"
+        self.assertIn("Incorrect value \'flatop\' provided to \'head_type\'. Should be among \'[\'hemispherical\', \'elliptical\', \'torispherical\', \'flat\']\'.\\n            ",
+                      str(exp))                  
 
     @pytest.mark.negative
     def test__HorizontalVessels_LLLL_incorrect_type_to_value(self):

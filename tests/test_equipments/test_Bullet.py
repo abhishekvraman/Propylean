@@ -217,4 +217,18 @@ class test_Bullet(unittest.TestCase):
             m4 = Bullet()
             m4.operating_pressure = []
         self.assertIn("Incorrect type '<class 'list'>' provided to 'operating_pressure'. Should be '(<class 'propylean.properties.Pressure'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
-                      str(exp))                                                                                          
+                      str(exp))          
+
+    @pytest.mark.negative
+    def test_Bullet_heayd_type_incorrect_value(self):
+        with pytest.raises(Exception) as exp:
+            Vertical_vessel = Bullet(
+                                               ID=(4, "m"), length=(10, "m"),
+                                               head_type="flatop")
+        self.assertIn("Incorrect value \'flatop\' provided to \'head_type\'. Should be among \'[\'hemispherical\', \'elliptical\', \'torispherical\', \'flat\']\'.\\n            ",
+                      str(exp))
+        with pytest.raises(Exception) as exp:
+            m4 = Bullet()
+            m4.head_type = "flatop"
+        self.assertIn("Incorrect value \'flatop\' provided to \'head_type\'. Should be among \'[\'hemispherical\', \'elliptical\', \'torispherical\', \'flat\']\'.\\n            ",
+                      str(exp))                                                                                                       

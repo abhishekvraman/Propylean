@@ -290,7 +290,7 @@ class test_AirCooler(unittest.TestCase):
         self.assertTrue(air_cooler.connect_stream(outlet_stream, 'out', stream_governed=False))
         self.assertTrue(air_cooler.connect_stream(air_cooler_fan_power, "in"))
         # Test disconnection
-        self.assertTrue(air_cooler.disconnect_stream(direction="In", stream_type="Material"))
+        self.assertTrue(air_cooler.disconnect_stream(direction="in", stream_type="Material"))
         self.assertTrue(air_cooler.disconnect_stream(direction="ouTlet", stream_type="materiaL"))
         self.assertTrue(air_cooler.disconnect_stream(stream_type="energy"))
         self.assertIsNone(air_cooler._inlet_material_stream_tag)

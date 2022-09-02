@@ -295,6 +295,7 @@ class PipeSegment(_EquipmentOneInletOutlet):
     @segment_type.setter
     def segment_type(self, value):
         _Validators.validate_arg_prop_value_type("segment_type", value, int)
+        _Validators.validate_arg_prop_value_range("segment_type", value, [1, 13])
         self = self._get_equipment_object(self)
         segments = '''\nSegments can be of following types and in range of numbers below:
                     1. Straight Tube
@@ -327,6 +328,7 @@ class PipeSegment(_EquipmentOneInletOutlet):
     @material.setter
     def material(self, value):
         _Validators.validate_arg_prop_value_type("material", value, int)
+        _Validators.validate_arg_prop_value_range("material", value, [1, 5])
         self = self._get_equipment_object(self)
         materials = '''\nSegment material can be of following types and in range of numbers below:
                     1. Raw Steel

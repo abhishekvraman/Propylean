@@ -290,7 +290,7 @@ class test_ElectricHeater(unittest.TestCase):
         self.assertTrue(electric_heater.connect_stream(outlet_stream, 'out', stream_governed=False))
         self.assertTrue(electric_heater.connect_stream(electric_heater_power, "in"))
         # Test disconnection
-        self.assertTrue(electric_heater.disconnect_stream(direction="In", stream_type="Material"))
+        self.assertTrue(electric_heater.disconnect_stream(direction="in", stream_type="Material"))
         self.assertTrue(electric_heater.disconnect_stream(direction="ouTlet", stream_type="materiaL"))
         self.assertTrue(electric_heater.disconnect_stream(stream_type="energy"))
         self.assertIsNone(electric_heater._inlet_material_stream_tag)

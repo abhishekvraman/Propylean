@@ -82,7 +82,7 @@ class ControlValve(_EquipmentOneInletOutlet):
                        stream_governed=True):
         if ((stream_object is not None and 
             isinstance(stream_object, streams.EnergyStream)) or
-            stream_type in ['energy', 'power', 'e', 'p']):
+            stream_type in ['energy', 'e']):
             raise Exception("No energy stream is associated  with control valve.")
         return super().connect_stream(direction=direction, 
                                       stream_object=stream_object, 
@@ -93,7 +93,7 @@ class ControlValve(_EquipmentOneInletOutlet):
     def disconnect_stream(self, stream_object=None, direction=None, stream_tag=None, stream_type=None):
         if ((stream_object is not None and 
             isinstance(stream_object, streams.EnergyStream)) or
-            stream_type in ['energy', 'power', 'e', 'p']):
+            stream_type in ['energy', 'e']):
             raise Exception("No energy stream is associated  with control valve.")
         return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
 

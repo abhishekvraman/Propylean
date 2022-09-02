@@ -145,7 +145,7 @@ class test_Tank(unittest.TestCase):
         self.assertIn("Incorrect type '<class 'list'>' provided to 'length'. Should be '(<class 'propylean.properties.Length'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
                       str(exp))                  
 
-    
+     
 
     @pytest.mark.negative
     def test_Tank_LLLL_incorrect_type_to_value(self):
