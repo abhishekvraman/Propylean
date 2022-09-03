@@ -1,6 +1,7 @@
 import propylean.properties as prop
 from propylean import streams
 from propylean.validators import _Validators
+import warnings
 
 _material_stream_equipment_map = dict()
 _energy_stream_equipment_map = dict()
@@ -409,7 +410,7 @@ class _EquipmentOneInletOutlet(object):
                        stream_governed=True):
         """ 
         DESCRIPTION:
-            Class method to connect a stream object with equiment.
+            Method to connect a stream object with equiment.
         
         PARAMETERS:
             stream_object:
@@ -439,6 +440,12 @@ class _EquipmentOneInletOutlet(object):
                 Acceptable values: 'm', 'mass', 'e', 'energy'
                 Description: Type of stream user wants to connect.
 
+            stream_governed:
+                Required: No 
+                Type: bool
+                Default values: True
+                Description: Determines if stream will govern the property. Fluid property will be passed.    
+
         RETURN VALUE:
             Type: bool
             Description: True is returned if connection is successful else False
@@ -453,6 +460,9 @@ class _EquipmentOneInletOutlet(object):
         """
         if stream_object is not None:
             _Validators.validate_arg_prop_value_type("stream_object", stream_object, (streams.MaterialStream, streams.EnergyStream))
+            _Validators.validate_arg_prop_value_type("direction", direction, str)
+            _Validators.validate_arg_prop_value_type("stream_governed", stream_governed, bool)
+            _Validators.validate_arg_prop_value_list("direction", direction, ['in', 'out', 'inlet', 'outlet'])
             if not (isinstance(stream_object, streams.EnergyStream) or
                     isinstance(stream_object, streams.MaterialStream)):
                     raise Exception("Stream object should be of type EnergyStream or Material Stream not " +
@@ -465,11 +475,12 @@ class _EquipmentOneInletOutlet(object):
         elif not self._is_disconnection and stream_tag is None:
             raise Exception("Either of Stream Object or Stream Tag is required for connection!")
         else:
-            _Validators.validate_arg_prop_value_type("stream_tag", stream_tag, (str))
-            _Validators.validate_arg_prop_value_type("direction", direction, (str))
+            _Validators.validate_arg_prop_value_type("stream_tag", stream_tag, str)
+            _Validators.validate_arg_prop_value_type("direction", direction, str)
             _Validators.validate_arg_prop_value_list("direction", direction, ['in', 'out', 'inlet', 'outlet'])
-            _Validators.validate_arg_prop_value_type("stream_type", stream_type, (str))
+            _Validators.validate_arg_prop_value_type("stream_type", stream_type, str)
             _Validators.validate_arg_prop_value_list("stream_type", stream_type, ['m', 'mass', 'e', 'energy', 'material'])
+            _Validators.validate_arg_prop_value_type("stream_governed", stream_governed, bool)
         
         stream_index = streams.get_stream_index(stream_tag, stream_type)
         is_inlet = True if direction.lower() in ['in', 'inlet'] else False
@@ -550,8 +561,11 @@ class _EquipmentOneInletOutlet(object):
             >>> eq1.disconnect_stream(stream_tag='Pump-outlet')
             >>> eq1.disconnect_stream(direction='in', stream_type="energy")
         """
+               
         def define_index_direction(tag):
             " This function is internal function. Not to be used elsewhere."
+            stream_type = None
+            direction = None
             if tag == self._inlet_material_stream_tag:
                 stream_type = "m"
                 direction = "in"
@@ -583,7 +597,36 @@ class _EquipmentOneInletOutlet(object):
         else:
             raise Exception("To disconnect stream from equipment, provide either just connected stream object or\
                              just stream tag or just direction & stream type") 
-              
+
+        # Validate if connection is there.
+        if stream_type is None and direction is None:
+            warnings.warn("Already there is no connection.")
+            return
+
+        if stream_type.lower() in ['material', 'mass', 'm']:
+            if direction.lower() in ['in', 'inlet']:
+                if (self._inlet_material_stream_tag is None or 
+                   self._inlet_material_stream_index is None):
+                   warnings.warn("Inlet already has no connection.")
+                   return 
+            else:
+                if (self._outlet_material_stream_tag is None or 
+                   self._outlet_material_stream_index is None):
+                   warnings.warn("Outlet already has no connection.")
+                   return 
+                  
+        else:
+            if direction.lower() in ['in', 'inlet']:
+                if (self._inlet_energy_stream_tag is None or 
+                   self._inlet_energy_stream_index is None):
+                   warnings.warn("Inlet already has no connection.")
+                   return 
+            else:
+                if (self._outlet_energy_stream_tag is None or 
+                   self._outlet_energy_stream_index is None):
+                   warnings.warn("Outlet already has no connection.")
+                   return       
+
         self._is_disconnection = True
         return self.connect_stream(stream_object,
                                    direction, 

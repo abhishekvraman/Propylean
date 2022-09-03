@@ -450,3 +450,55 @@ class test_CentrifugalCompressor(unittest.TestCase):
             m4.energy_out = []
         self.assertIn("Incorrect type '<class 'list'>' provided to 'energy_out'. Should be '(<class 'propylean.properties.Power'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
                       str(exp))
+
+    @pytest.mark.negative
+    def test_CentrifugalCompressor_stream_connecion_disconnection_incorrect_type(self):
+        cv = CentrifugalCompressor(tag="compressor_2232",
+                               differential_pressure=(10, 'bar'),
+                               efficiency=40)
+        inlet_stream = MaterialStream(tag="Inlet_compressor_2232",
+                                      mass_flowrate=(1000, 'kg/h'),
+                                      pressure=(30, 'bar'),
+                                      temperature=(25, 'C'))
+        inlet_stream.isentropic_exponent = 1.36952
+        inlet_stream.Z_g = 0.94024
+        inlet_stream.molecular_weight = prop.MolecularWeigth(16.043, 'g/mol')
+                    
+        with pytest.raises(Exception) as exp:
+            cv.connect_stream([inlet_stream], 'in', stream_governed=True)
+        self.assertIn("Incorrect type \'<class \'list\'>\' provided to \'stream_object\'. Should be \'(<class \'propylean.streams.MaterialStream\'>, <class \'propylean.streams.EnergyStream\'>)\'.\\n            ",
+                      str(exp)) 
+        
+        with pytest.raises(Exception) as exp:
+            cv.connect_stream(inlet_stream, ['in'], stream_governed=True)
+        self.assertIn("Incorrect type \'<class \'list\'>\' provided to \'direction\'. Should be \'<class \'str\'>\'.\\n            ",
+                      str(exp)) 
+        with pytest.raises(Exception) as exp:
+            cv.connect_stream(inlet_stream, 'in', stream_governed=[True])
+        self.assertIn("Incorrect type \'<class \'list\'>\' provided to \'stream_governed\'. Should be \'<class \'bool\'>\'.\\n            ",
+                      str(exp)) 
+
+        cv.connect_stream(inlet_stream, 'in', stream_governed=True)
+        with pytest.raises(Exception) as exp:
+            cv.disconnect_stream(stream_tag=["Inlet_cv_19"])
+        self.assertIn("Incorrect type \'<class \'list\'>\' provided to \'stream_tag\'. Should be \'<class \'str\'>\'.\\n            ",
+                      str(exp))    
+
+    @pytest.mark.negative
+    def test_CentrifugalCompressor_stream_disconnection_before_connecion(self):  
+        cv = CentrifugalCompressor(tag="compressor_223332",
+                               differential_pressure=(10, 'bar'),
+                               efficiency=40)
+        inlet_stream = MaterialStream(tag="Inlet_compress2232",
+                                      mass_flowrate=(1000, 'kg/h'),
+                                      pressure=(30, 'bar'),
+                                      temperature=(25, 'C'))
+        inlet_stream.isentropic_exponent = 1.36952
+        inlet_stream.Z_g = 0.94024
+        inlet_stream.molecular_weight = prop.MolecularWeigth(16.043, 'g/mol')
+        import warnings
+        with warnings.catch_warnings(record=True) as exp:
+            cv.disconnect_stream(inlet_stream)
+         
+        self.assertIn("Already there is no connection.",
+                      str(exp[-1].message))                  

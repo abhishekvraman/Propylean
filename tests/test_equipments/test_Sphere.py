@@ -232,3 +232,43 @@ class test_Sphere(unittest.TestCase):
             m4.head_type = "flatop"
         self.assertIn("Incorrect value \'flatop\' provided to \'head_type\'. Should be among \'[\'hemispherical\', \'elliptical\', \'torispherical\', \'flat\']\'.\\n            ",
                       str(exp))                       
+
+    @pytest.mark.negative
+    def test_Sphere_stream_connecion_disconnection_incorrect_type(self):
+        cv = Sphere()
+        from propylean import MaterialStream
+        inlet_stream = MaterialStream(pressure=(20, 'bar'))
+        inlet_stream.components = prop.Components({"water": 1})
+            
+        with pytest.raises(Exception) as exp:
+            cv.connect_stream([inlet_stream], 'in', stream_governed=True)
+        self.assertIn("Incorrect type \'<class \'list\'>\' provided to \'stream_object\'. Should be \'(<class \'propylean.streams.MaterialStream\'>, <class \'propylean.streams.EnergyStream\'>)\'.\\n            ",
+                      str(exp)) 
+        
+        with pytest.raises(Exception) as exp:
+            cv.connect_stream(inlet_stream, ['in'], stream_governed=True)
+        self.assertIn("Incorrect type \'<class \'list\'>\' provided to \'direction\'. Should be \'<class \'str\'>\'.\\n            ",
+                      str(exp)) 
+        with pytest.raises(Exception) as exp:
+            cv.connect_stream(inlet_stream, 'in', stream_governed=[True])
+        self.assertIn("Incorrect type \'<class \'list\'>\' provided to \'stream_governed\'. Should be \'<class \'bool\'>\'.\\n            ",
+                      str(exp)) 
+
+        cv.connect_stream(inlet_stream, 'in', stream_governed=True)
+        with pytest.raises(Exception) as exp:
+            cv.disconnect_stream(stream_tag=["Inlet_cv_19"])
+        self.assertIn("Incorrect type \'<class \'list\'>\' provided to \'stream_tag\'. Should be \'<class \'str\'>\'.\\n            ",
+                      str(exp))    
+
+    @pytest.mark.negative
+    def test_Sphere_stream_disconnection_before_connecion(self):  
+        cv = Sphere()
+        from propylean import MaterialStream
+        inlet_stream = MaterialStream(pressure=(20, 'bar'))
+        inlet_stream.components = prop.Components({"water": 1})
+        import warnings
+        with warnings.catch_warnings(record=True) as exp:
+            cv.disconnect_stream(inlet_stream)
+         
+        self.assertIn("Already there is no connection.",
+                      str(exp[-1].message))                  

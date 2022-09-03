@@ -3,6 +3,7 @@ import unittest
 from propylean.instruments.control import ControlValve
 from propylean.streams import MaterialStream
 import propylean.properties as prop
+import warnings
 
 class test_ControlValve(unittest.TestCase):
     @pytest.mark.positive
@@ -189,11 +190,11 @@ class test_ControlValve(unittest.TestCase):
     @pytest.mark.positive
     @pytest.mark.temp
     def test_ControlValve_stream_disconnection_by_stream_tag(self):
-        cv = ControlValve(tag="cv_19",
+        cv = ControlValve(tag="cv_19oj",
                           pressure_drop=(10, 'bar'))
-        inlet_stream = MaterialStream(tag="Inlet_cv_19", pressure=(20, 'bar'))
+        inlet_stream = MaterialStream(tag="Inlet_llcv_19", pressure=(20, 'bar'))
         inlet_stream.components = prop.Components({"water": 1})
-        outlet_stream = MaterialStream(tag="Outlet_cv_19")
+        outlet_stream = MaterialStream(tag="Outlet_lkcv_19")
     
         # Test connection is made.
         self.assertTrue(cv.connect_stream(inlet_stream, 'in', stream_governed=True))
@@ -201,8 +202,8 @@ class test_ControlValve(unittest.TestCase):
         self.assertEqual(inlet_stream.components, outlet_stream.components)
         
         # Test disconnection
-        self.assertTrue(cv.disconnect_stream(stream_tag="Inlet_cv_19"))
-        self.assertTrue(cv.disconnect_stream(stream_tag="Outlet_cv_19"))
+        self.assertTrue(cv.disconnect_stream(stream_tag="Inlet_llcv_19"))
+        self.assertTrue(cv.disconnect_stream(stream_tag="Outlet_lkcv_19"))
         
         self.assertIsNone(cv._inlet_material_stream_tag)
         self.assertIsNone(cv._outlet_material_stream_tag)
@@ -365,4 +366,45 @@ class test_ControlValve(unittest.TestCase):
             m4 = ControlValve()
             m4.energy_out = []
         self.assertIn("Incorrect type '<class 'list'>' provided to 'energy_out'. Should be '(<class 'propylean.properties.Power'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
-                      str(exp))        
+                      str(exp))       
+    
+    @pytest.mark.negative
+    def test_ControlValve_stream_connecion_disconnection_incorrect_type(self):
+        cv = ControlValve(tag="cv_1099",
+                          pressure_drop=(10, 'bar'))
+        inlet_stream = MaterialStream(tag="Inlet_cv_19", pressure=(20, 'bar'))
+        inlet_stream.components = prop.Components({"water": 1})
+            
+        with pytest.raises(Exception) as exp:
+            cv.connect_stream([inlet_stream], 'in', stream_governed=True)
+        self.assertIn("Incorrect type \'<class \'list\'>\' provided to \'stream_object\'. Should be \'(<class \'propylean.streams.MaterialStream\'>, <class \'propylean.streams.EnergyStream\'>)\'.\\n            ",
+                      str(exp)) 
+        
+        with pytest.raises(Exception) as exp:
+            cv.connect_stream(inlet_stream, ['in'], stream_governed=True)
+        self.assertIn("Incorrect type \'<class \'list\'>\' provided to \'direction\'. Should be \'<class \'str\'>\'.\\n            ",
+                      str(exp)) 
+        with pytest.raises(Exception) as exp:
+            cv.connect_stream(inlet_stream, 'in', stream_governed=[True])
+        self.assertIn("Incorrect type \'<class \'list\'>\' provided to \'stream_governed\'. Should be \'<class \'bool\'>\'.\\n            ",
+                      str(exp)) 
+
+        cv.connect_stream(inlet_stream, 'in', stream_governed=True)
+        with pytest.raises(Exception) as exp:
+            cv.disconnect_stream(stream_tag=["Inlet_cv_19"])
+        self.assertIn("Incorrect type \'<class \'list\'>\' provided to \'stream_tag\'. Should be \'<class \'str\'>\'.\\n            ",
+                      str(exp))    
+
+    @pytest.mark.negative
+    def test_ControlValve_stream_disconnection_before_connecion(self):  
+        cv = ControlValve(tag="cv_2419",
+                          pressure_drop=(10, 'bar'))
+        inlet_stream = MaterialStream(tag="Inlet_cv_24519", pressure=(20, 'bar'))
+        inlet_stream.components = prop.Components({"water": 1})
+
+        with warnings.catch_warnings(record=True) as exp:
+            cv.disconnect_stream(stream_tag="Inlet_cv_19")
+         
+        self.assertIn("Already there is no connection.",
+                      str(exp[-1].message))    
+                          
