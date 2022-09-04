@@ -51,7 +51,7 @@ class _Validators(object):
             """.format(str(value), arg_prop_name, str(correct_values)))
 
     @classmethod
-    def validate_arg_prop_value_range(cls, arg_prop_name, value, range):
+    def validate_arg_prop_value_range(cls, arg_prop_name, value, range, exclude=None):
         """
         DESCRIPTION:
             Function to validate values passed to properties or args is 
@@ -70,13 +70,24 @@ class _Validators(object):
                 Type: Tuple or list of length
                 Description: Correct range values of the argument or property.
                              If Tuple provided, ends are not included.
-                             If list is provided, ends are included.             
+                             If list is provided, ends are included.  
+            exclude:
+                Required: No
+                Type: strig
+                Description: Specifies the side of the value in the range provided as list.                             
         """
         if len(range) != 2:
             raise Exception("Provide start and end value. For e.g (3, 5) or [3, 5]")
         if isinstance(range, tuple) and (value <= range[0] or value >= range[1]):
-            raise Exception("""Incorrect value '{0}' provided to '{1}'. Should be between '{2}'.
+            raise Exception("""Incorrect value '{0}' provided to '{1}'. Should be between '{2}' exculding the boundaries.
             """.format(str(value), arg_prop_name, str(range))) 
-        if isinstance(range, list) and (value < range[0] or value > range[1]):
-            raise Exception("""Incorrect value '{0}' provided to '{1}'. Should be between '{2}'.
-            """.format(str(value), arg_prop_name, str(range)))           
+        if isinstance(range, list):
+            if exclude is None and (value < range[0] or value > range[1]):
+                raise Exception("""Incorrect value '{0}' provided to '{1}'. Should be between '{2}' inculding the boundaries.
+                """.format(str(value), arg_prop_name, str(range))) 
+            elif exclude == "left" and (value <= range[0] or value > range[1]):
+                raise Exception("""Incorrect value '{0}' provided to '{1}'. Should be between '{2}' exculding the left boundary.
+                """.format(str(value), arg_prop_name, str(range)))   
+            elif exclude == "right" and (value < range[0] or value >= range[1]):
+                raise Exception("""Incorrect value '{0}' provided to '{1}'. Should be between '{2}' exculding the right boundary.
+                """.format(str(value), arg_prop_name, str(range)))                   

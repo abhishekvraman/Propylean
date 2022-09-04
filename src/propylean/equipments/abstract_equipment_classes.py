@@ -386,7 +386,9 @@ class _EquipmentOneInletOutlet(object):
             >>> eq1.get_stream_tag('energy', 'in')
         """
         _Validators.validate_arg_prop_value_type("stream_type", stream_type, (str))
+        _Validators.validate_arg_prop_value_list("stream_type", stream_type, ['m', 'mass', 'e', 'energy', 'material'])
         _Validators.validate_arg_prop_value_type("direction", direction, (str))
+        _Validators.validate_arg_prop_value_list("direction", direction, ['in', 'out', 'inlet', 'outlet'])
 
         if stream_type.lower() in ['material', 'mass', 'm']:
             stream_tag = [self._inlet_material_stream_tag, self._outlet_material_stream_tag]
