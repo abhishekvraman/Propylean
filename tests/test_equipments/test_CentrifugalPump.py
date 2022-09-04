@@ -44,7 +44,7 @@ class test_CentrifugalPump(unittest.TestCase):
         self.assertEqual(pump.differential_pressure, prop.Pressure(100, 'bar'))
         self.assertEqual(pump.min_flow, prop.VolumetricFlowRate(100, "lit/h"))
         self.assertEqual(pump.NPSHr, prop.Length(4, 'm'))
-        self.assertEqual(pump.efficiency, 70)
+        self.assertEqual(pump.efficiency, 0.70)
     
     @pytest.mark.positive
     @pytest.mark.instantiation
@@ -276,7 +276,7 @@ class test_CentrifugalPump(unittest.TestCase):
         self.assertTrue(pump.connect_stream(outlet_stream, 'out', stream_governed=False))
         self.assertTrue(pump.connect_stream(pump_power))
         # Test disconnection
-        self.assertTrue(pump.disconnect_stream(direction="In", stream_type="Material"))
+        self.assertTrue(pump.disconnect_stream(direction="in", stream_type="Material"))
         self.assertTrue(pump.disconnect_stream(direction="ouTlet", stream_type="materiaL"))
         self.assertTrue(pump.disconnect_stream(stream_type="energy"))
         self.assertIsNone(pump._inlet_material_stream_tag)
@@ -323,5 +323,148 @@ class test_CentrifugalPump(unittest.TestCase):
         pump_brake_horse_power = pump.power
         pump_brake_horse_power.unit = "kW"
         self.assertAlmostEqual(expected_hydraulic_power.value, pump_hydraulic_power.value, 1)
-        self.assertAlmostEqual(expected_brake_horse_power, pump_brake_horse_power.value, 2)
+        self.assertAlmostEqual(expected_brake_horse_power, pump_brake_horse_power.value, 1)
 
+    @pytest.mark.negative
+    def test_CentrifugalPump_inlet_pressure_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = CentrifugalPump()
+            m4.inlet_pressure = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'inlet_pressure'. Should be '(<class 'propylean.properties.Pressure'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))
+
+    @pytest.mark.negative
+    def test_CentrifugalPump_outlet_pressure_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = CentrifugalPump()
+            m4.outlet_pressure = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'outlet_pressure'. Should be '(<class 'propylean.properties.Pressure'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp)) 
+
+    @pytest.mark.negative
+    def test_CentrifugalPump_pressure_drop_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = CentrifugalPump()
+            m4.pressure_drop = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'pressure_drop'. Should be '(<class 'propylean.properties.Pressure'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))                                    
+
+    @pytest.mark.negative
+    def test_CentrifugalPump_design_pressure_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = CentrifugalPump()
+            m4.design_pressure = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'design_pressure'. Should be '(<class 'propylean.properties.Pressure'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp)) 
+
+    @pytest.mark.negative
+    def test_CentrifugalPump_inlet_temperature_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = CentrifugalPump()
+            m4.inlet_temperature = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'inlet_temperature'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))
+
+    @pytest.mark.negative
+    def test_CentrifugalPump_outlet_temperature_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = CentrifugalPump()
+            m4.outlet_temperature = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'outlet_temperature'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp)) 
+
+    @pytest.mark.negative
+    def test_CentrifugalPump_temperature_decrease_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = CentrifugalPump()
+            m4.temperature_decrease = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'temperature_decrease'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp)) 
+
+    @pytest.mark.negative
+    def test_CentrifugalPump_temperature_increase_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = CentrifugalPump()
+            m4.temperature_increase = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'temperature_increase'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))                                                      
+
+    @pytest.mark.negative
+    def test_CentrifugalPump_design_temperature_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = CentrifugalPump()
+            m4.design_temperature = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'design_temperature'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp)) 
+
+    @pytest.mark.negative
+    def test_CentrifugalPump_inlet_mass_flowrate_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = CentrifugalPump()
+            m4.inlet_mass_flowrate = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'inlet_mass_flowrate'. Should be '(<class 'propylean.properties.MassFlowRate'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))                   
+
+    @pytest.mark.negative
+    def test_CentrifugalPump_outlet_mass_flowrate_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = CentrifugalPump()
+            m4.outlet_mass_flowrate = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'outlet_mass_flowrate'. Should be '(<class 'propylean.properties.MassFlowRate'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))
+
+    @pytest.mark.negative
+    def test_CentrifugalPump_energy_in_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = CentrifugalPump()
+            m4.energy_in = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'energy_in'. Should be '(<class 'propylean.properties.Power'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))      
+
+    @pytest.mark.negative
+    def test_CentrifugalPump_energy_out_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = CentrifugalPump()
+            m4.energy_out = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'energy_out'. Should be '(<class 'propylean.properties.Power'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))
+
+    @pytest.mark.negative
+    def test_CentrifugalPump_stream_connecion_disconnection_incorrect_type(self):
+        cv = CentrifugalPump()
+        from propylean import MaterialStream
+        inlet_stream = MaterialStream(pressure=(20, 'bar'))
+        inlet_stream.components = prop.Components({"water": 1})
+            
+        with pytest.raises(Exception) as exp:
+            cv.connect_stream([inlet_stream], 'in', stream_governed=True)
+        self.assertIn("Incorrect type \'<class \'list\'>\' provided to \'stream_object\'. Should be \'(<class \'propylean.streams.MaterialStream\'>, <class \'propylean.streams.EnergyStream\'>)\'.\\n            ",
+                      str(exp)) 
+        
+        with pytest.raises(Exception) as exp:
+            cv.connect_stream(inlet_stream, ['in'], stream_governed=True)
+        self.assertIn("Incorrect type \'<class \'list\'>\' provided to \'direction\'. Should be \'<class \'str\'>\'.\\n            ",
+                      str(exp)) 
+        with pytest.raises(Exception) as exp:
+            cv.connect_stream(inlet_stream, 'in', stream_governed=[True])
+        self.assertIn("Incorrect type \'<class \'list\'>\' provided to \'stream_governed\'. Should be \'<class \'bool\'>\'.\\n            ",
+                      str(exp)) 
+
+        cv.connect_stream(inlet_stream, 'in', stream_governed=True)
+        with pytest.raises(Exception) as exp:
+            cv.disconnect_stream(stream_tag=["Inlet_cv_19"])
+        self.assertIn("Incorrect type \'<class \'list\'>\' provided to \'stream_tag\'. Should be \'<class \'str\'>\'.\\n            ",
+                      str(exp))    
+
+    @pytest.mark.negative
+    def test_CentrifugalPump_stream_disconnection_before_connecion(self):  
+        cv = CentrifugalPump()
+        from propylean import MaterialStream
+        inlet_stream = MaterialStream(pressure=(20, 'bar'))
+        inlet_stream.components = prop.Components({"water": 1})
+        import warnings
+        with warnings.catch_warnings(record=True) as exp:
+            cv.disconnect_stream(inlet_stream)
+         
+        self.assertIn("Already there is no connection.",
+                      str(exp[-1].message))                  

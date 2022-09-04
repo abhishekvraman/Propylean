@@ -1,5 +1,7 @@
 import propylean.properties as prop
 from propylean import streams
+from propylean.validators import _Validators
+import warnings
 
 _material_stream_equipment_map = dict()
 _energy_stream_equipment_map = dict()
@@ -104,6 +106,7 @@ class _EquipmentOneInletOutlet(object):
         return self._tag
     @tag.setter
     def tag(self, value):
+        _Validators.validate_arg_prop_value_type("tag", value, (str))
         if self._check_tag_assigned(value):
             msg = "Tag '{}' already assigned!".format(value)
             raise Exception(msg)
@@ -116,6 +119,7 @@ class _EquipmentOneInletOutlet(object):
         return self._inlet_pressure
     @inlet_pressure.setter
     def inlet_pressure(self, value):
+        _Validators.validate_arg_prop_value_type("inlet_pressure", value, (prop.Pressure, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Pressure)
         if unit is None:
@@ -130,6 +134,7 @@ class _EquipmentOneInletOutlet(object):
         return self._outlet_pressure
     @outlet_pressure.setter
     def outlet_pressure(self, value):
+        _Validators.validate_arg_prop_value_type("outlet_pressure", value, (prop.Pressure, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Pressure)
         if unit is None:
@@ -144,6 +149,7 @@ class _EquipmentOneInletOutlet(object):
         return self._pressure_drop
     @pressure_drop.setter
     def pressure_drop(self, value):
+        _Validators.validate_arg_prop_value_type("pressure_drop", value, (prop.Pressure, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Pressure)
         if unit is None:
@@ -158,6 +164,7 @@ class _EquipmentOneInletOutlet(object):
         return self._design_pressure
     @design_pressure.setter
     def design_pressure(self, value):
+        _Validators.validate_arg_prop_value_type("design_pressure", value, (prop.Pressure, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Pressure)
         if unit is None:
@@ -171,6 +178,7 @@ class _EquipmentOneInletOutlet(object):
         return self._inlet_temperature
     @inlet_temperature.setter
     def inlet_temperature(self, value):
+        _Validators.validate_arg_prop_value_type("inlet_temperature", value, (prop.Temperature, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Temperature)
         if unit is None:
@@ -185,6 +193,7 @@ class _EquipmentOneInletOutlet(object):
         return self._outlet_temperature
     @outlet_temperature.setter
     def outlet_temperature(self,value):
+        _Validators.validate_arg_prop_value_type("outlet_temperature", value, (prop.Temperature, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Temperature)
         if unit is None:
@@ -199,6 +208,7 @@ class _EquipmentOneInletOutlet(object):
         return self._temperature_increase
     @temperature_increase.setter
     def temperature_increase(self, value):
+        _Validators.validate_arg_prop_value_type("temperature_increase", value, (prop.Temperature, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Temperature)
         if unit is None:
@@ -213,11 +223,12 @@ class _EquipmentOneInletOutlet(object):
         return prop.Temperature(decrease, self._temperature_increase.unit)
     @temperature_decrease.setter
     def temperature_decrease(self, value):
+        _Validators.validate_arg_prop_value_type("temperature_decrease", value, (prop.Temperature, int, float, tuple))
         if isinstance(value, prop.Temperature):
             value = prop.Temperature(-1 * value.value, value.unit)
         elif isinstance(value, tuple):
             value = prop.Temperature(-1 * value[0], value[1])
-        elif isinstance(value, int) or isinstance(value, float):
+        elif isinstance(value, (int, float)):
             value = prop.Temperature(-1 * value, self._temperature_increase.unit)
         self.temperature_increase = value
     
@@ -227,6 +238,7 @@ class _EquipmentOneInletOutlet(object):
         return self._design_pressure
     @design_temperature.setter
     def design_temperature(self, value):
+        _Validators.validate_arg_prop_value_type("design_temperature", value, (prop.Temperature, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Temperature)
         if unit is None:
@@ -240,6 +252,7 @@ class _EquipmentOneInletOutlet(object):
         return self._inlet_mass_flowrate
     @inlet_mass_flowrate.setter
     def inlet_mass_flowrate(self, value):
+        _Validators.validate_arg_prop_value_type("inlet_mass_flowrate", value, (prop.MassFlowRate, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.MassFlowRate)
         if unit is None:
@@ -254,6 +267,7 @@ class _EquipmentOneInletOutlet(object):
         return self._outlet_mass_flowrate
     @outlet_mass_flowrate.setter
     def outlet_mass_flowrate(self, value):
+        _Validators.validate_arg_prop_value_type("outlet_mass_flowrate", value, (prop.MassFlowRate, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.MassFlowRate)
         if unit is None:
@@ -271,6 +285,7 @@ class _EquipmentOneInletOutlet(object):
     @inventory_change_rate.setter
     def inventory_change_rate(self, value):
         raise Exception("Dynamic simulation is not yet supported.")
+        _Validators.validate_arg_prop_value_type("inventory_change_rate", value, (int))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.MassFlowRate)
         if unit is None:
@@ -283,6 +298,7 @@ class _EquipmentOneInletOutlet(object):
         return self._energy_in
     @energy_in.setter
     def energy_in(self, value):
+        _Validators.validate_arg_prop_value_type("energy_in", value, (prop.Power, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
         if unit is None:
@@ -301,6 +317,7 @@ class _EquipmentOneInletOutlet(object):
         return self._energy_out
     @energy_out.setter
     def energy_out(self, value):
+        _Validators.validate_arg_prop_value_type("energy_out", value, (prop.Power, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
         if unit is None:
@@ -368,6 +385,10 @@ class _EquipmentOneInletOutlet(object):
             >>> eq1.get_stream_tag('m', 'out')
             >>> eq1.get_stream_tag('energy', 'in')
         """
+        _Validators.validate_arg_prop_value_type("stream_type", stream_type, (str))
+        _Validators.validate_arg_prop_value_list("stream_type", stream_type, ['m', 'mass', 'e', 'energy', 'material'])
+        _Validators.validate_arg_prop_value_type("direction", direction, (str))
+        _Validators.validate_arg_prop_value_list("direction", direction, ['in', 'out', 'inlet', 'outlet'])
 
         if stream_type.lower() in ['material', 'mass', 'm']:
             stream_tag = [self._inlet_material_stream_tag, self._outlet_material_stream_tag]
@@ -391,7 +412,7 @@ class _EquipmentOneInletOutlet(object):
                        stream_governed=True):
         """ 
         DESCRIPTION:
-            Class method to connect a stream object with equiment.
+            Method to connect a stream object with equiment.
         
         PARAMETERS:
             stream_object:
@@ -421,6 +442,12 @@ class _EquipmentOneInletOutlet(object):
                 Acceptable values: 'm', 'mass', 'e', 'energy'
                 Description: Type of stream user wants to connect.
 
+            stream_governed:
+                Required: No 
+                Type: bool
+                Default values: True
+                Description: Determines if stream will govern the property. Fluid property will be passed.    
+
         RETURN VALUE:
             Type: bool
             Description: True is returned if connection is successful else False
@@ -434,22 +461,28 @@ class _EquipmentOneInletOutlet(object):
             >>> eq1.connect_stream(direction='out', stream_tag='Pump-outlet', stream_type='m')
         """
         if stream_object is not None:
+            _Validators.validate_arg_prop_value_type("stream_object", stream_object, (streams.MaterialStream, streams.EnergyStream))
+            _Validators.validate_arg_prop_value_type("direction", direction, str)
+            _Validators.validate_arg_prop_value_type("stream_governed", stream_governed, bool)
+            _Validators.validate_arg_prop_value_list("direction", direction, ['in', 'out', 'inlet', 'outlet'])
             if not (isinstance(stream_object, streams.EnergyStream) or
                     isinstance(stream_object, streams.MaterialStream)):
-                    raise Exception("Stream object should be of type EnergyStream or Material Stream not "+
-                                    +type(stream_object))
+                    raise Exception("Stream object should be of type EnergyStream or Material Stream not " +
+                                    type(stream_object))
             stream_tag = stream_object.tag
             if isinstance(stream_object, streams.MaterialStream):
-                stream_type = 'material'
+                stream_type = 'm'
             elif isinstance(stream_object, streams.EnergyStream):
-                stream_type = 'energy'
+                stream_type = 'e'
         elif not self._is_disconnection and stream_tag is None:
             raise Exception("Either of Stream Object or Stream Tag is required for connection!")
-        
-        if stream_type.lower() not in ['material', 'mass', 'm', 'energy', 'power', 'e', 'p']:
-            raise Exception('Incorrect stream_type specified! Provided \"'+stream_type+'\". Can only be "material/mass/m" or "energy/e/power/p"]')
-        if direction.lower() not in ['in', 'inlet', 'out', 'outlet']:
-            raise Exception('Incorrect direction specified! Provided \"'+direction+'\". Can only be ["in", "out", "inlet", "outlet"]')
+        else:
+            _Validators.validate_arg_prop_value_type("stream_tag", stream_tag, str)
+            _Validators.validate_arg_prop_value_type("direction", direction, str)
+            _Validators.validate_arg_prop_value_list("direction", direction, ['in', 'out', 'inlet', 'outlet'])
+            _Validators.validate_arg_prop_value_type("stream_type", stream_type, str)
+            _Validators.validate_arg_prop_value_list("stream_type", stream_type, ['m', 'mass', 'e', 'energy', 'material'])
+            _Validators.validate_arg_prop_value_type("stream_governed", stream_governed, bool)
         
         stream_index = streams.get_stream_index(stream_tag, stream_type)
         is_inlet = True if direction.lower() in ['in', 'inlet'] else False
@@ -530,34 +563,72 @@ class _EquipmentOneInletOutlet(object):
             >>> eq1.disconnect_stream(stream_tag='Pump-outlet')
             >>> eq1.disconnect_stream(direction='in', stream_type="energy")
         """
+               
         def define_index_direction(tag):
             " This function is internal function. Not to be used elsewhere."
+            stream_type = None
+            direction = None
             if tag == self._inlet_material_stream_tag:
-                stream_type = "material"
+                stream_type = "m"
                 direction = "in"
             elif tag == self._outlet_material_stream_tag:
-                stream_type = "material"
+                stream_type = "m"
                 direction = "out"
             elif tag == self._inlet_energy_stream_tag:
-                stream_type = "energy"
+                stream_type = "e"
                 direction = "in"
             elif tag == self._outlet_energy_stream_tag:
-                stream_type = "energy"
+                stream_type = "e"
                 direction = "out"
             return stream_type, direction
 
         if stream_object is not None:
+            _Validators.validate_arg_prop_value_type("stream_object", stream_object, (streams.MaterialStream, streams.EnergyStream))
             stream_type, direction = define_index_direction(stream_object.tag)
         elif stream_tag is not None:
+            _Validators.validate_arg_prop_value_type("stream_tag", stream_tag, (str))
             stream_type, direction = define_index_direction(stream_tag)
         elif (direction is not None and 
               stream_type is not None):
+              _Validators.validate_arg_prop_value_type("direction", direction, (str))
+              _Validators.validate_arg_prop_value_type("stream_type", stream_type, (str))
+              _Validators.validate_arg_prop_value_list("direction", direction, ['in', 'out', 'inlet', 'outlet'])
+              _Validators.validate_arg_prop_value_list("stream_type", stream_type, ['m', 'mass', 'e', 'energy', 'material'])
               stream_tag = self.get_stream_tag(stream_type, direction)
               stream_type, direction = define_index_direction(stream_tag)
         else:
             raise Exception("To disconnect stream from equipment, provide either just connected stream object or\
                              just stream tag or just direction & stream type") 
-              
+
+        # Validate if connection is there.
+        if stream_type is None and direction is None:
+            warnings.warn("Already there is no connection.")
+            return
+
+        if stream_type.lower() in ['material', 'mass', 'm']:
+            if direction.lower() in ['in', 'inlet']:
+                if (self._inlet_material_stream_tag is None or 
+                   self._inlet_material_stream_index is None):
+                   warnings.warn("Inlet already has no connection.")
+                   return 
+            else:
+                if (self._outlet_material_stream_tag is None or 
+                   self._outlet_material_stream_index is None):
+                   warnings.warn("Outlet already has no connection.")
+                   return 
+                  
+        else:
+            if direction.lower() in ['in', 'inlet']:
+                if (self._inlet_energy_stream_tag is None or 
+                   self._inlet_energy_stream_index is None):
+                   warnings.warn("Inlet already has no connection.")
+                   return 
+            else:
+                if (self._outlet_energy_stream_tag is None or 
+                   self._outlet_energy_stream_index is None):
+                   warnings.warn("Outlet already has no connection.")
+                   return       
+
         self._is_disconnection = True
         return self.connect_stream(stream_object,
                                    direction, 

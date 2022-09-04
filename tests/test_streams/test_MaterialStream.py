@@ -176,3 +176,154 @@ class test_MaterialStream(unittest.TestCase):
         self.assertEqual(m4.density.unit, "g/cm^3")
         m4.vol_flowrate.unit = "m^3/h"
         self.assertEqual(m4.vol_flowrate.unit, "m^3/h")
+    
+    @pytest.mark.negative
+    def test_MaterialStream_pressure_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = MaterialStream(pressure=[10],
+                                temperature=300,
+                                mass_flowrate=prop.MassFlowRate(1000, "kg/h"))
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'pressure'. Should be '(<class 'propylean.properties.Pressure'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))
+        with pytest.raises(Exception) as exp:
+            m4 = MaterialStream()
+            m4.pressure = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'pressure'. Should be '(<class 'propylean.properties.Pressure'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'", str(exp))
+
+    @pytest.mark.negative
+    def test_MaterialStream_temperature_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = MaterialStream(pressure=10,
+                                temperature=[300],
+                                mass_flowrate=prop.MassFlowRate(1000, "kg/h"))
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'temperature'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))
+        with pytest.raises(Exception) as exp:
+            m4 = MaterialStream()
+            m4.temperature = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'temperature'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'", str(exp))
+
+    @pytest.mark.negative
+    def test_MaterialStream_mass_flowrate_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = MaterialStream(pressure=10,
+                                temperature=300,
+                                mass_flowrate=[])
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'mass_flowrate'. Should be '(<class 'propylean.properties.MassFlowRate'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))
+        with pytest.raises(Exception) as exp:
+            m4 = MaterialStream()
+            m4.mass_flowrate = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'mass_flowrate'. Should be '(<class 'propylean.properties.MassFlowRate'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'", str(exp))
+
+    @pytest.mark.negative
+    def test_MaterialStream_molecular_weigth_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = MaterialStream()
+            m4.molecular_weight = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'molecular_weight'. Should be '(<class 'propylean.properties.MolecularWeigth'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'", str(exp))
+
+    @pytest.mark.negative
+    def test_MaterialStream_components_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = MaterialStream()
+            m4.components = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'components'. Should be '<class 'propylean.properties.Components'>'", str(exp))
+
+    @pytest.mark.negative
+    def test_MaterialStream_desnity_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = MaterialStream()
+            m4.density = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'density'. Should be '(<class 'propylean.properties.Density'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'", str(exp))
+
+    @pytest.mark.negative
+    def test_MaterialStream_desnity_l_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = MaterialStream()
+            m4.density_l = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'density_l'. Should be '(<class 'propylean.properties.Density'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'", str(exp))
+
+    @pytest.mark.negative
+    def test_MaterialStream_desnity_g_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = MaterialStream()
+            m4.density_g = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'density_g'. Should be '(<class 'propylean.properties.Density'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'", str(exp))
+
+    @pytest.mark.negative
+    def test_MaterialStream_desnity_s_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = MaterialStream()
+            m4.density_s = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'density_s'. Should be '(<class 'propylean.properties.Density'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'", str(exp))
+
+    @pytest.mark.negative
+    def test_MaterialStream_d_viscosity_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = MaterialStream()
+            m4.d_viscosity = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'd_viscosity'. Should be '(<class 'propylean.properties.DViscosity'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'", str(exp))
+
+    @pytest.mark.negative
+    def test_MaterialStream_d_viscosity_l_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = MaterialStream()
+            m4.d_viscosity_l = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'd_viscosity_l'. Should be '(<class 'propylean.properties.DViscosity'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'", str(exp))
+
+    @pytest.mark.negative
+    def test_MaterialStream_d_viscosity_g_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = MaterialStream()
+            m4.d_viscosity_g = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'd_viscosity_g'. Should be '(<class 'propylean.properties.DViscosity'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'", str(exp))
+
+    @pytest.mark.negative
+    def test_MaterialStream_isentropic_exponent_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = MaterialStream()
+            m4.isentropic_exponent = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'isentropic_exponent'. Should be '(<class 'int'>, <class 'float'>)'", str(exp))
+    
+    @pytest.mark.negative
+    def test_MaterialStream_phase_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = MaterialStream()
+            m4.phase = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'phase'. Should be '<class 'str'>'", str(exp))
+
+    @pytest.mark.negative
+    def test_MaterialStream_Z_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = MaterialStream()
+            m4.Z = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'Z'. Should be '(<class 'int'>, <class 'float'>)'", str(exp))
+    
+    @pytest.mark.negative
+    def test_MaterialStream_Z_g_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = MaterialStream()
+            m4.Z_g = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'Z_g'. Should be '(<class 'int'>, <class 'float'>)'", str(exp))
+    
+    @pytest.mark.negative
+    def test_MaterialStream_Z_l_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = MaterialStream()
+            m4.Z_l = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'Z_l'. Should be '(<class 'int'>, <class 'float'>)'", str(exp))
+    
+    @pytest.mark.negative
+    def test_MaterialStream_Pc_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = MaterialStream()
+            m4.Pc = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'Pc'. Should be '(<class 'propylean.properties.Pressure'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'", str(exp))
+
+    @pytest.mark.negative
+    def test_MaterialStream_Psat_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = MaterialStream()
+            m4.Psat = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'Psat'. Should be '(<class 'propylean.properties.Pressure'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'", str(exp))

@@ -1,6 +1,7 @@
 from propylean.equipments.generic_equipment_classes import _Exchangers
 from propylean import streams
 from propylean import properties as prop
+from propylean.validators import _Validators
 
 # Start of final classes of heat exchangers
 class ShellnTubeExchanger(_Exchangers):
@@ -40,6 +41,7 @@ class AirCooler(_Exchangers):
         return prop.Temperature(value, self._temperature_change.unit)
     @temperature_change.setter
     def temperature_change(self, value):
+        _Validators.validate_arg_prop_value_type("temperature_change", value, (prop.Temperature, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Temperature)
         if unit is None:
@@ -54,6 +56,7 @@ class AirCooler(_Exchangers):
         return self._fan_power
     @fan_power.setter
     def fan_power(self, value):
+        _Validators.validate_arg_prop_value_type("fan_power", value, (prop.Power, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
         if unit is None:
@@ -66,6 +69,7 @@ class AirCooler(_Exchangers):
         return self.fan_power
     @energy_in.setter
     def energy_in(self, value):
+        _Validators.validate_arg_prop_value_type("energy_in", value, (prop.Power, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
         if unit is None:
@@ -85,7 +89,7 @@ class AirCooler(_Exchangers):
                        stream_governed=True):
         if ((stream_object is not None and 
             isinstance(stream_object, streams.EnergyStream)) or
-            stream_type in ['energy', 'power', 'e', 'p']):
+            stream_type in ['energy', 'e']):
             direction = 'in'
             stream_governed = False
         return super().connect_stream(direction=direction, 
@@ -97,7 +101,7 @@ class AirCooler(_Exchangers):
     def disconnect_stream(self, stream_object=None, direction=None, stream_tag=None, stream_type=None):
         if ((stream_object is not None and 
             isinstance(stream_object, streams.EnergyStream)) or
-            stream_type in ['energy', 'power', 'e', 'p']):
+            stream_type in ['energy', 'e']):
             direction = 'in'
         return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
 
@@ -123,7 +127,7 @@ class ElectricHeater(_Exchangers):
                        stream_governed=True):
         if ((stream_object is not None and 
             isinstance(stream_object, streams.EnergyStream)) or
-            stream_type in ['energy', 'power', 'e', 'p']):
+            stream_type in ['energy', 'e']):
             direction = 'in'
             stream_governed = False
         return super().connect_stream(direction=direction, 
@@ -135,7 +139,7 @@ class ElectricHeater(_Exchangers):
     def disconnect_stream(self, stream_object=None, direction=None, stream_tag=None, stream_type=None):
         if ((stream_object is not None and 
             isinstance(stream_object, streams.EnergyStream)) or
-            stream_type in ['energy', 'power', 'e', 'p']):
+            stream_type in ['energy', 'e']):
             direction = 'in'
         return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
 
@@ -145,6 +149,7 @@ class ElectricHeater(_Exchangers):
         return self._power
     @power.setter
     def power(self, value):
+        _Validators.validate_arg_prop_value_type("energy_in", value, (prop.Power, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
         if unit is None:
@@ -157,6 +162,7 @@ class ElectricHeater(_Exchangers):
         return self.power
     @energy_in.setter
     def energy_in(self, value):
+        _Validators.validate_arg_prop_value_type("energy_in", value, (prop.Power, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
         if unit is None:

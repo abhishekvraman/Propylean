@@ -3,6 +3,8 @@ from propylean.settings import Settings
 from propylean.constants import Constants
 from propylean import properties as prop
 from math import pi
+import pandas as pd
+from propylean.validators import _Validators
 
 class PipeSegment(_EquipmentOneInletOutlet):
     items = []
@@ -168,6 +170,7 @@ class PipeSegment(_EquipmentOneInletOutlet):
         return self._segment_frame
     @segment_frame.setter
     def segment_frame(self, value):
+        _Validators.validate_arg_prop_value_type("segment_frame", value, pd.DataFrame)
         self = self._get_equipment_object(self)
         self._segment_frame = value
         self._update_equipment_object(self)
@@ -183,6 +186,7 @@ class PipeSegment(_EquipmentOneInletOutlet):
         return self._length
     @length.setter
     def length(self, value):
+        _Validators.validate_arg_prop_value_type("length", value, (prop.Length, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
         if unit is None:
@@ -222,6 +226,7 @@ class PipeSegment(_EquipmentOneInletOutlet):
         return self._elevation
     @elevation.setter
     def elevation(self, value):
+        _Validators.validate_arg_prop_value_type("elevation", value, (prop.Length, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
         if unit is None:
@@ -235,6 +240,7 @@ class PipeSegment(_EquipmentOneInletOutlet):
         return self._ID
     @ID.setter
     def ID(self, value):
+        _Validators.validate_arg_prop_value_type("ID", value, (prop.Length, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
         if unit is None:
@@ -253,6 +259,7 @@ class PipeSegment(_EquipmentOneInletOutlet):
         return self._OD
     @OD.setter
     def OD(self, value):
+        _Validators.validate_arg_prop_value_type("OD", value, (prop.Length, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
         if unit is None:
@@ -273,6 +280,7 @@ class PipeSegment(_EquipmentOneInletOutlet):
         return self._OD - self._ID
     @thickness.setter
     def thickness(self, value):
+        _Validators.validate_arg_prop_value_type("thickness", value, (prop.Length, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
         if unit is None:
@@ -286,6 +294,8 @@ class PipeSegment(_EquipmentOneInletOutlet):
         return self._segment_type
     @segment_type.setter
     def segment_type(self, value):
+        _Validators.validate_arg_prop_value_type("segment_type", value, int)
+        _Validators.validate_arg_prop_value_range("segment_type", value, [1, 13])
         self = self._get_equipment_object(self)
         segments = '''\nSegments can be of following types and in range of numbers below:
                     1. Straight Tube
@@ -317,6 +327,8 @@ class PipeSegment(_EquipmentOneInletOutlet):
         return self._material
     @material.setter
     def material(self, value):
+        _Validators.validate_arg_prop_value_type("material", value, int)
+        _Validators.validate_arg_prop_value_range("material", value, [1, 5])
         self = self._get_equipment_object(self)
         materials = '''\nSegment material can be of following types and in range of numbers below:
                     1. Raw Steel

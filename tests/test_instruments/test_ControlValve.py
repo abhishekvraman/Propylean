@@ -3,6 +3,7 @@ import unittest
 from propylean.instruments.control import ControlValve
 from propylean.streams import MaterialStream
 import propylean.properties as prop
+import warnings
 
 class test_ControlValve(unittest.TestCase):
     @pytest.mark.positive
@@ -189,11 +190,11 @@ class test_ControlValve(unittest.TestCase):
     @pytest.mark.positive
     @pytest.mark.temp
     def test_ControlValve_stream_disconnection_by_stream_tag(self):
-        cv = ControlValve(tag="cv_19",
+        cv = ControlValve(tag="cv_19oj",
                           pressure_drop=(10, 'bar'))
-        inlet_stream = MaterialStream(tag="Inlet_cv_19", pressure=(20, 'bar'))
+        inlet_stream = MaterialStream(tag="Inlet_llcv_19", pressure=(20, 'bar'))
         inlet_stream.components = prop.Components({"water": 1})
-        outlet_stream = MaterialStream(tag="Outlet_cv_19")
+        outlet_stream = MaterialStream(tag="Outlet_lkcv_19")
     
         # Test connection is made.
         self.assertTrue(cv.connect_stream(inlet_stream, 'in', stream_governed=True))
@@ -201,8 +202,8 @@ class test_ControlValve(unittest.TestCase):
         self.assertEqual(inlet_stream.components, outlet_stream.components)
         
         # Test disconnection
-        self.assertTrue(cv.disconnect_stream(stream_tag="Inlet_cv_19"))
-        self.assertTrue(cv.disconnect_stream(stream_tag="Outlet_cv_19"))
+        self.assertTrue(cv.disconnect_stream(stream_tag="Inlet_llcv_19"))
+        self.assertTrue(cv.disconnect_stream(stream_tag="Outlet_lkcv_19"))
         
         self.assertIsNone(cv._inlet_material_stream_tag)
         self.assertIsNone(cv._outlet_material_stream_tag)
@@ -223,7 +224,7 @@ class test_ControlValve(unittest.TestCase):
         self.assertTrue(cv.connect_stream(outlet_stream, 'out', stream_governed=False))
      
         # Test disconnection
-        self.assertTrue(cv.disconnect_stream(direction="In", stream_type="Material"))
+        self.assertTrue(cv.disconnect_stream(direction="in", stream_type="Material"))
         self.assertTrue(cv.disconnect_stream(direction="ouTlet", stream_type="materiaL"))
         
         self.assertIsNone(cv._inlet_material_stream_tag)
@@ -262,3 +263,148 @@ class test_ControlValve(unittest.TestCase):
         cv.connect_stream(inlet_stream, 'in', stream_governed=True)
         # TODO: Improve calulation accuracy
         self.assertGreater(cv.Cv, 0)
+
+    @pytest.mark.negative
+    def test_ControlValve_inlet_pressure_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = ControlValve()
+            m4.inlet_pressure = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'inlet_pressure'. Should be '(<class 'propylean.properties.Pressure'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))
+
+    @pytest.mark.negative
+    def test_ControlValve_outlet_pressure_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = ControlValve()
+            m4.outlet_pressure = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'outlet_pressure'. Should be '(<class 'propylean.properties.Pressure'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp)) 
+
+    @pytest.mark.negative
+    def test_ControlValve_pressure_drop_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = ControlValve()
+            m4.pressure_drop = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'pressure_drop'. Should be '(<class 'propylean.properties.Pressure'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))                                    
+
+    @pytest.mark.negative
+    def test_ControlValve_design_pressure_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = ControlValve()
+            m4.design_pressure = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'design_pressure'. Should be '(<class 'propylean.properties.Pressure'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp)) 
+
+    @pytest.mark.negative
+    def test_ControlValve_inlet_temperature_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = ControlValve()
+            m4.inlet_temperature = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'inlet_temperature'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))
+
+    @pytest.mark.negative
+    def test_ControlValve_outlet_temperature_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = ControlValve()
+            m4.outlet_temperature = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'outlet_temperature'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp)) 
+
+    @pytest.mark.negative
+    def test_ControlValve_temperature_decrease_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = ControlValve()
+            m4.temperature_decrease = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'temperature_decrease'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp)) 
+
+    @pytest.mark.negative
+    def test_ControlValve_temperature_increase_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = ControlValve()
+            m4.temperature_increase = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'temperature_increase'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))                                                      
+
+    @pytest.mark.negative
+    def test_ControlValve_design_temperature_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = ControlValve()
+            m4.design_temperature = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'design_temperature'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp)) 
+
+    @pytest.mark.negative
+    def test_ControlValve_inlet_mass_flowrate_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = ControlValve()
+            m4.inlet_mass_flowrate = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'inlet_mass_flowrate'. Should be '(<class 'propylean.properties.MassFlowRate'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))                   
+
+    @pytest.mark.negative
+    def test_ControlValve_outlet_mass_flowrate_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = ControlValve()
+            m4.outlet_mass_flowrate = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'outlet_mass_flowrate'. Should be '(<class 'propylean.properties.MassFlowRate'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))
+
+    @pytest.mark.negative
+    def test_ControlValve_energy_in_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = ControlValve()
+            m4.energy_in = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'energy_in'. Should be '(<class 'propylean.properties.Power'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))      
+
+    @pytest.mark.negative
+    def test_ControlValve_energy_out_incorrect_type_to_value(self):
+        with pytest.raises(Exception) as exp:
+            m4 = ControlValve()
+            m4.energy_out = []
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'energy_out'. Should be '(<class 'propylean.properties.Power'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+                      str(exp))       
+    
+    @pytest.mark.negative
+    def test_ControlValve_stream_connecion_disconnection_incorrect_type(self):
+        cv = ControlValve(tag="cv_1099",
+                          pressure_drop=(10, 'bar'))
+        inlet_stream = MaterialStream(tag="Inlet_cv_19", pressure=(20, 'bar'))
+        inlet_stream.components = prop.Components({"water": 1})
+            
+        with pytest.raises(Exception) as exp:
+            cv.connect_stream([inlet_stream], 'in', stream_governed=True)
+        self.assertIn("Incorrect type \'<class \'list\'>\' provided to \'stream_object\'. Should be \'(<class \'propylean.streams.MaterialStream\'>, <class \'propylean.streams.EnergyStream\'>)\'.\\n            ",
+                      str(exp)) 
+        
+        with pytest.raises(Exception) as exp:
+            cv.connect_stream(inlet_stream, ['in'], stream_governed=True)
+        self.assertIn("Incorrect type \'<class \'list\'>\' provided to \'direction\'. Should be \'<class \'str\'>\'.\\n            ",
+                      str(exp)) 
+        with pytest.raises(Exception) as exp:
+            cv.connect_stream(inlet_stream, 'in', stream_governed=[True])
+        self.assertIn("Incorrect type \'<class \'list\'>\' provided to \'stream_governed\'. Should be \'<class \'bool\'>\'.\\n            ",
+                      str(exp)) 
+
+        cv.connect_stream(inlet_stream, 'in', stream_governed=True)
+        with pytest.raises(Exception) as exp:
+            cv.disconnect_stream(stream_tag=["Inlet_cv_19"])
+        self.assertIn("Incorrect type \'<class \'list\'>\' provided to \'stream_tag\'. Should be \'<class \'str\'>\'.\\n            ",
+                      str(exp))    
+
+    @pytest.mark.negative
+    def test_ControlValve_stream_disconnection_before_connecion(self):  
+        cv = ControlValve(tag="cv_2419",
+                          pressure_drop=(10, 'bar'))
+        inlet_stream = MaterialStream(tag="Inlet_cv_24519", pressure=(20, 'bar'))
+        inlet_stream.components = prop.Components({"water": 1})
+
+        with warnings.catch_warnings(record=True) as exp:
+            cv.disconnect_stream(stream_tag="Inlet_cv_19")
+         
+        self.assertIn("Already there is no connection.",
+                      str(exp[-1].message))    
+                          

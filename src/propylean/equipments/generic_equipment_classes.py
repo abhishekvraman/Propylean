@@ -2,6 +2,7 @@ from propylean.equipments.abstract_equipment_classes import _EquipmentOneInletOu
 import propylean.properties as prop
 from propylean.constants import Constants
 import pandas as pd
+from propylean.validators import _Validators
 from math import pi, sqrt, acos
 
 #Defining generic class for all types of pressure changers like Pumps, Compressors and Expanders.
@@ -72,7 +73,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         if 'performance_curve' in inputs:
             self.performace_curve = inputs['performance_curve']
         
-        self._efficiency = 100 if 'efficiency' not in inputs else inputs['efficiency']
+        self.efficiency = 100 if 'efficiency' not in inputs else inputs['efficiency']
         
     @property
     def suction_pressure(self):
@@ -94,6 +95,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
                              self.pressure_drop.unit)
     @differential_pressure.setter
     def differential_pressure(self, value):
+        _Validators.validate_arg_prop_value_type("differential_pressure", value, (prop.Pressure, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Pressure)
         if unit is None:
@@ -108,8 +110,9 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         return self._perfomace_curve
     @performance_curve.setter
     def performance_curve(self,value):
+        _Validators.validate_arg_prop_value_type("performance_curve", value, pd.DataFrame)
         self = self._get_equipment_object(self)
-        if isinstance(value, pd.DataFrame) and value.shape[1] == 2:
+        if value.shape[1] == 2:
                 self._performance_curve = value
         else:
             raise Exception("Please enter performance_curve as pandas dataframe of 2 columns.\nOne for Flow and other for head.")
@@ -121,6 +124,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         return self._efficiency
     @efficiency.setter
     def efficiency(self, value):
+        _Validators.validate_arg_prop_value_type("efficiency", value, (int, float))
         self = self._get_equipment_object(self)
         if value < 0:
             raise Exception("Please enter a positive value for efficiency")
@@ -136,6 +140,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         return self._power
     @power.setter
     def power(self, value):
+        _Validators.validate_arg_prop_value_type("power", value, (prop.Power, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
         if unit is None:
@@ -240,7 +245,24 @@ class _Vessels(_EquipmentOneInletOutlet):
                 Acceptable values: Non-negative integer
                 Default value: 0 m   
                 Description: liquid level of the vessel.
+            
+        METHODS:
+            get_inventory(type="volume")
+            DESCRIPTION:
+                Function to get the inventory in the vessel.
         
+            PARAMETERS:
+                type:
+                    Type: String
+                    Acceptable values: "volume" or "mass"
+                    Default value: "volume"  
+                    Description: The type of inventory to be calculated.
+                                 "volume" calculates volumetic inventroy and
+                                 "mass" calculates mass inventory of corresponding
+                                  volumetic inventory based on density of liquid.
+                                  Property main_fluid should be set for vessesl 
+                                  containging liquid.
+                                        
         ERROR RAISED:
             Type:
             Description: 
@@ -287,7 +309,12 @@ class _Vessels(_EquipmentOneInletOutlet):
         self.HLL = prop.Length() if 'HLL' not in inputs else inputs['HLL']
         self.HHLL = prop.Length() if 'HHLL' not in inputs else inputs['HHLL']
 
-        self._head_type = "torispherical" if "head_type" not in inputs else inputs["head_type"]
+        if "head_type" not in inputs:
+            self._head_type = "torispherical"  
+        else:
+            _Validators.validate_arg_prop_value_type("head_type", inputs["head_type"], str)
+            _Validators.validate_arg_prop_value_list("head_type", inputs["head_type"], Constants.HEAD_TYPES)
+            self._head_type = inputs["head_type"]
         
         if "is_blanketed" in inputs and inputs["is_blanketed"]:
             self.blanketing = _Blanketing(tag=self.tag)
@@ -299,6 +326,7 @@ class _Vessels(_EquipmentOneInletOutlet):
         return self._ID
     @ID.setter
     def ID(self, value):
+        _Validators.validate_arg_prop_value_type("ID", value, (prop.Length, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
         if unit is None:
@@ -312,6 +340,7 @@ class _Vessels(_EquipmentOneInletOutlet):
         return self._OD
     @OD.setter
     def OD(self, value):
+        _Validators.validate_arg_prop_value_type("OD", value, (prop.Length, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
         if unit is None:
@@ -327,6 +356,7 @@ class _Vessels(_EquipmentOneInletOutlet):
         return self._OD - self._ID
     @thickness.setter
     def thickness(self, value):
+        _Validators.validate_arg_prop_value_type("thickness", value, (prop.Length, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
         if unit is None:
@@ -344,6 +374,7 @@ class _Vessels(_EquipmentOneInletOutlet):
         return self._length
     @length.setter
     def length(self, value):
+        _Validators.validate_arg_prop_value_type("length", value, (prop.Length, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
         if unit is None:
@@ -362,6 +393,7 @@ class _Vessels(_EquipmentOneInletOutlet):
         return self._LLLL
     @LLLL.setter
     def LLLL(self, value):
+        _Validators.validate_arg_prop_value_type("LLLL", value, (prop.Length, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
         if unit is None:
@@ -380,6 +412,7 @@ class _Vessels(_EquipmentOneInletOutlet):
         return self._LLL
     @LLL.setter
     def LLL(self, value):
+        _Validators.validate_arg_prop_value_type("LLL", value, (prop.Length, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
         if unit is None:
@@ -398,6 +431,7 @@ class _Vessels(_EquipmentOneInletOutlet):
         return self._NLL
     @NLL.setter
     def NLL(self, value):
+        _Validators.validate_arg_prop_value_type("NLL", value, (prop.Length, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
         if unit is None:
@@ -416,6 +450,7 @@ class _Vessels(_EquipmentOneInletOutlet):
         return self._HLL
     @HLL.setter
     def HLL(self, value):
+        _Validators.validate_arg_prop_value_type("HLL", value, (prop.Length, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
         if unit is None:
@@ -434,6 +469,7 @@ class _Vessels(_EquipmentOneInletOutlet):
         return self._HHLL
     @HHLL.setter
     def HHLL(self, value):
+        _Validators.validate_arg_prop_value_type("HHLL", value, (prop.Length, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
         if unit is None:
@@ -452,6 +488,8 @@ class _Vessels(_EquipmentOneInletOutlet):
         return self._head_type
     @head_type.setter
     def head_type(self, value):
+        _Validators.validate_arg_prop_value_type("head_type", value, str)
+        _Validators.validate_arg_prop_value_list("head_type", value, Constants.HEAD_TYPES)
         self = self._get_equipment_object(self)
         if value not in Constants.HEAD_TYPES:
             raise Exception("""Head type '{0}', not supported. Supported types are:\n
@@ -470,6 +508,8 @@ class _Vessels(_EquipmentOneInletOutlet):
         return self._material
     @material.setter
     def material(self, value):
+        _Validators.validate_arg_prop_value_type("material", value, int)
+        _Validators.validate_arg_prop_value_range("head_type", value, [1, 4])
         self = self._get_equipment_object(self)
         materials = '''\nSegment material can be of following types and in range of numbers below:
                     1. Raw Steel
@@ -488,6 +528,8 @@ class _Vessels(_EquipmentOneInletOutlet):
         return self._main_fluid
     @main_fluid.setter
     def main_fluid(self, value):
+        _Validators.validate_arg_prop_value_type("main_fluid", value, str)
+        _Validators.validate_arg_prop_value_list("main_fluid", value, ("liquid", "gas"))
         self = self._get_equipment_object(self)
         self._main_fluid = value
         self._update_equipment_object(self)
@@ -507,6 +549,7 @@ class _Vessels(_EquipmentOneInletOutlet):
         return self._pressure_drop
     @pressure_drop.setter
     def pressure_drop(self, value):
+        _Validators.validate_arg_prop_value_type("pressure_drop", value, (prop.Pressure, int, float, tuple))
         if ((self._inlet_energy_stream_index is not None or
              self._outlet_energy_stream_index is not None) and 
              self.main_fluid == "liquid"):
@@ -524,6 +567,7 @@ class _Vessels(_EquipmentOneInletOutlet):
         return self.inlet_pressure
     @operating_pressure.setter
     def operating_pressure(self, value):
+        _Validators.validate_arg_prop_value_type("operating_pressure", value, (prop.Pressure, int, float, tuple))
         self.inlet_pressure = value
         if self.blanketing is not None:
             self.blanketing.inlet_pressure = value
@@ -533,6 +577,7 @@ class _Vessels(_EquipmentOneInletOutlet):
         return self.inlet_temperature
     @operating_temperature.setter
     def operating_temperature(self, value):
+        _Validators.validate_arg_prop_value_type("operating_temperature", value, (prop.Temperature, int, float, tuple))
         self.inlet_temperature = value
         if self.blanketing is not None:
             self.blanketing.inlet_temperature = value
@@ -565,6 +610,7 @@ class _Vessels(_EquipmentOneInletOutlet):
         return self._liquid_level
     @liquid_level.setter
     def liquid_level(self, value):
+        _Validators.validate_arg_prop_value_type("liquid_level", value, (prop.Length, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
         if unit is None:
@@ -785,6 +831,7 @@ class _Exchangers(_EquipmentOneInletOutlet):
         return self._efficiency
     @efficiency.setter
     def efficiency(self, value):
+        _Validators.validate_arg_prop_value_type("efficiency", value, (int, float))
         self = self._get_equipment_object(self)
         if value < 0:
             raise Exception("Please enter a positive value for efficiency")
