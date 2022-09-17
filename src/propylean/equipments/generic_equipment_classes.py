@@ -115,7 +115,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         if value.shape[1] == 2:
                 self._performance_curve = value
         else:
-            raise Exception("Please enter performance_curve as pandas dataframe of 2 columns.\nOne for Flow and other for head.")
+            raise Exception("Enter performance_curve as pandas dataframe of 2 columns.\nOne for Flow and other for head.")
         self._update_equipment_object(self)
     
     @property
@@ -127,7 +127,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         _Validators.validate_arg_prop_value_type("efficiency", value, (int, float))
         self = self._get_equipment_object(self)
         if value < 0:
-            raise Exception("Please enter a positive value for efficiency")
+            raise Exception("Enter a positive value for efficiency")
         elif value <= 1:
             self._efficiency = value
         else:
@@ -619,6 +619,8 @@ class _Vessels(_EquipmentOneInletOutlet):
         self._update_equipment_object(self)
 
     def get_inventory(self, type="volume"):
+        _Validators.validate_arg_prop_value_type("type", type, str)
+        _Validators.validate_arg_prop_value_list("type", type, ["volume", "mass"])
         self = self._get_equipment_object(self)
         if self.main_fluid == "gas":
             if type == "volume":

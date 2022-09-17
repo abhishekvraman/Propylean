@@ -676,3 +676,20 @@ class test__VerticalVessels(unittest.TestCase):
          
         self.assertIn("Already there is no connection.",
                       str(exp[-1].message))                                                                                                   
+
+    @pytest.mark.negative
+    @pytest.mark.get_inventory
+    def test__VerticalVessels_get_inventory_incorrect_type_to_type(self):
+        with pytest.raises(Exception) as exp:
+            m4 = _VerticalVessels()
+            m4.get_inventory([])
+        self.assertIn("Incorrect type '<class 'list'>' provided to 'type'. Should be '<class \'str\'>",
+                      str(exp))   
+    @pytest.mark.negative
+    @pytest.mark.get_inventory
+    def test__VerticalVessels_get_inventory_incorrect_value_to_type(self):
+        with pytest.raises(Exception) as exp:
+            m4 = _VerticalVessels()
+            m4.get_inventory('list')
+        self.assertIn("Incorrect value \'list\' provided to \'type\'. Should be among \'[\'volume\', \'mass\']\'.",
+                      str(exp))
