@@ -1,0 +1,7 @@
+first 
+py -m build
+Scond
+py -m twine upload --repository testpypi dist/* --verbose
+
+third
+py -m twine upload dist/* --verbose
