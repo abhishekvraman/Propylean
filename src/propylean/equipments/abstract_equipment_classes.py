@@ -639,12 +639,12 @@ class _EquipmentOneInletOutlet(object):
         """ 
             DESCRIPTION:
                 Internal function to map stream with equipment object.
-                _material_stream_equipment_map and __energy_stream_equipment_map 
+                _material_stream_equipment_map and _energy_stream_equipment_map 
                 are dictionary of list which store index of coming from and going 
                 to equipment and type of equipment. Structured like 
                 {12: [10, CentrifugalPump, 21, PipeSegment], 
                  23: [21, PipeSegment, 36, FlowMeter]]} 
-                were 12th index stream will have data in key no. 12. 
+                where 12th index stream will have data in key no. 12. 
                 Stream is coming from equipment with index 10 and is of type CentrifugalPump.  
                 Stream is going into equipment with index 21 of type PipeSegment.
             
@@ -704,18 +704,20 @@ class _EquipmentOneInletOutlet(object):
             old_equipment_index = stream_equipment_map[stream_index][e_index]
             stream_equipment_map[stream_index][e_type] = equipment_type if not self._is_disconnection else None
             stream_equipment_map[stream_index][e_index] = equipment_index if not self._is_disconnection else None
-            if (old_equipment_index is not None
+            if (not self._is_disconnection and
+                old_equipment_index is not None
                 and old_equipment_type is not None):
                 old_equipment_obj = old_equipment_type.list_objects()[old_equipment_index]
-                old_equipment_obj.disconnect_stream(stream_type, 'in' if is_inlet else 'out')
-                raise Warning("Equipment type " + old_equipment_type +
+                old_equipment_obj.disconnect_stream(stream_type=stream_type, direction='in' if is_inlet else 'out')
+                raise Warning("Equipment type " + str(old_equipment_type) +
                               " with tag " + old_equipment_obj.tag + 
-                              " was disconnected from stream type " + stream_type +
-                              " with tag " + self.get_stream_tag(stream_type,
-                                                                'in' if is_inlet else 'out'))
+                              " was disconnected from stream type " + str(stream_type) +
+                              " with tag " + str(self.get_stream_tag(stream_type,
+                                                                'in' if is_inlet else 'out')))
         try:
             set_type_index()   
-        except:
+        except Exception as e:
+            print(e)
             try:
                 stream_equipment_map[stream_index] = [None, None, None, None]
                 set_type_index()
@@ -972,7 +974,46 @@ class _EquipmentOneInletOutlet(object):
             inlet_e_stream_object = streams.EnergyStream.list_objects()[self._inlet_energy_stream_index]
             outlet_e_stream_object = streams.EnergyStream.list_objects()[self._outlet_energy_stream_index]
             outlet_e_stream_object.amount = inlet_e_stream_object.amount
-                
+
+    def delete(self):
+        """ 
+        DESCRIPTION:
+            Method to delete an equipment object.
+        
+        PARAMETERS:
+            None
+
+        RETURN VALUE:
+            Type: bool
+            Description: True is returned if deletion is successful else False
+        
+        ERROR RAISED:
+            Type: General
+            Description: 
+        
+        SAMPLE USE CASES:
+            >>> eq1 = CentrifugalPump
+            >>> eq1.delete()
+        """
+        result = True
+        if self._inlet_material_stream_index is not None:
+            result = result & self.disconnect_stream(direction='in',
+                                                     stream_tag=self._inlet_material_stream_tag,
+                                                     stream_type='material')
+        if self._outlet_material_stream_index is not None:
+            result = result & self.disconnect_stream(direction='out',
+                                                     stream_tag=self._outlet_material_stream_tag,
+                                                     stream_type='material')
+        if self._inlet_energy_stream_index is not None:
+            result = result & self.disconnect_stream(direction='in',
+                                                     stream_tag=self._inlet_energy_stream_tag,
+                                                     stream_type='energy')
+        if self._outlet_energy_stream_index is not None:
+            result = result & self.disconnect_stream(direction='out',
+                                                     stream_tag=self._outlet_energy_stream_tag,
+                                                     stream_type='energy')
+        del self
+        return result
 
 #Defining generic base class for all equipments with multiple inlet and outlet. TODO !!!!!!       
 class _EquipmentMultipleInletOutlet:
