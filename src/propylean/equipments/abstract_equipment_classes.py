@@ -343,8 +343,8 @@ class _EquipmentOneInletOutlet(object):
             return obj
     @classmethod
     def _update_equipment_object(cls, obj):
-        if cls.__name__ != type(obj).__name__:
-            raise Exception("Object type should be {} type. Type passed is {}".format(cls.__name__, type(obj).__name__))
+        _Validators.validate_arg_prop_value_type("obj", obj, cls)
+        
         try:
             cls.items[obj.index] = obj
         except:
@@ -1012,6 +1012,7 @@ class _EquipmentOneInletOutlet(object):
             result = result & self.disconnect_stream(direction='out',
                                                      stream_tag=self._outlet_energy_stream_tag,
                                                      stream_type='energy')
+        del self.items[self.index]
         del self
         return result
 
