@@ -2,6 +2,7 @@ import pytest
 import unittest
 from propylean.equipments.storages import Sphere
 from propylean import properties as prop
+from propylean import MaterialStream, EnergyStream
 
 class test_Sphere(unittest.TestCase):
     def test_Sphere_representation(self):
@@ -288,4 +289,53 @@ class test_Sphere(unittest.TestCase):
             m4 = Sphere()
             m4.get_inventory('list')
         self.assertIn("Incorrect value \'list\' provided to \'type\'. Should be among \'[\'volume\', \'mass\']\'.",
-                      str(exp))        
+                      str(exp))    
+
+    @pytest.mark.mapping
+    def test_Sphere_stream_equipment_mapping(self):
+        from propylean.equipments.abstract_equipment_classes import _material_stream_equipment_map as mse_map
+        from propylean.equipments.abstract_equipment_classes import _energy_stream_equipment_map as ese_map
+        sphere = Sphere(pressure_drop=(0.1, 'bar'))
+        inlet_stream = MaterialStream(pressure=(20, 'bar'))
+        inlet_stream.components = prop.Components({"water": 1})
+        outlet_stream = MaterialStream()
+        energy_in = EnergyStream()
+        energy_out = EnergyStream()
+
+        sphere.connect_stream(inlet_stream, direction="in")
+        sphere.connect_stream(outlet_stream, direction="out")
+        sphere.connect_stream(energy_in, direction="in")
+        sphere.connect_stream(energy_out, direction="out")
+
+        self.assertEqual(mse_map[inlet_stream.index][2], sphere.index)
+        self.assertEqual(mse_map[inlet_stream.index][3], sphere.__class__)
+        self.assertEqual(mse_map[outlet_stream.index][0], sphere.index)
+        self.assertEqual(mse_map[outlet_stream.index][1], sphere.__class__) 
+
+        self.assertEqual(ese_map[energy_in.index][2], sphere.index)
+        self.assertEqual(ese_map[energy_in.index][3], sphere.__class__)
+        self.assertEqual(ese_map[energy_out.index][0], sphere.index)
+        self.assertEqual(ese_map[energy_out.index][1], sphere.__class__)    
+
+        sphere.disconnect_stream(inlet_stream)
+        sphere.disconnect_stream(outlet_stream)
+        sphere.disconnect_stream(energy_in)
+        sphere.disconnect_stream(energy_out)  
+
+        self.assertIsNone(mse_map[inlet_stream.index][2])
+        self.assertIsNone(mse_map[inlet_stream.index][3])
+        self.assertIsNone(mse_map[outlet_stream.index][0])
+        self.assertIsNone(mse_map[outlet_stream.index][1]) 
+
+        self.assertIsNone(ese_map[energy_in.index][2])
+        self.assertIsNone(ese_map[energy_in.index][3])
+        self.assertIsNone(ese_map[energy_out.index][0])
+        self.assertIsNone(ese_map[energy_out.index][1])   
+
+    @pytest.mark.delete 
+    def test_Sphere_stream_equipment_delete_without_connection(self):
+        sphere = Sphere(pressure_drop=(0.1, 'bar'))   
+        print(sphere)
+        sphere.delete()
+        with pytest.raises(Exception) as exp:
+            print(sphere)            

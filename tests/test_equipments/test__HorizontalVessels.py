@@ -252,6 +252,7 @@ class test__HorizontalVessels(unittest.TestCase):
         self.assertIsNone(horizontal_vessel._outlet_material_stream_tag)
         self.assertIsNone(inlet_stream._to_equipment_tag)
         self.assertIsNone(outlet_stream._from_equipment_tag)
+
     
     @pytest.mark.positive
     @pytest.mark.temp

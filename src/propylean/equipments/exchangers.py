@@ -7,8 +7,8 @@ from propylean.validators import _Validators
 class ShellnTubeExchanger(_Exchangers):
     items = []
     def __init__(self, **inputs) -> None:
-        self._index = len(ShellnTubeExchanger.items)
         super().__init__( **inputs)
+        self._index = len(ShellnTubeExchanger.items)
         ShellnTubeExchanger.items.append(self)
     
     def __repr__(self):
@@ -23,10 +23,10 @@ class ShellnTubeExchanger(_Exchangers):
 class AirCooler(_Exchangers):
     items = []
     def __init__(self, **inputs) -> None:
-        self._index = len(AirCooler.items)
         super().__init__( **inputs)
         self.fan_power = prop.Power() if "fan_power" not in inputs else inputs["fan_power"]
         del self.energy_out
+        self._index = len(AirCooler.items)
         AirCooler.items.append(self)
     
     def __repr__(self):
@@ -108,10 +108,10 @@ class AirCooler(_Exchangers):
 class ElectricHeater(_Exchangers):
     items = []
     def __init__(self, **inputs) -> None:
-        self._index = len(ElectricHeater.items)
         super().__init__( **inputs)
         self.power = prop.Power() if "power" not in inputs else inputs["power"]
         del self.energy_out
+        self._index = len(ElectricHeater.items)
         ElectricHeater.items.append(self)
     
     def __repr__(self):

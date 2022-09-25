@@ -2,6 +2,7 @@ import pytest
 import unittest
 from propylean.equipments.storages import VerticalStorage
 from propylean import properties as prop
+from propylean import MaterialStream, EnergyStream
 
 class test_VerticalStorage(unittest.TestCase):
     def test_VerticalStorage_representation(self):
@@ -288,4 +289,53 @@ class test_VerticalStorage(unittest.TestCase):
             m4 = VerticalStorage()
             m4.get_inventory('list')
         self.assertIn("Incorrect value \'list\' provided to \'type\'. Should be among \'[\'volume\', \'mass\']\'.",
-                      str(exp))                                   
+                      str(exp)) 
+
+    @pytest.mark.mapping
+    def test_VerticalStorage_stream_equipment_mapping(self):
+        from propylean.equipments.abstract_equipment_classes import _material_stream_equipment_map as mse_map
+        from propylean.equipments.abstract_equipment_classes import _energy_stream_equipment_map as ese_map
+        vs = VerticalStorage(pressure_drop=(0.1, 'bar'))
+        inlet_stream = MaterialStream(pressure=(20, 'bar'))
+        inlet_stream.components = prop.Components({"water": 1})
+        outlet_stream = MaterialStream()
+        energy_in = EnergyStream()
+        energy_out = EnergyStream()
+
+        vs.connect_stream(inlet_stream, direction="in")
+        vs.connect_stream(outlet_stream, direction="out")
+        vs.connect_stream(energy_in, direction="in")
+        vs.connect_stream(energy_out, direction="out")
+
+        self.assertEqual(mse_map[inlet_stream.index][2], vs.index)
+        self.assertEqual(mse_map[inlet_stream.index][3], vs.__class__)
+        self.assertEqual(mse_map[outlet_stream.index][0], vs.index)
+        self.assertEqual(mse_map[outlet_stream.index][1], vs.__class__) 
+
+        self.assertEqual(ese_map[energy_in.index][2], vs.index)
+        self.assertEqual(ese_map[energy_in.index][3], vs.__class__)
+        self.assertEqual(ese_map[energy_out.index][0], vs.index)
+        self.assertEqual(ese_map[energy_out.index][1], vs.__class__)    
+
+        vs.disconnect_stream(inlet_stream)
+        vs.disconnect_stream(outlet_stream)
+        vs.disconnect_stream(energy_in)
+        vs.disconnect_stream(energy_out)  
+
+        self.assertIsNone(mse_map[inlet_stream.index][2])
+        self.assertIsNone(mse_map[inlet_stream.index][3])
+        self.assertIsNone(mse_map[outlet_stream.index][0])
+        self.assertIsNone(mse_map[outlet_stream.index][1]) 
+
+        self.assertIsNone(ese_map[energy_in.index][2])
+        self.assertIsNone(ese_map[energy_in.index][3])
+        self.assertIsNone(ese_map[energy_out.index][0])
+        self.assertIsNone(ese_map[energy_out.index][1])   
+
+    @pytest.mark.delete 
+    def test_VerticalStorage_stream_equipment_delete_without_connection(self):
+        vs = VerticalStorage(pressure_drop=(0.1, 'bar'))   
+        print(vs)
+        vs.delete()
+        with pytest.raises(Exception) as exp:
+            print(vs)                                          

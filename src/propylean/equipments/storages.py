@@ -5,18 +5,22 @@ from propylean.constants import Constants
 from propylean import properties as prop
 
 class VerticalStorage(_VerticalVessels):
+    items = []
     def __init__(self, **inputs) -> None:
-        super().__init__(**inputs)                    
+        super().__init__(**inputs) 
+        self._index = len(VerticalStorage.items)                   
         VerticalStorage.items.append(self)
     
     def __repr__(self):
         return "Vertical Storage with tag: " + self.tag
 
 class Bullet(_HorizontalVessels):
+    items = []
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
         if "is_blanketed" in inputs and inputs["is_blanketed"]:
             self.blanketing = _Blanketing(tag=self.tag)  
+        self._index = len(Bullet.items)
         Bullet.items.append(self)
     
     def __repr__(self):
@@ -25,11 +29,11 @@ class Bullet(_HorizontalVessels):
 class Tank(_VerticalVessels):
     items = []
     def __init__(self, **inputs) -> None:
-        self._index = len(Tank.items)
         super().__init__( **inputs)
         inputs["head_type"] = "Flat"
         if "is_blanketed" in inputs and inputs["is_blanketed"]:
             self.blanketing = _Blanketing(tag=self.tag)
+        self._index = len(Tank.items)
         Tank.items.append(self)
     
     def __repr__(self):
@@ -50,10 +54,13 @@ class Tank(_VerticalVessels):
         return cls.items
 
 class Sphere(_SphericalVessels):
+    items = []
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs) 
         if "is_blanketed" in inputs and inputs["is_blanketed"]:
             self.blanketing = _Blanketing(tag=self.tag)
+        self._index = len(Sphere.items)
+        Sphere.items.append(self)
     
     def __repr__(self):
         return "Sphere with tag: " + self.tag   
@@ -62,9 +69,11 @@ class Sphere(_SphericalVessels):
 
 # Specialized storage equipments.
 class AirReciever(_VerticalVessels):
+    items = []
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
         self._main_fluid = "gas"
+        self._index = len(AirReciever.items)
         AirReciever.items.append(self)
     
     def __repr__(self):
@@ -79,9 +88,15 @@ class AirReciever(_VerticalVessels):
         raise Exception("Setting property 'main_fluid' is not allowed for AirReciever.")
 
 class HotOilExpansionVessel(_HorizontalVessels):
+    items = []
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
+        self._index = len(HotOilExpansionVessel.items)
+        HotOilExpansionVessel.items.append(self)
 
 class FlareKOD(_HorizontalVessels):
+    items = []
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
+        self._index = len(FlareKOD.items)
+        FlareKOD.items.append(self)

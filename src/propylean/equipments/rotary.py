@@ -63,7 +63,6 @@ class CentrifugalPump(_PressureChangers):
             >>> print(pump_1)
             Centrifugal Pump with tag: P1
         """
-        self._index = len(CentrifugalPump.items)
         super().__init__( **inputs)
         self._NPSHr = prop.Length()
         self._NPSHa = prop.Length()
@@ -74,7 +73,8 @@ class CentrifugalPump(_PressureChangers):
             self.min_flow = inputs['min_flow']
         if "NPSHr" in inputs:
             self.NPSHr = inputs['NPSHr']
-    
+        
+        self._index = len(CentrifugalPump.items)
         CentrifugalPump.items.append(self)
     
     def __repr__(self):
@@ -200,6 +200,8 @@ class CentrifugalPump(_PressureChangers):
             direction = 'in'
         return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
 
+    def __del__(self):
+        return super().delete()
 class PositiveDisplacementPump(_PressureChangers):
     items = []
     def __init__(self, **inputs) -> None:
@@ -254,7 +256,6 @@ class PositiveDisplacementPump(_PressureChangers):
             >>> print(pump_1)
             Positive Displacement Pump with tag: P1
         """
-        self._index = len(PositiveDisplacementPump.items)
         super().__init__( **inputs)
         self._speed = prop.Frequency()
         self._NPSHr = prop.Length()
@@ -262,7 +263,7 @@ class PositiveDisplacementPump(_PressureChangers):
             self.NPSHr = inputs['NPSHr']
         del self.energy_out
 
-
+        self._index = len(PositiveDisplacementPump.items)
         PositiveDisplacementPump.items.append(self)
     
     def __repr__(self):
@@ -440,11 +441,11 @@ class CentrifugalCompressor(_PressureChangers):
             >>> print(CC_1)
             Centrifugal Compressor with tag: P1
         """
-        self._index = len(CentrifugalCompressor.items)
         super().__init__( **inputs)
         self.adiabatic_efficiency = 0.7 if 'efficiency' not in inputs else inputs['efficiency']
         self.polytropic_exponent = 1.4 if 'polytropic_exponent' not in inputs else inputs['polytropic_exponent']
         del self.energy_out
+        self._index = len(CentrifugalCompressor.items)
         CentrifugalCompressor.items.append(self)
     
     def __repr__(self):
@@ -460,7 +461,7 @@ class CentrifugalCompressor(_PressureChangers):
            self._outlet_material_stream_index is not None):
             is_inlet = False if self._inlet_material_stream_index is None else True
             k = self._connected_stream_property_getter(is_inlet, "material", "isentropic_exponent")
-            if Settings.compressor_process == "Polytropic":
+            if Settings.compression_process == "Polytropic":
                 k = compressible_fluid.polytropic_exponent(k=k, eta_p=self.polytropic_efficiency)
 
         T1 = self.inlet_temperature
@@ -640,9 +641,9 @@ class CentrifugalCompressor(_PressureChangers):
 class Expander(_PressureChangers):
     items = []
     def __init__(self, **inputs) -> None:
-        self._index = len(Expander.items)
         super().__init__( **inputs)
         del self.energy_in
+        self._index = len(Expander.items)
         Expander.items.append(self)
     
     def __repr__(self):

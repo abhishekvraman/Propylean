@@ -2,6 +2,7 @@ import pytest
 import unittest
 from propylean.equipments.storages import Tank
 from propylean import properties as prop
+from propylean import MaterialStream, EnergyStream
 
 class test_Tank(unittest.TestCase):
     def test_Tank_representation(self):
@@ -259,3 +260,52 @@ class test_Tank(unittest.TestCase):
             m4.get_inventory('list')
         self.assertIn("Incorrect value \'list\' provided to \'type\'. Should be among \'[\'volume\', \'mass\']\'.",
                       str(exp))
+    
+    @pytest.mark.mapping
+    def test_Tank_stream_equipment_mapping(self):
+        from propylean.equipments.abstract_equipment_classes import _material_stream_equipment_map as mse_map
+        from propylean.equipments.abstract_equipment_classes import _energy_stream_equipment_map as ese_map
+        tank = Tank(pressure_drop=(0.1, 'bar'))
+        inlet_stream = MaterialStream(pressure=(20, 'bar'))
+        inlet_stream.components = prop.Components({"water": 1})
+        outlet_stream = MaterialStream()
+        energy_in = EnergyStream()
+        energy_out = EnergyStream()
+
+        tank.connect_stream(inlet_stream, direction="in")
+        tank.connect_stream(outlet_stream, direction="out")
+        tank.connect_stream(energy_in, direction="in")
+        tank.connect_stream(energy_out, direction="out")
+
+        self.assertEqual(mse_map[inlet_stream.index][2], tank.index)
+        self.assertEqual(mse_map[inlet_stream.index][3], tank.__class__)
+        self.assertEqual(mse_map[outlet_stream.index][0], tank.index)
+        self.assertEqual(mse_map[outlet_stream.index][1], tank.__class__) 
+
+        self.assertEqual(ese_map[energy_in.index][2], tank.index)
+        self.assertEqual(ese_map[energy_in.index][3], tank.__class__)
+        self.assertEqual(ese_map[energy_out.index][0], tank.index)
+        self.assertEqual(ese_map[energy_out.index][1], tank.__class__)    
+
+        tank.disconnect_stream(inlet_stream)
+        tank.disconnect_stream(outlet_stream)
+        tank.disconnect_stream(energy_in)
+        tank.disconnect_stream(energy_out)  
+
+        self.assertIsNone(mse_map[inlet_stream.index][2])
+        self.assertIsNone(mse_map[inlet_stream.index][3])
+        self.assertIsNone(mse_map[outlet_stream.index][0])
+        self.assertIsNone(mse_map[outlet_stream.index][1]) 
+
+        self.assertIsNone(ese_map[energy_in.index][2])
+        self.assertIsNone(ese_map[energy_in.index][3])
+        self.assertIsNone(ese_map[energy_out.index][0])
+        self.assertIsNone(ese_map[energy_out.index][1])   
+
+    @pytest.mark.delete 
+    def test_Tank_stream_equipment_delete_without_connection(self):
+        tank = Tank(pressure_drop=(0.1, 'bar'))   
+        print(tank)
+        tank.delete()
+        with pytest.raises(Exception) as exp:
+            print(tank)        

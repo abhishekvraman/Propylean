@@ -5,6 +5,7 @@ from propylean.streams import MaterialStream, EnergyStream
 import propylean.properties as prop
 import pandas as pd
 from propylean.settings import Settings
+from propylean import MaterialStream, EnergyStream
 
 class test_CentrifugalCompressor(unittest.TestCase):
     @pytest.mark.positive
@@ -502,3 +503,55 @@ class test_CentrifugalCompressor(unittest.TestCase):
          
         self.assertIn("Already there is no connection.",
                       str(exp[-1].message))                  
+
+    @pytest.mark.mapping
+    def test_CentrifugalCompressor_stream_equipment_mapping(self):
+        from propylean.equipments.abstract_equipment_classes import _material_stream_equipment_map as mse_map
+        from propylean.equipments.abstract_equipment_classes import _energy_stream_equipment_map as ese_map
+        comp = CentrifugalCompressor(
+                               differential_pressure=(10, 'bar'))
+        inlet_stream = MaterialStream()
+        inlet_stream.isentropic_exponent = 1.36952
+        inlet_stream.Z_g = 0.94024
+        inlet_stream.molecular_weight = prop.MolecularWeigth(16.043, 'g/mol')
+        outlet_stream = MaterialStream()
+        energy_in = EnergyStream()
+        energy_out = EnergyStream()
+
+        comp.connect_stream(inlet_stream, direction="in", stream_governed=True)
+        comp.connect_stream(outlet_stream, direction="out", stream_governed=False)
+        comp.connect_stream(energy_in, direction="in")
+        comp.connect_stream(energy_out, direction="out")
+
+        self.assertEqual(mse_map[inlet_stream.index][2], comp.index)
+        self.assertEqual(mse_map[inlet_stream.index][3], comp.__class__)
+        self.assertEqual(mse_map[outlet_stream.index][0], comp.index)
+        self.assertEqual(mse_map[outlet_stream.index][1], comp.__class__) 
+
+        self.assertEqual(ese_map[energy_in.index][2], comp.index)
+        self.assertEqual(ese_map[energy_in.index][3], comp.__class__)
+        self.assertEqual(ese_map[energy_out.index][0], comp.index)
+        self.assertEqual(ese_map[energy_out.index][1], comp.__class__)    
+
+        comp.disconnect_stream(inlet_stream)
+        comp.disconnect_stream(outlet_stream)
+        comp.disconnect_stream(energy_in)
+        comp.disconnect_stream(energy_out)  
+
+        self.assertIsNone(mse_map[inlet_stream.index][2])
+        self.assertIsNone(mse_map[inlet_stream.index][3])
+        self.assertIsNone(mse_map[outlet_stream.index][0])
+        self.assertIsNone(mse_map[outlet_stream.index][1]) 
+
+        self.assertIsNone(ese_map[energy_in.index][2])
+        self.assertIsNone(ese_map[energy_in.index][3])
+        self.assertIsNone(ese_map[energy_out.index][0])
+        self.assertIsNone(ese_map[energy_out.index][1])   
+
+    @pytest.mark.delete 
+    def test_comp_stream_equipment_delete_without_connection(self):
+        comp = CentrifugalCompressor(pressure_drop=(0.1, 'bar'))   
+        print(comp)
+        comp.delete()
+        with pytest.raises(Exception) as exp:
+            print(comp)

@@ -77,6 +77,8 @@ class EnergyStream (Stream):
         super().__init__(tag)
         self._amount = prop.Power() 
         self.amount = amount
+
+        self._index = len(EnergyStream.items)
         EnergyStream.items.append(self)
 
     @property
@@ -109,7 +111,6 @@ class MaterialStream(Stream):
                  temperature = 298):
                  
                  super().__init__(tag)
-                 self._index = len(MaterialStream.items)
                  self._mass_flowrate = prop.MassFlowRate()
                  self._pressure = prop.Pressure()
                  self._temperature = prop.Temperature()
@@ -137,6 +138,7 @@ class MaterialStream(Stream):
                  self._Psat = None
                  self._Pc = None
 
+                 self._index = len(MaterialStream.items)
                  MaterialStream.items.append(self)
         
     @property

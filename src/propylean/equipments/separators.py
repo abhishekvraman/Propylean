@@ -6,8 +6,8 @@ from propylean import properties as prop
 class VerticalSeparator(_VerticalVessels):
     items = []
     def __init__(self, **inputs) -> None:
-        self._index = len(VerticalSeparator.items)
         super().__init__( **inputs)
+        self._index = len(VerticalSeparator.items)
         VerticalSeparator.items.append(self)
     
     def __repr__(self):
@@ -22,8 +22,8 @@ class VerticalSeparator(_VerticalVessels):
 class HorizontalSeparator(_HorizontalVessels):
     items = []
     def __init__(self, **inputs) -> None:
-        self._index = len(HorizontalSeparator.items)
         super().__init__( **inputs)
+        self._index = len(HorizontalSeparator.items)
         HorizontalSeparator.items.append(self)
     
     def __repr__(self):
@@ -38,8 +38,8 @@ class HorizontalSeparator(_HorizontalVessels):
 class Column(_VerticalVessels):
     items = []
     def __init__(self, **inputs) -> None:
-        self._index = len(Column.items)
         super().__init__( **inputs)
+        self._index = len(Column.items)
         Column.items.append(self)
     
     def __repr__(self):

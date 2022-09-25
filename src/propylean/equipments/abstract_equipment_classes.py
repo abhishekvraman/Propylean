@@ -716,8 +716,7 @@ class _EquipmentOneInletOutlet(object):
                                                                 'in' if is_inlet else 'out')))
         try:
             set_type_index()   
-        except Exception as e:
-            print(e)
+        except:
             try:
                 stream_equipment_map[stream_index] = [None, None, None, None]
                 set_type_index()

@@ -442,9 +442,11 @@ class PipeSegment(_EquipmentOneInletOutlet):
         return cls.items
 
 class Strainers(_EquipmentOneInletOutlet):
+    items = []
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
         
 class Filters(_EquipmentOneInletOutlet):
+    items = []
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
