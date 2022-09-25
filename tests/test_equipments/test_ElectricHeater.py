@@ -458,7 +458,11 @@ class test_ElectricHeater(unittest.TestCase):
         elec_heater.connect_stream(inlet_stream, direction="in")
         elec_heater.connect_stream(outlet_stream, direction="out")
         elec_heater.connect_stream(energy_in, direction="in")
-        elec_heater.connect_stream(energy_out, direction="out")
+        with pytest.raises(Exception) as exp:
+            elec_heater.connect_stream(energy_out, direction="out")
+         
+        self.assertIn("ElectricHeater only supports energy inlet.",
+                      str(exp))
 
         self.assertEqual(mse_map[inlet_stream.index][2], elec_heater.index)
         self.assertEqual(mse_map[inlet_stream.index][3], elec_heater.__class__)
@@ -473,7 +477,11 @@ class test_ElectricHeater(unittest.TestCase):
         elec_heater.disconnect_stream(inlet_stream)
         elec_heater.disconnect_stream(outlet_stream)
         elec_heater.disconnect_stream(energy_in)
-        elec_heater.disconnect_stream(energy_out)  
+        with pytest.raises(Exception) as exp:
+            elec_heater.disconnect_stream(energy_out, direction="out")
+         
+        self.assertIn("ElectricHeater only supports energy inlet.",
+                      str(exp)) 
 
         self.assertIsNone(mse_map[inlet_stream.index][2])
         self.assertIsNone(mse_map[inlet_stream.index][3])

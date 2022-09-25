@@ -87,9 +87,12 @@ class AirCooler(_Exchangers):
                        stream_tag=None, 
                        stream_type=None,
                        stream_governed=True):
+        
         if ((stream_object is not None and 
             isinstance(stream_object, streams.EnergyStream)) or
             stream_type in ['energy', 'e']):
+            if direction is not None and 'out' in direction:
+                raise Exception('AirCooler only supports energy inlet.')
             direction = 'in'
             stream_governed = False
         return super().connect_stream(direction=direction, 
@@ -102,6 +105,8 @@ class AirCooler(_Exchangers):
         if ((stream_object is not None and 
             isinstance(stream_object, streams.EnergyStream)) or
             stream_type in ['energy', 'e']):
+            if direction is not None and 'out' in direction:
+                raise Exception('AirCooler only supports energy inlet.')
             direction = 'in'
         return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
 
@@ -128,6 +133,8 @@ class ElectricHeater(_Exchangers):
         if ((stream_object is not None and 
             isinstance(stream_object, streams.EnergyStream)) or
             stream_type in ['energy', 'e']):
+            if direction is not None and 'out' in direction:
+                raise Exception('ElectricHeater only supports energy inlet.')
             direction = 'in'
             stream_governed = False
         return super().connect_stream(direction=direction, 
@@ -140,6 +147,8 @@ class ElectricHeater(_Exchangers):
         if ((stream_object is not None and 
             isinstance(stream_object, streams.EnergyStream)) or
             stream_type in ['energy', 'e']):
+            if direction is not None and 'out' in direction:
+                raise Exception('ElectricHeater only supports energy inlet.')
             direction = 'in'
         return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
 

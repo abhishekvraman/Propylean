@@ -456,7 +456,12 @@ class test_AirCooler(unittest.TestCase):
         aircooler.connect_stream(inlet_stream, direction="in")
         aircooler.connect_stream(outlet_stream, direction="out")
         aircooler.connect_stream(energy_in, direction="in")
-        aircooler.connect_stream(energy_out, direction="out")
+        with pytest.raises(Exception) as exp:
+            aircooler.connect_stream(energy_out, direction="out")
+         
+        self.assertIn("AirCooler only supports energy inlet.",
+                      str(exp))
+        
 
         self.assertEqual(mse_map[inlet_stream.index][2], aircooler.index)
         self.assertEqual(mse_map[inlet_stream.index][3], aircooler.__class__)
@@ -471,7 +476,12 @@ class test_AirCooler(unittest.TestCase):
         aircooler.disconnect_stream(inlet_stream)
         aircooler.disconnect_stream(outlet_stream)
         aircooler.disconnect_stream(energy_in)
-        aircooler.disconnect_stream(energy_out)  
+        with pytest.raises(Exception) as exp:
+            aircooler.disconnect_stream(energy_out, direction="out")
+         
+        self.assertIn("AirCooler only supports energy inlet.",
+                      str(exp)) 
+
 
         self.assertIsNone(mse_map[inlet_stream.index][2])
         self.assertIsNone(mse_map[inlet_stream.index][3])
