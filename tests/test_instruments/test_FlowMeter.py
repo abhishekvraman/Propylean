@@ -387,8 +387,6 @@ class test_FlowMeter(unittest.TestCase):
         inlet_stream = MaterialStream(pressure=(20, 'bar'))
         inlet_stream.components = prop.Components({"water": 1})
         outlet_stream = MaterialStream()
-        energy_in = EnergyStream()
-        energy_out = EnergyStream()
 
         flow_meter.connect_stream(inlet_stream, direction="in")
         flow_meter.connect_stream(outlet_stream, direction="out")
@@ -399,8 +397,7 @@ class test_FlowMeter(unittest.TestCase):
         self.assertEqual(mse_map[outlet_stream.index][1], flow_meter.__class__)    
 
         flow_meter.disconnect_stream(inlet_stream)
-        flow_meter.disconnect_stream(outlet_stream)
-        flow_meter.disconnect_stream(energy_out)  
+        flow_meter.disconnect_stream(outlet_stream) 
 
         self.assertIsNone(mse_map[inlet_stream.index][2])
         self.assertIsNone(mse_map[inlet_stream.index][3])

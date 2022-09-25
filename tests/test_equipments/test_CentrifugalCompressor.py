@@ -550,7 +550,7 @@ class test_CentrifugalCompressor(unittest.TestCase):
 
     @pytest.mark.delete 
     def test_comp_stream_equipment_delete_without_connection(self):
-        comp = CentrifugalCompressor(pressure_drop=(0.1, 'bar'))   
+        comp = CentrifugalCompressor()   
         print(comp)
         comp.delete()
         with pytest.raises(Exception) as exp:
