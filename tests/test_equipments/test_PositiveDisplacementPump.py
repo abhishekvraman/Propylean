@@ -4,6 +4,7 @@ from propylean.equipments.rotary import PositiveDisplacementPump
 from propylean.streams import MaterialStream, EnergyStream
 import propylean.properties as prop
 import pandas as pd
+from propylean import MaterialStream, EnergyStream
 from unittest.mock import patch
 
 class test_PositiveDisplacementPump(unittest.TestCase):
@@ -464,4 +465,87 @@ class test_PositiveDisplacementPump(unittest.TestCase):
             cv.disconnect_stream(inlet_stream)
          
         self.assertIn("Already there is no connection.",
-                      str(exp[-1].message))                  
+                      str(exp[-1].message))  
+
+    @pytest.mark.mapping
+    def test_PositiveDisplacementPump_stream_equipment_mapping(self):
+        from propylean.equipments.abstract_equipment_classes import _material_stream_equipment_map as mse_map
+        from propylean.equipments.abstract_equipment_classes import _energy_stream_equipment_map as ese_map
+        pos_pump = PositiveDisplacementPump()
+        inlet_stream = MaterialStream(pressure=(20, 'bar'))
+        inlet_stream.components = prop.Components({"water": 1})
+        outlet_stream = MaterialStream()
+        energy_in = EnergyStream()
+        energy_out = EnergyStream()
+
+        pos_pump.connect_stream(inlet_stream, direction="in")
+        pos_pump.connect_stream(outlet_stream, direction="out")
+        pos_pump.connect_stream(energy_in, direction="in")
+        with pytest.raises(Exception) as exp:
+            pos_pump.connect_stream(energy_out, direction="out")
+        self.assertIn("PositiveDisplacementPump only supports energy inlet.",
+                      str(exp))
+
+        self.assertEqual(mse_map[inlet_stream.index][2], pos_pump.index)
+        self.assertEqual(mse_map[inlet_stream.index][3], pos_pump.__class__)
+        self.assertEqual(mse_map[outlet_stream.index][0], pos_pump.index)
+        self.assertEqual(mse_map[outlet_stream.index][1], pos_pump.__class__) 
+
+        self.assertEqual(ese_map[energy_in.index][2], pos_pump.index)
+        self.assertEqual(ese_map[energy_in.index][3], pos_pump.__class__)  
+
+        pos_pump.disconnect_stream(inlet_stream)
+        pos_pump.disconnect_stream(outlet_stream)
+        pos_pump.disconnect_stream(energy_in)
+        with pytest.raises(Exception) as exp:
+            pos_pump.disconnect_stream(energy_out, direction="out")
+        self.assertIn("PositiveDisplacementPump only supports energy inlet.",
+                      str(exp))  
+
+        self.assertIsNone(mse_map[inlet_stream.index][2])
+        self.assertIsNone(mse_map[inlet_stream.index][3])
+        self.assertIsNone(mse_map[outlet_stream.index][0])
+        self.assertIsNone(mse_map[outlet_stream.index][1]) 
+
+        self.assertIsNone(ese_map[energy_in.index][2])
+        self.assertIsNone(ese_map[energy_in.index][3]) 
+
+    @pytest.mark.delete 
+    def test_PositiveDisplacementPump_stream_equipment_delete_without_connection(self):
+        pos_pump = PositiveDisplacementPump()   
+        repr(pos_pump)
+        pos_pump.delete()
+        with pytest.raises(Exception) as exp:
+            repr(pos_pump)   
+        self.assertIn("Equipment does not exist!",
+                      str(exp))                     
+    
+    @pytest.mark.delete 
+    def test_PositiveDisplacementPump_stream_equipment_delete_with_connection(self):
+        from propylean.equipments.abstract_equipment_classes import _material_stream_equipment_map as mse_map
+        from propylean.equipments.abstract_equipment_classes import _energy_stream_equipment_map as ese_map
+        pos_pump = PositiveDisplacementPump()
+        inlet_stream = MaterialStream(pressure=(20, 'bar'))
+        inlet_stream.components = prop.Components({"water": 1})
+        outlet_stream = MaterialStream()
+        energy_in = EnergyStream()
+        energy_out = EnergyStream()
+
+        pos_pump.connect_stream(inlet_stream, direction="in")
+        pos_pump.connect_stream(outlet_stream, direction="out")
+        pos_pump.connect_stream(energy_in, direction="in")
+
+        repr(pos_pump)
+        pos_pump.delete()
+        with pytest.raises(Exception) as exp:
+            repr(pos_pump)   
+        self.assertIn("Equipment does not exist!",
+                      str(exp))  
+
+        self.assertIsNone(mse_map[inlet_stream.index][2])
+        self.assertIsNone(mse_map[inlet_stream.index][3])
+        self.assertIsNone(mse_map[outlet_stream.index][0])
+        self.assertIsNone(mse_map[outlet_stream.index][1]) 
+
+        self.assertIsNone(ese_map[energy_in.index][2])
+        self.assertIsNone(ese_map[energy_in.index][3]) 

@@ -7,8 +7,8 @@ from propylean.validators import _Validators
 class ShellnTubeExchanger(_Exchangers):
     items = []
     def __init__(self, **inputs) -> None:
-        self._index = len(ShellnTubeExchanger.items)
         super().__init__( **inputs)
+        self._index = len(ShellnTubeExchanger.items)
         ShellnTubeExchanger.items.append(self)
     
     def __repr__(self):
@@ -23,13 +23,14 @@ class ShellnTubeExchanger(_Exchangers):
 class AirCooler(_Exchangers):
     items = []
     def __init__(self, **inputs) -> None:
-        self._index = len(AirCooler.items)
         super().__init__( **inputs)
         self.fan_power = prop.Power() if "fan_power" not in inputs else inputs["fan_power"]
         del self.energy_out
+        self._index = len(AirCooler.items)
         AirCooler.items.append(self)
     
     def __repr__(self):
+        self = self._get_equipment_object(self)
         return "Air Cooler with tag: " + self.tag   
     def __hash__(self):
         return hash(self.__repr__())
@@ -87,9 +88,12 @@ class AirCooler(_Exchangers):
                        stream_tag=None, 
                        stream_type=None,
                        stream_governed=True):
+        
         if ((stream_object is not None and 
             isinstance(stream_object, streams.EnergyStream)) or
             stream_type in ['energy', 'e']):
+            if direction is not None and 'out' in direction:
+                raise Exception('AirCooler only supports fan energy inlet.')
             direction = 'in'
             stream_governed = False
         return super().connect_stream(direction=direction, 
@@ -102,19 +106,22 @@ class AirCooler(_Exchangers):
         if ((stream_object is not None and 
             isinstance(stream_object, streams.EnergyStream)) or
             stream_type in ['energy', 'e']):
+            if direction is not None and 'out' in direction:
+                raise Exception('AirCooler only supports fan energy inlet.')
             direction = 'in'
         return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
 
 class ElectricHeater(_Exchangers):
     items = []
     def __init__(self, **inputs) -> None:
-        self._index = len(ElectricHeater.items)
         super().__init__( **inputs)
         self.power = prop.Power() if "power" not in inputs else inputs["power"]
         del self.energy_out
+        self._index = len(ElectricHeater.items)
         ElectricHeater.items.append(self)
     
     def __repr__(self):
+        self = self._get_equipment_object(self)
         return "Electric Heater with tag: " + self.tag   
     def __hash__(self):
         return hash(self.__repr__())
@@ -128,6 +135,8 @@ class ElectricHeater(_Exchangers):
         if ((stream_object is not None and 
             isinstance(stream_object, streams.EnergyStream)) or
             stream_type in ['energy', 'e']):
+            if direction is not None and 'out' in direction:
+                raise Exception('ElectricHeater only supports energy inlet.')
             direction = 'in'
             stream_governed = False
         return super().connect_stream(direction=direction, 
@@ -140,6 +149,8 @@ class ElectricHeater(_Exchangers):
         if ((stream_object is not None and 
             isinstance(stream_object, streams.EnergyStream)) or
             stream_type in ['energy', 'e']):
+            if direction is not None and 'out' in direction:
+                raise Exception('ElectricHeater only supports energy inlet.')
             direction = 'in'
         return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
 

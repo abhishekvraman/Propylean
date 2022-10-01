@@ -327,3 +327,48 @@ class test_MaterialStream(unittest.TestCase):
             m4 = MaterialStream()
             m4.Psat = []
         self.assertIn("Incorrect type '<class 'list'>' provided to 'Psat'. Should be '(<class 'propylean.properties.Pressure'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'", str(exp))
+
+    @pytest.mark.delete 
+    def test_MaterialStream_stream_equipment_delete_without_connection(self):
+        e4 = MaterialStream()   
+        repr(e4)
+        e4.delete()
+        with pytest.raises(Exception) as exp:
+            repr(e4)     
+        self.assertIn("Stream does not exist!",
+                      str(exp))  
+
+    @pytest.mark.delete
+    def test_MaterialStream_stream_equipment_delete_with_connection(self):
+        from propylean.equipments.abstract_equipment_classes import _material_stream_equipment_map as mse_map
+        from propylean import CentrifugalPump
+        pump = CentrifugalPump()
+        inlet_stream = MaterialStream(pressure=(20, 'bar'))
+        inlet_stream.components = prop.Components({"water": 1})
+        outlet_stream = MaterialStream()
+
+        pump.connect_stream(inlet_stream, direction="in")
+        pump.connect_stream(outlet_stream, direction="out")
+
+        self.assertEqual(mse_map[inlet_stream.index][2], pump.index)
+        self.assertEqual(mse_map[inlet_stream.index][3], pump.__class__)
+        self.assertEqual(mse_map[outlet_stream.index][0], pump.index)
+        self.assertEqual(mse_map[outlet_stream.index][1], pump.__class__) 
+
+
+        repr(inlet_stream)
+        repr(outlet_stream)
+        outlet_stream.delete()
+        inlet_stream.delete()
+        with pytest.raises(Exception) as exp:
+            repr(inlet_stream)               
+        self.assertIn("Stream does not exist!",
+                      str(exp))
+        
+        with pytest.raises(Exception) as exp:
+            repr(outlet_stream)               
+        self.assertIn("Stream does not exist!",
+                      str(exp))
+        
+        self.assertNotIn(inlet_stream.index, mse_map.keys())
+        self.assertNotIn(outlet_stream.index, mse_map.keys())

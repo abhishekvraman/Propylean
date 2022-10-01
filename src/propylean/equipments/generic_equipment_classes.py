@@ -1,7 +1,7 @@
 from propylean.equipments.abstract_equipment_classes import _EquipmentOneInletOutlet, _EquipmentMultipleInletOutlet
 import propylean.properties as prop
 from propylean.constants import Constants
-import pandas as pd
+from pandas import DataFrame
 from propylean.validators import _Validators
 from math import pi, sqrt, acos
 
@@ -69,11 +69,12 @@ class _PressureChangers(_EquipmentOneInletOutlet):
                 self._pressure_drop = prop.Pressure(-1 * diff_presure[0],
                                                      diff_presure[1])
                  
-        self._performance_curve = pd.DataFrame()
+        self._performance_curve = DataFrame()
         if 'performance_curve' in inputs:
             self.performace_curve = inputs['performance_curve']
         
         self.efficiency = 100 if 'efficiency' not in inputs else inputs['efficiency']
+        
         
     @property
     def suction_pressure(self):
@@ -110,12 +111,12 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         return self._perfomace_curve
     @performance_curve.setter
     def performance_curve(self,value):
-        _Validators.validate_arg_prop_value_type("performance_curve", value, pd.DataFrame)
+        _Validators.validate_arg_prop_value_type("performance_curve", value, DataFrame)
         self = self._get_equipment_object(self)
         if value.shape[1] == 2:
                 self._performance_curve = value
         else:
-            raise Exception("Please enter performance_curve as pandas dataframe of 2 columns.\nOne for Flow and other for head.")
+            raise Exception("Enter performance_curve as pandas dataframe of 2 columns.\nOne for Flow and other for head.")
         self._update_equipment_object(self)
     
     @property
@@ -127,7 +128,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         _Validators.validate_arg_prop_value_type("efficiency", value, (int, float))
         self = self._get_equipment_object(self)
         if value < 0:
-            raise Exception("Please enter a positive value for efficiency")
+            raise Exception("Enter a positive value for efficiency")
         elif value <= 1:
             self._efficiency = value
         else:
@@ -544,7 +545,7 @@ class _Vessels(_EquipmentOneInletOutlet):
             is_inlet = False if self._inlet_material_stream_index is None else True
             density = self._connected_stream_property_getter(is_inlet, "material", "density")
             density.unit = "kg/m^3"
-            pd = density.vaule * g * self.liquid_level.value
+            pd = density.value * g * self.liquid_level.value
             return prop.Pressure(pd)
         return self._pressure_drop
     @pressure_drop.setter
@@ -619,6 +620,8 @@ class _Vessels(_EquipmentOneInletOutlet):
         self._update_equipment_object(self)
 
     def get_inventory(self, type="volume"):
+        _Validators.validate_arg_prop_value_type("type", type, str)
+        _Validators.validate_arg_prop_value_list("type", type, ["volume", "mass"])
         self = self._get_equipment_object(self)
         if self.main_fluid == "gas":
             if type == "volume":

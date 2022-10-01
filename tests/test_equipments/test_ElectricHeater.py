@@ -5,6 +5,7 @@ from propylean.streams import MaterialStream, EnergyStream
 import propylean.properties as prop
 import pandas as pd
 from propylean.settings import Settings
+from propylean import MaterialStream, EnergyStream
 
 class test_ElectricHeater(unittest.TestCase):
     @pytest.mark.positive
@@ -441,4 +442,89 @@ class test_ElectricHeater(unittest.TestCase):
             cv.disconnect_stream(inlet_stream)
          
         self.assertIn("Already there is no connection.",
-                      str(exp[-1].message))                  
+                      str(exp[-1].message))  
+    
+    @pytest.mark.mapping
+    def test_ElectricHeater_stream_equipment_mapping(self):
+        from propylean.equipments.abstract_equipment_classes import _material_stream_equipment_map as mse_map
+        from propylean.equipments.abstract_equipment_classes import _energy_stream_equipment_map as ese_map
+        elec_heater = ElectricHeater(pressure_drop=(0.1, 'bar'))
+        inlet_stream = MaterialStream(pressure=(20, 'bar'))
+        inlet_stream.components = prop.Components({"water": 1})
+        outlet_stream = MaterialStream()
+        energy_in = EnergyStream()
+        energy_out = EnergyStream()
+
+        elec_heater.connect_stream(inlet_stream, direction="in")
+        elec_heater.connect_stream(outlet_stream, direction="out")
+        elec_heater.connect_stream(energy_in, direction="in")
+        with pytest.raises(Exception) as exp:
+            elec_heater.connect_stream(energy_out, direction="out")
+         
+        self.assertIn("ElectricHeater only supports energy inlet.",
+                      str(exp))
+
+        self.assertEqual(mse_map[inlet_stream.index][2], elec_heater.index)
+        self.assertEqual(mse_map[inlet_stream.index][3], elec_heater.__class__)
+        self.assertEqual(mse_map[outlet_stream.index][0], elec_heater.index)
+        self.assertEqual(mse_map[outlet_stream.index][1], elec_heater.__class__) 
+
+        self.assertEqual(ese_map[energy_in.index][2], elec_heater.index)
+        self.assertEqual(ese_map[energy_in.index][3], elec_heater.__class__)  
+
+        elec_heater.disconnect_stream(inlet_stream)
+        elec_heater.disconnect_stream(outlet_stream)
+        elec_heater.disconnect_stream(energy_in)
+        with pytest.raises(Exception) as exp:
+            elec_heater.disconnect_stream(energy_out, direction="out")
+         
+        self.assertIn("ElectricHeater only supports energy inlet.",
+                      str(exp)) 
+
+        self.assertIsNone(mse_map[inlet_stream.index][2])
+        self.assertIsNone(mse_map[inlet_stream.index][3])
+        self.assertIsNone(mse_map[outlet_stream.index][0])
+        self.assertIsNone(mse_map[outlet_stream.index][1]) 
+
+        self.assertIsNone(ese_map[energy_in.index][2])
+        self.assertIsNone(ese_map[energy_in.index][3])  
+
+    @pytest.mark.delete 
+    def test_ElectricHeater_stream_equipment_delete_without_connection(self):
+        elec_heater = ElectricHeater(pressure_drop=(0.1, 'bar'))   
+        repr(elec_heater)
+        elec_heater.delete()
+        with pytest.raises(Exception) as exp:
+            repr(elec_heater)                 
+        self.assertIn("Equipment does not exist!",
+                      str(exp))
+    
+    @pytest.mark.delete 
+    def test_ElectricHeater_stream_equipment_delete_with_connection(self):
+        from propylean.equipments.abstract_equipment_classes import _material_stream_equipment_map as mse_map
+        from propylean.equipments.abstract_equipment_classes import _energy_stream_equipment_map as ese_map
+        elec_heater = ElectricHeater(pressure_drop=(0.1, 'bar'))
+        inlet_stream = MaterialStream(pressure=(20, 'bar'))
+        inlet_stream.components = prop.Components({"water": 1})
+        outlet_stream = MaterialStream()
+        energy_in = EnergyStream()
+        energy_out = EnergyStream()
+
+        elec_heater.connect_stream(inlet_stream, direction="in")
+        elec_heater.connect_stream(outlet_stream, direction="out")
+        elec_heater.connect_stream(energy_in, direction="in")
+
+        repr(elec_heater)
+        elec_heater.delete()
+        with pytest.raises(Exception) as exp:
+            repr(elec_heater)                 
+        self.assertIn("Equipment does not exist!",
+                      str(exp))
+
+        self.assertIsNone(mse_map[inlet_stream.index][2])
+        self.assertIsNone(mse_map[inlet_stream.index][3])
+        self.assertIsNone(mse_map[outlet_stream.index][0])
+        self.assertIsNone(mse_map[outlet_stream.index][1]) 
+
+        self.assertIsNone(ese_map[energy_in.index][2])
+        self.assertIsNone(ese_map[energy_in.index][3]) 

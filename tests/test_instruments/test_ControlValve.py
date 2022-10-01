@@ -1,7 +1,7 @@
 import pytest
 import unittest
 from propylean.instruments.control import ControlValve
-from propylean.streams import MaterialStream
+from propylean import MaterialStream, EnergyStream
 import propylean.properties as prop
 import warnings
 
@@ -408,3 +408,37 @@ class test_ControlValve(unittest.TestCase):
         self.assertIn("Already there is no connection.",
                       str(exp[-1].message))    
                           
+    @pytest.mark.mapping
+    def test_ControlValve_stream_equipment_mapping(self):
+        from propylean.equipments.abstract_equipment_classes import _material_stream_equipment_map as mse_map
+        from propylean.equipments.abstract_equipment_classes import _energy_stream_equipment_map as ese_map
+        cv = ControlValve(pressure_drop=(0.1, 'bar'))
+        inlet_stream = MaterialStream(pressure=(20, 'bar'))
+        inlet_stream.components = prop.Components({"water": 1})
+        outlet_stream = MaterialStream()
+        energy_in = EnergyStream()
+        energy_out = EnergyStream()
+
+        cv.connect_stream(inlet_stream, direction="in")
+        cv.connect_stream(outlet_stream, direction="out")
+
+        self.assertEqual(mse_map[inlet_stream.index][2], cv.index)
+        self.assertEqual(mse_map[inlet_stream.index][3], cv.__class__)
+        self.assertEqual(mse_map[outlet_stream.index][0], cv.index)
+        self.assertEqual(mse_map[outlet_stream.index][1], cv.__class__) 
+
+        cv.disconnect_stream(inlet_stream)
+        cv.disconnect_stream(outlet_stream)
+
+        self.assertIsNone(mse_map[inlet_stream.index][2])
+        self.assertIsNone(mse_map[inlet_stream.index][3])
+        self.assertIsNone(mse_map[outlet_stream.index][0])
+        self.assertIsNone(mse_map[outlet_stream.index][1])   
+
+    @pytest.mark.delete 
+    def test_ControlValve_stream_equipment_delete_without_connection(self):
+        cv = ControlValve(pressure_drop=(0.1, 'bar'))   
+        print(cv)
+        cv.delete()
+        with pytest.raises(Exception) as exp:
+            print(cv)        

@@ -29,7 +29,7 @@ class test_EnergyStream(unittest.TestCase):
         self.assertEqual("Energy Stream Tag: Pump_Inlet_Energy_1",str(e4))
 
     @pytest.mark.negative
-    def test_EnergyStream_(self):
+    def test_EnergyStream_incorrect_assignment(self):
         with pytest.raises(Exception) as exp:
             e5 = EnergyStream("gggg", [])
         self.assertIn("Incorrect type '<class 'list'>' provided to 'amount'. Should be '(<class 'propylean.properties.Power'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
@@ -39,4 +39,49 @@ class test_EnergyStream(unittest.TestCase):
             e5 = EnergyStream()
             e5.amount = []
         self.assertIn("Incorrect type '<class 'list'>' provided to 'amount'. Should be '(<class 'propylean.properties.Power'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
-                      str(exp))                  
+                      str(exp))     
+
+    @pytest.mark.delete 
+    def test_EnergyStream_stream_equipment_delete_without_connection(self):
+        e4 = EnergyStream()   
+        repr(e4)
+        e4.delete()
+        with pytest.raises(Exception) as exp:
+            repr(e4)     
+        self.assertIn("Stream does not exist!",
+                      str(exp))         
+    
+    @pytest.mark.delete
+    def test_EnergyStream_stream_equipment_delete_with_connection(self):
+        from propylean.equipments.abstract_equipment_classes import _energy_stream_equipment_map as ese_map
+        from propylean import Bullet
+        pump = Bullet()
+        
+        inlet_stream = EnergyStream()
+        outlet_stream = EnergyStream()
+
+        pump.connect_stream(inlet_stream, direction="in")
+        pump.connect_stream(outlet_stream, direction="out")
+
+        self.assertEqual(ese_map[inlet_stream.index][2], pump.index)
+        self.assertEqual(ese_map[inlet_stream.index][3], pump.__class__)
+        self.assertEqual(ese_map[outlet_stream.index][0], pump.index)
+        self.assertEqual(ese_map[outlet_stream.index][1], pump.__class__) 
+
+
+        repr(inlet_stream)
+        repr(outlet_stream)
+        outlet_stream.delete()
+        inlet_stream.delete()
+        with pytest.raises(Exception) as exp:
+            repr(inlet_stream)               
+        self.assertIn("Stream does not exist!",
+                      str(exp))
+        
+        with pytest.raises(Exception) as exp:
+            repr(outlet_stream)               
+        self.assertIn("Stream does not exist!",
+                      str(exp))
+        
+        self.assertNotIn(inlet_stream.index, ese_map.keys())
+        self.assertNotIn(outlet_stream.index, ese_map.keys())

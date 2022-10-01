@@ -6,11 +6,12 @@ from propylean import properties as prop
 class VerticalSeparator(_VerticalVessels):
     items = []
     def __init__(self, **inputs) -> None:
-        self._index = len(VerticalSeparator.items)
         super().__init__( **inputs)
+        self._index = len(VerticalSeparator.items)
         VerticalSeparator.items.append(self)
     
     def __repr__(self):
+        self = self._get_equipment_object(self)
         return "Vertical Separator with tag: " + self.tag   
     def __hash__(self):
         return hash(self.__repr__())
@@ -22,11 +23,12 @@ class VerticalSeparator(_VerticalVessels):
 class HorizontalSeparator(_HorizontalVessels):
     items = []
     def __init__(self, **inputs) -> None:
-        self._index = len(HorizontalSeparator.items)
         super().__init__( **inputs)
+        self._index = len(HorizontalSeparator.items)
         HorizontalSeparator.items.append(self)
     
     def __repr__(self):
+        self = self._get_equipment_object(self)
         return "Horizontal Separator with tag: " + self.tag   
     def __hash__(self):
         return hash(self.__repr__())
@@ -38,11 +40,12 @@ class HorizontalSeparator(_HorizontalVessels):
 class Column(_VerticalVessels):
     items = []
     def __init__(self, **inputs) -> None:
-        self._index = len(Column.items)
         super().__init__( **inputs)
+        self._index = len(Column.items)
         Column.items.append(self)
     
     def __repr__(self):
+        self = self._get_equipment_object(self)
         return "Column with tag: " + self.tag   
     def __hash__(self):
         return hash(self.__repr__())
