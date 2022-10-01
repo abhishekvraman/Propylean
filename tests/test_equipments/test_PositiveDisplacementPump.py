@@ -481,7 +481,10 @@ class test_PositiveDisplacementPump(unittest.TestCase):
         pos_pump.connect_stream(inlet_stream, direction="in")
         pos_pump.connect_stream(outlet_stream, direction="out")
         pos_pump.connect_stream(energy_in, direction="in")
-        pos_pump.connect_stream(energy_out, direction="out")
+        with pytest.raises(Exception) as exp:
+            pos_pump.connect_stream(energy_out, direction="out")
+        self.assertIn("PositiveDisplacementPump only supports energy inlet.",
+                      str(exp))
 
         self.assertEqual(mse_map[inlet_stream.index][2], pos_pump.index)
         self.assertEqual(mse_map[inlet_stream.index][3], pos_pump.__class__)
@@ -489,14 +492,15 @@ class test_PositiveDisplacementPump(unittest.TestCase):
         self.assertEqual(mse_map[outlet_stream.index][1], pos_pump.__class__) 
 
         self.assertEqual(ese_map[energy_in.index][2], pos_pump.index)
-        self.assertEqual(ese_map[energy_in.index][3], pos_pump.__class__)
-        self.assertEqual(ese_map[energy_out.index][0], pos_pump.index)
-        self.assertEqual(ese_map[energy_out.index][1], pos_pump.__class__)    
+        self.assertEqual(ese_map[energy_in.index][3], pos_pump.__class__)  
 
         pos_pump.disconnect_stream(inlet_stream)
         pos_pump.disconnect_stream(outlet_stream)
         pos_pump.disconnect_stream(energy_in)
-        pos_pump.disconnect_stream(energy_out)  
+        with pytest.raises(Exception) as exp:
+            pos_pump.disconnect_stream(energy_out, direction="out")
+        self.assertIn("PositiveDisplacementPump only supports energy inlet.",
+                      str(exp))  
 
         self.assertIsNone(mse_map[inlet_stream.index][2])
         self.assertIsNone(mse_map[inlet_stream.index][3])
@@ -504,9 +508,7 @@ class test_PositiveDisplacementPump(unittest.TestCase):
         self.assertIsNone(mse_map[outlet_stream.index][1]) 
 
         self.assertIsNone(ese_map[energy_in.index][2])
-        self.assertIsNone(ese_map[energy_in.index][3])
-        self.assertIsNone(ese_map[energy_out.index][0])
-        self.assertIsNone(ese_map[energy_out.index][1])   
+        self.assertIsNone(ese_map[energy_in.index][3]) 
 
     @pytest.mark.delete 
     def test_PositiveDisplacementPump_stream_equipment_delete_without_connection(self):

@@ -521,7 +521,10 @@ class test_CentrifugalCompressor(unittest.TestCase):
         comp.connect_stream(inlet_stream, direction="in", stream_governed=True)
         comp.connect_stream(outlet_stream, direction="out", stream_governed=False)
         comp.connect_stream(energy_in, direction="in")
-        comp.connect_stream(energy_out, direction="out")
+        with pytest.raises(Exception) as exp:
+            comp.connect_stream(energy_out, direction="out")
+        self.assertIn("CentrifugalCompressor only supports energy inlet.",
+                      str(exp))
 
         self.assertEqual(mse_map[inlet_stream.index][2], comp.index)
         self.assertEqual(mse_map[inlet_stream.index][3], comp.__class__)
@@ -529,14 +532,15 @@ class test_CentrifugalCompressor(unittest.TestCase):
         self.assertEqual(mse_map[outlet_stream.index][1], comp.__class__) 
 
         self.assertEqual(ese_map[energy_in.index][2], comp.index)
-        self.assertEqual(ese_map[energy_in.index][3], comp.__class__)
-        self.assertEqual(ese_map[energy_out.index][0], comp.index)
-        self.assertEqual(ese_map[energy_out.index][1], comp.__class__)    
+        self.assertEqual(ese_map[energy_in.index][3], comp.__class__)   
 
         comp.disconnect_stream(inlet_stream)
         comp.disconnect_stream(outlet_stream)
-        comp.disconnect_stream(energy_in)
-        comp.disconnect_stream(energy_out)  
+        comp.disconnect_stream(energy_in, direction="in")
+        with pytest.raises(Exception) as exp:
+            comp.disconnect_stream(energy_out, direction="out")  
+        self.assertIn("CentrifugalCompressor only supports energy inlet.",
+                      str(exp))
 
         self.assertIsNone(mse_map[inlet_stream.index][2])
         self.assertIsNone(mse_map[inlet_stream.index][3])
@@ -544,14 +548,12 @@ class test_CentrifugalCompressor(unittest.TestCase):
         self.assertIsNone(mse_map[outlet_stream.index][1]) 
 
         self.assertIsNone(ese_map[energy_in.index][2])
-        self.assertIsNone(ese_map[energy_in.index][3])
-        self.assertIsNone(ese_map[energy_out.index][0])
-        self.assertIsNone(ese_map[energy_out.index][1])   
+        self.assertIsNone(ese_map[energy_in.index][3])  
 
     @pytest.mark.delete 
     def test_comp_stream_equipment_delete_without_connection(self):
         comp = CentrifugalCompressor()   
-        print(comp)
+        repr(comp)
         comp.delete()
         with pytest.raises(Exception) as exp:
-            print(comp)
+            repr(comp)

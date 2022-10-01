@@ -30,6 +30,7 @@ class AirCooler(_Exchangers):
         AirCooler.items.append(self)
     
     def __repr__(self):
+        self = self._get_equipment_object(self)
         return "Air Cooler with tag: " + self.tag   
     def __hash__(self):
         return hash(self.__repr__())
@@ -92,7 +93,7 @@ class AirCooler(_Exchangers):
             isinstance(stream_object, streams.EnergyStream)) or
             stream_type in ['energy', 'e']):
             if direction is not None and 'out' in direction:
-                raise Exception('AirCooler only supports energy inlet.')
+                raise Exception('AirCooler only supports fan energy inlet.')
             direction = 'in'
             stream_governed = False
         return super().connect_stream(direction=direction, 
@@ -106,7 +107,7 @@ class AirCooler(_Exchangers):
             isinstance(stream_object, streams.EnergyStream)) or
             stream_type in ['energy', 'e']):
             if direction is not None and 'out' in direction:
-                raise Exception('AirCooler only supports energy inlet.')
+                raise Exception('AirCooler only supports fan energy inlet.')
             direction = 'in'
         return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
 
@@ -120,6 +121,7 @@ class ElectricHeater(_Exchangers):
         ElectricHeater.items.append(self)
     
     def __repr__(self):
+        self = self._get_equipment_object(self)
         return "Electric Heater with tag: " + self.tag   
     def __hash__(self):
         return hash(self.__repr__())

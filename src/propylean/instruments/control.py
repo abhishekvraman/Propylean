@@ -29,13 +29,14 @@ class ControlValve(_EquipmentOneInletOutlet):
             >>> print(CV_1)
             Contrl Valve with tag: CV1
         """
-        self._index = len(ControlValve.items)
         super().__init__( **inputs)
         del self.energy_in
         del self.energy_out
+        self._index = len(ControlValve.items)
         ControlValve.items.append(self)
     
     def __repr__(self):
+        self = self._get_equipment_object(self)
         return "Control Valve with tag: " + self.tag   
     def __hash__(self):
         return hash(self.__repr__())

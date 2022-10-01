@@ -107,7 +107,6 @@ class PipeSegment(_EquipmentOneInletOutlet):
             >>> print(PS_1)
             Pipe Segment with tag: P1
         """
-        self._index = len(PipeSegment.items)
         super().__init__( **inputs)
         self._pressure_drop = prop.Pressure(0)
         self._ID = prop.Length()
@@ -156,10 +155,11 @@ class PipeSegment(_EquipmentOneInletOutlet):
             del self.OD
             del self.material
             del self.segment_type
-
+        self._index = len(PipeSegment.items)
         PipeSegment.items.append(self)
     
     def __repr__(self):
+        self = self._get_equipment_object(self)
         return "Pipe Segment with tag: " + self.tag   #ADD SEGMENT TYPE!!
     def __hash__(self):
         return hash(self.__repr__())
@@ -445,8 +445,12 @@ class Strainers(_EquipmentOneInletOutlet):
     items = []
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
+        self._index = len(Strainers.items)
+        Strainers.items.append(self)
         
 class Filters(_EquipmentOneInletOutlet):
     items = []
     def __init__(self, **inputs) -> None:
         super().__init__(**inputs)
+        self._index = len(Filters.items)
+        Filters.items.append(self)

@@ -11,6 +11,7 @@ class VerticalSeparator(_VerticalVessels):
         VerticalSeparator.items.append(self)
     
     def __repr__(self):
+        self = self._get_equipment_object(self)
         return "Vertical Separator with tag: " + self.tag   
     def __hash__(self):
         return hash(self.__repr__())
@@ -27,6 +28,7 @@ class HorizontalSeparator(_HorizontalVessels):
         HorizontalSeparator.items.append(self)
     
     def __repr__(self):
+        self = self._get_equipment_object(self)
         return "Horizontal Separator with tag: " + self.tag   
     def __hash__(self):
         return hash(self.__repr__())
@@ -43,6 +45,7 @@ class Column(_VerticalVessels):
         Column.items.append(self)
     
     def __repr__(self):
+        self = self._get_equipment_object(self)
         return "Column with tag: " + self.tag   
     def __hash__(self):
         return hash(self.__repr__())

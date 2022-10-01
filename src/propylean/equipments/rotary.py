@@ -78,6 +78,7 @@ class CentrifugalPump(_PressureChangers):
         CentrifugalPump.items.append(self)
     
     def __repr__(self):
+        self = self._get_equipment_object(self)
         return "Centrifugal Pump with tag: " + self.tag
     def __hash__(self):
         return hash(self.__repr__())
@@ -185,6 +186,8 @@ class CentrifugalPump(_PressureChangers):
         if ((stream_object is not None and 
             isinstance(stream_object, streams.EnergyStream)) or
             stream_type in ['energy', 'power', 'e', 'p']):
+            if direction is not None and 'out' in direction:
+                raise Exception('CentrifugalPump only supports energy inlet.')
             direction = 'in'
             stream_governed = False
         return super().connect_stream(direction=direction, 
@@ -197,11 +200,12 @@ class CentrifugalPump(_PressureChangers):
         if ((stream_object is not None and 
             isinstance(stream_object, streams.EnergyStream)) or
             stream_type in ['energy', 'power', 'e', 'p']):
+            if direction is not None and 'out' in direction:
+                raise Exception('CentrifugalPump only supports energy inlet.')
             direction = 'in'
         return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
 
-    def __del__(self):
-        return super().delete()
+
 class PositiveDisplacementPump(_PressureChangers):
     items = []
     def __init__(self, **inputs) -> None:
@@ -267,6 +271,7 @@ class PositiveDisplacementPump(_PressureChangers):
         PositiveDisplacementPump.items.append(self)
     
     def __repr__(self):
+        self = self._get_equipment_object(self)
         return "Positive Displacement Pump with tag: " + self.tag
     def __hash__(self):
         return hash(self.__repr__())
@@ -365,6 +370,8 @@ class PositiveDisplacementPump(_PressureChangers):
         if ((stream_object is not None and 
             isinstance(stream_object, streams.EnergyStream)) or
             stream_type in ['energy', 'power', 'e', 'p']):
+            if direction is not None and 'out' in direction:
+                raise Exception('PositiveDisplacementPump only supports energy inlet.')
             direction = 'in'
         return super().connect_stream(direction=direction, 
                                       stream_object=stream_object, 
@@ -376,6 +383,8 @@ class PositiveDisplacementPump(_PressureChangers):
         if ((stream_object is not None and 
             isinstance(stream_object, streams.EnergyStream)) or
             stream_type in ['energy', 'power', 'e', 'p']):
+            if direction is not None and 'out' in direction:
+                raise Exception('PositiveDisplacementPump only supports energy inlet.')
             direction = 'in'
         return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
 # End of final classes of pumps
@@ -449,6 +458,7 @@ class CentrifugalCompressor(_PressureChangers):
         CentrifugalCompressor.items.append(self)
     
     def __repr__(self):
+        self = self._get_equipment_object(self)
         return "Centrifugal Compressor with tag: " + self.tag
     def __hash__(self):
         return hash(self.__repr__())
@@ -623,6 +633,8 @@ class CentrifugalCompressor(_PressureChangers):
         if ((stream_object is not None and 
             isinstance(stream_object, streams.EnergyStream)) or
             stream_type in ['energy', 'power', 'e', 'p']):
+            if direction is not None and 'out' in direction:
+                raise Exception('CentrifugalCompressor only supports energy inlet.')
             direction = 'in'
             stream_governed = False
         return super().connect_stream(direction=direction, 
@@ -635,6 +647,8 @@ class CentrifugalCompressor(_PressureChangers):
         if ((stream_object is not None and 
             isinstance(stream_object, streams.EnergyStream)) or
             stream_type in ['energy', 'power', 'e', 'p']):
+            if direction is not None and 'out' in direction:
+                raise Exception('CentrifugalCompressor only supports energy inlet.')
             direction = 'in'
         return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
 
@@ -647,6 +661,7 @@ class Expander(_PressureChangers):
         Expander.items.append(self)
     
     def __repr__(self):
+        self = self._get_equipment_object(self)
         return "Expander with tag: " + self.tag
     def __hash__(self):
         return hash(self.__repr__())
@@ -664,6 +679,8 @@ class Expander(_PressureChangers):
         if ((stream_object is not None and 
             isinstance(stream_object, streams.EnergyStream)) or
             stream_type in ['energy', 'power', 'e', 'p']):
+            if direction is not None and 'in' in direction:
+                raise Exception('Expander only supports energy outlet.')
             direction = 'out'
         return super().connect_stream(direction=direction, 
                                       stream_object=stream_object, 
@@ -675,6 +692,8 @@ class Expander(_PressureChangers):
         if ((stream_object is not None and 
             isinstance(stream_object, streams.EnergyStream)) or
             stream_type in ['energy', 'power', 'e', 'p']):
+            if direction is not None and 'in' in direction:
+                raise Exception('Expander only supports energy outlet.')
             direction = 'out'
         return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
 

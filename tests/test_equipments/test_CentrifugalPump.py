@@ -484,7 +484,10 @@ class test_CentrifugalPump(unittest.TestCase):
         pump.connect_stream(inlet_stream, direction="in")
         pump.connect_stream(outlet_stream, direction="out")
         pump.connect_stream(energy_in, direction="in")
-        pump.connect_stream(energy_out, direction="out")
+        with pytest.raises(Exception) as exp:
+            pump.connect_stream(energy_out, direction="out")
+        self.assertIn("CentrifugalPump only supports energy inlet.",
+                      str(exp))
 
         self.assertEqual(mse_map[inlet_stream.index][2], pump.index)
         self.assertEqual(mse_map[inlet_stream.index][3], pump.__class__)
@@ -492,14 +495,15 @@ class test_CentrifugalPump(unittest.TestCase):
         self.assertEqual(mse_map[outlet_stream.index][1], pump.__class__) 
 
         self.assertEqual(ese_map[energy_in.index][2], pump.index)
-        self.assertEqual(ese_map[energy_in.index][3], pump.__class__)
-        self.assertEqual(ese_map[energy_out.index][0], pump.index)
-        self.assertEqual(ese_map[energy_out.index][1], pump.__class__)    
+        self.assertEqual(ese_map[energy_in.index][3], pump.__class__)   
 
         pump.disconnect_stream(inlet_stream)
         pump.disconnect_stream(outlet_stream)
-        pump.disconnect_stream(energy_in)
-        pump.disconnect_stream(energy_out)  
+        pump.disconnect_stream(energy_in, direction="in")
+        with pytest.raises(Exception) as exp:
+            pump.disconnect_stream(energy_out, direction="out")
+        self.assertIn("CentrifugalPump only supports energy inlet.",
+                      str(exp))  
 
         self.assertIsNone(mse_map[inlet_stream.index][2])
         self.assertIsNone(mse_map[inlet_stream.index][3])
@@ -508,8 +512,6 @@ class test_CentrifugalPump(unittest.TestCase):
 
         self.assertIsNone(ese_map[energy_in.index][2])
         self.assertIsNone(ese_map[energy_in.index][3])
-        self.assertIsNone(ese_map[energy_out.index][0])
-        self.assertIsNone(ese_map[energy_out.index][1])   
 
     @pytest.mark.delete 
     def test_CentrifugalPump_stream_equipment_delete_without_connection(self):

@@ -459,7 +459,7 @@ class test_AirCooler(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             aircooler.connect_stream(energy_out, direction="out")
          
-        self.assertIn("AirCooler only supports energy inlet.",
+        self.assertIn("AirCooler only supports fan energy inlet.",
                       str(exp))
         
 
@@ -469,9 +469,7 @@ class test_AirCooler(unittest.TestCase):
         self.assertEqual(mse_map[outlet_stream.index][1], aircooler.__class__) 
 
         self.assertEqual(ese_map[energy_in.index][2], aircooler.index)
-        self.assertEqual(ese_map[energy_in.index][3], aircooler.__class__)
-        self.assertEqual(ese_map[energy_out.index][0], aircooler.index)
-        self.assertEqual(ese_map[energy_out.index][1], aircooler.__class__)    
+        self.assertEqual(ese_map[energy_in.index][3], aircooler.__class__)  
 
         aircooler.disconnect_stream(inlet_stream)
         aircooler.disconnect_stream(outlet_stream)
@@ -479,7 +477,7 @@ class test_AirCooler(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             aircooler.disconnect_stream(energy_out, direction="out")
          
-        self.assertIn("AirCooler only supports energy inlet.",
+        self.assertIn("AirCooler only supports fan energy inlet.",
                       str(exp)) 
 
 
@@ -496,7 +494,7 @@ class test_AirCooler(unittest.TestCase):
     @pytest.mark.delete 
     def test_aircooler_stream_equipment_delete_without_connection(self):
         aircooler = AirCooler(pressure_drop=(0.1, 'bar'))   
-        print(aircooler)
+        repr(aircooler)
         aircooler.delete()
         with pytest.raises(Exception) as exp:
-            print(aircooler)                   
+            repr(aircooler)                   

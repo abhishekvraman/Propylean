@@ -12,6 +12,7 @@ class VerticalStorage(_VerticalVessels):
         VerticalStorage.items.append(self)
     
     def __repr__(self):
+        self = self._get_equipment_object(self)
         return "Vertical Storage with tag: " + self.tag
 
 class Bullet(_HorizontalVessels):
@@ -24,6 +25,7 @@ class Bullet(_HorizontalVessels):
         Bullet.items.append(self)
     
     def __repr__(self):
+        self = self._get_equipment_object(self)
         return "Bullet with tag: " + self.tag
 
 class Tank(_VerticalVessels):
@@ -37,6 +39,7 @@ class Tank(_VerticalVessels):
         Tank.items.append(self)
     
     def __repr__(self):
+        self = self._get_equipment_object(self)
         return "Tank with tag: " + self.tag   
     def __hash__(self):
         return hash(self.__repr__())
@@ -63,6 +66,7 @@ class Sphere(_SphericalVessels):
         Sphere.items.append(self)
     
     def __repr__(self):
+        self = self._get_equipment_object(self)
         return "Sphere with tag: " + self.tag   
     def __hash__(self):
         return hash(self.__repr__())
@@ -85,6 +89,7 @@ class AirReciever(_VerticalVessels):
         return self._main_fluid
     @main_fluid.setter
     def main_fluid(self, value):
+        self = self._get_equipment_object(self)
         raise Exception("Setting property 'main_fluid' is not allowed for AirReciever.")
 
 class HotOilExpansionVessel(_HorizontalVessels):

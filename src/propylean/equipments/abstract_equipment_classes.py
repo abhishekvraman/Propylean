@@ -336,11 +336,15 @@ class _EquipmentOneInletOutlet(object):
                 return index
         return None
     
+    @classmethod
     def _get_equipment_object(cls, obj):
         try:
             return cls.items[obj.index]
-        except:
+        except IndexError:
+            raise Exception("Equipment does not exist!")
+        except AttributeError:
             return obj
+    
     @classmethod
     def _update_equipment_object(cls, obj):
         _Validators.validate_arg_prop_value_type("obj", obj, cls)

@@ -470,9 +470,7 @@ class test_ElectricHeater(unittest.TestCase):
         self.assertEqual(mse_map[outlet_stream.index][1], elec_heater.__class__) 
 
         self.assertEqual(ese_map[energy_in.index][2], elec_heater.index)
-        self.assertEqual(ese_map[energy_in.index][3], elec_heater.__class__)
-        self.assertEqual(ese_map[energy_out.index][0], elec_heater.index)
-        self.assertEqual(ese_map[energy_out.index][1], elec_heater.__class__)    
+        self.assertEqual(ese_map[energy_in.index][3], elec_heater.__class__)  
 
         elec_heater.disconnect_stream(inlet_stream)
         elec_heater.disconnect_stream(outlet_stream)
@@ -489,9 +487,7 @@ class test_ElectricHeater(unittest.TestCase):
         self.assertIsNone(mse_map[outlet_stream.index][1]) 
 
         self.assertIsNone(ese_map[energy_in.index][2])
-        self.assertIsNone(ese_map[energy_in.index][3])
-        self.assertIsNone(ese_map[energy_out.index][0])
-        self.assertIsNone(ese_map[energy_out.index][1])   
+        self.assertIsNone(ese_map[energy_in.index][3])  
 
     @pytest.mark.delete 
     def test_ElectricHeater_stream_equipment_delete_without_connection(self):
