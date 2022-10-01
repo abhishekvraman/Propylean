@@ -995,7 +995,7 @@ class _EquipmentOneInletOutlet(object):
             Description: 
         
         SAMPLE USE CASES:
-            >>> eq1 = CentrifugalPump
+            >>> eq1 = CentrifugalPump()
             >>> eq1.delete()
         """
         result = True

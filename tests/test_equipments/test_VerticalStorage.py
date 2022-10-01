@@ -339,3 +339,37 @@ class test_VerticalStorage(unittest.TestCase):
         vs.delete()
         with pytest.raises(Exception) as exp:
             print(vs)                                          
+        self.assertIn("Equipment does not exist!",
+                      str(exp))
+    
+    @pytest.mark.delete 
+    def test_VerticalStorage_stream_equipment_delete_with_connection(self):
+        from propylean.equipments.abstract_equipment_classes import _material_stream_equipment_map as mse_map
+        from propylean.equipments.abstract_equipment_classes import _energy_stream_equipment_map as ese_map
+        vs = VerticalStorage(pressure_drop=(0.1, 'bar'))
+        inlet_stream = MaterialStream(pressure=(20, 'bar'))
+        inlet_stream.components = prop.Components({"water": 1})
+        outlet_stream = MaterialStream()
+        energy_in = EnergyStream()
+        energy_out = EnergyStream()
+
+        vs.connect_stream(inlet_stream, direction="in")
+        vs.connect_stream(outlet_stream, direction="out")
+        vs.connect_stream(energy_in, direction="in")
+        vs.connect_stream(energy_out, direction="out")
+
+        vs.delete()
+        with pytest.raises(Exception) as exp:
+            print(vs)                                          
+        self.assertIn("Equipment does not exist!",
+                      str(exp))
+
+        self.assertIsNone(mse_map[inlet_stream.index][2])
+        self.assertIsNone(mse_map[inlet_stream.index][3])
+        self.assertIsNone(mse_map[outlet_stream.index][0])
+        self.assertIsNone(mse_map[outlet_stream.index][1]) 
+
+        self.assertIsNone(ese_map[energy_in.index][2])
+        self.assertIsNone(ese_map[energy_in.index][3])
+        self.assertIsNone(ese_map[energy_out.index][0])
+        self.assertIsNone(ese_map[energy_out.index][1])  

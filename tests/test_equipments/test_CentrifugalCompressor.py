@@ -557,3 +557,38 @@ class test_CentrifugalCompressor(unittest.TestCase):
         comp.delete()
         with pytest.raises(Exception) as exp:
             repr(comp)
+        self.assertIn("Equipment does not exist!",
+                      str(exp))
+    
+    @pytest.mark.delete 
+    def test_comp_stream_equipment_delete_with_connection(self):
+        from propylean.equipments.abstract_equipment_classes import _material_stream_equipment_map as mse_map
+        from propylean.equipments.abstract_equipment_classes import _energy_stream_equipment_map as ese_map
+        comp = CentrifugalCompressor(
+                               differential_pressure=(10, 'bar'))
+        inlet_stream = MaterialStream()
+        inlet_stream.isentropic_exponent = 1.36952
+        inlet_stream.Z_g = 0.94024
+        inlet_stream.molecular_weight = prop.MolecularWeigth(16.043, 'g/mol')
+        outlet_stream = MaterialStream()
+        energy_in = EnergyStream()
+        energy_out = EnergyStream()
+
+        comp.connect_stream(inlet_stream, direction="in", stream_governed=True)
+        comp.connect_stream(outlet_stream, direction="out", stream_governed=False)
+        comp.connect_stream(energy_in, direction="in")
+
+        repr(comp)
+        comp.delete()
+        with pytest.raises(Exception) as exp:
+            repr(comp)
+        self.assertIn("Equipment does not exist!",
+                      str(exp))
+
+        self.assertIsNone(mse_map[inlet_stream.index][2])
+        self.assertIsNone(mse_map[inlet_stream.index][3])
+        self.assertIsNone(mse_map[outlet_stream.index][0])
+        self.assertIsNone(mse_map[outlet_stream.index][1]) 
+
+        self.assertIsNone(ese_map[energy_in.index][2])
+        self.assertIsNone(ese_map[energy_in.index][3])

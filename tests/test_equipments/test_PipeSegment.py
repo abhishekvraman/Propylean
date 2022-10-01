@@ -620,7 +620,42 @@ class test_PipeSegment(unittest.TestCase):
     @pytest.mark.delete 
     def test_PipeSegment_stream_equipment_delete_without_connection(self):
         pump = PipeSegment(length=(10, "m"), ID=(18, 'mm'), shape=(20, 18))   
-        print(pump)
+        repr(pump)
         pump.delete()
         with pytest.raises(Exception) as exp:
-            print(pump) 
+            repr(pump) 
+        self.assertIn("Equipment does not exist!",
+                      str(exp))
+    
+    @pytest.mark.delete 
+    def test_PipeSegment_stream_equipment_delete_with_connection(self):
+        from propylean.equipments.abstract_equipment_classes import _material_stream_equipment_map as mse_map
+        from propylean.equipments.abstract_equipment_classes import _energy_stream_equipment_map as ese_map
+        pump = PipeSegment(length=(10, "m"), ID=(18, 'mm'), shape=(20, 18))
+        inlet_stream = MaterialStream(pressure=(20, 'bar'))
+        inlet_stream.components = prop.Components({"water": 1})
+        outlet_stream = MaterialStream()
+        energy_in = EnergyStream()
+        energy_out = EnergyStream()
+
+        pump.connect_stream(inlet_stream, direction="in")
+        pump.connect_stream(outlet_stream, direction="out")
+        pump.connect_stream(energy_in, direction="in")
+        pump.connect_stream(energy_out, direction="out")
+
+        repr(pump)
+        pump.delete()
+        with pytest.raises(Exception) as exp:
+            repr(pump) 
+        self.assertIn("Equipment does not exist!",
+                      str(exp))
+        
+        self.assertIsNone(mse_map[inlet_stream.index][2])
+        self.assertIsNone(mse_map[inlet_stream.index][3])
+        self.assertIsNone(mse_map[outlet_stream.index][0])
+        self.assertIsNone(mse_map[outlet_stream.index][1]) 
+
+        self.assertIsNone(ese_map[energy_in.index][2])
+        self.assertIsNone(ese_map[energy_in.index][3])
+        self.assertIsNone(ese_map[energy_out.index][0])
+        self.assertIsNone(ese_map[energy_out.index][1])
