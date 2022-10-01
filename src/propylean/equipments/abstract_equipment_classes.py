@@ -3,7 +3,9 @@ from propylean import streams
 from propylean.validators import _Validators
 import warnings
 
+global _material_stream_equipment_map
 _material_stream_equipment_map = dict()
+global _energy_stream_equipment_map
 _energy_stream_equipment_map = dict()
 
 #Defining generic base class for all equipments with one inlet and outlet

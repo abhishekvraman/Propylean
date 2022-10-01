@@ -1,6 +1,7 @@
 from thermo import Mixture
 import propylean.properties as prop
 from propylean.validators import _Validators
+
 class Stream(object):
    
     def __init__(self, tag=None, **inputs) -> None:
@@ -73,33 +74,6 @@ class Stream(object):
         elif any([isinstance(value, float), isinstance(value, int)]):
             return value, None
 
-    def delete(self):
-        """ 
-        DESCRIPTION:
-            Method to delete an Stream object.
-        
-        PARAMETERS:
-            None
-
-        RETURN VALUE:
-            Type: bool
-            Description: True is returned if deletion is successful else False
-        
-        ERROR RAISED:
-            Type: General
-            Description: 
-        
-        SAMPLE USE CASES:
-            >>> e1 = EnergyStream()
-            >>> e1.delete()
-        """
-        result = True
-        self._to_equipment_tag = None
-        self._from_equipment_tag = None
-        
-        del self.items[self.index]
-        del self
-        return result
 
 class EnergyStream (Stream):
     items = [] 
@@ -132,6 +106,37 @@ class EnergyStream (Stream):
     @classmethod
     def list_objects(cls):
         return cls.items
+    
+    def delete(self):
+        """ 
+        DESCRIPTION:
+            Method to delete an MaterialStream object.
+        
+        PARAMETERS:
+            None
+
+        RETURN VALUE:
+            Type: bool
+            Description: True is returned if deletion is successful else False
+        
+        ERROR RAISED:
+            Type: General
+            Description: 
+        
+        SAMPLE USE CASES:
+            >>> e1 = EnergyStream()
+            >>> e1.delete()
+        """
+        result = True
+        self._to_equipment_tag = None
+        self._from_equipment_tag = None
+        del self.items[self.index]
+        global _energy_stream_equipment_map
+        from propylean.equipments.abstract_equipment_classes import _energy_stream_equipment_map
+        if self.index in globals()["_energy_stream_equipment_map"]:
+            del globals()["_energy_stream_equipment_map"][self.index]
+        del self
+        return result
       
 class MaterialStream(Stream):
     property_package = None
@@ -568,6 +573,37 @@ class MaterialStream(Stream):
     def __repr__(self) -> str:
         self = self._get_stream_object(self)
         return 'Material Stream Tag: ' + self.tag
+    
+    def delete(self):
+        """ 
+        DESCRIPTION:
+            Method to delete an MaterialStream object.
+        
+        PARAMETERS:
+            None
+
+        RETURN VALUE:
+            Type: bool
+            Description: True is returned if deletion is successful else False
+        
+        ERROR RAISED:
+            Type: General
+            Description: 
+        
+        SAMPLE USE CASES:
+            >>> m1 = MaterialStream()
+            >>> m1.delete()
+        """
+        result = True
+        self._to_equipment_tag = None
+        self._from_equipment_tag = None
+        del self.items[self.index]
+        global _material_stream_equipment_map
+        from propylean.equipments.abstract_equipment_classes import _material_stream_equipment_map
+        if self.index in globals()["_material_stream_equipment_map"]:
+            del globals()["_material_stream_equipment_map"][self.index]
+        del self
+        return result
 
 #Get stream index function
 def get_stream_index(tag, stream_type=None):

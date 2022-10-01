@@ -83,7 +83,5 @@ class test_EnergyStream(unittest.TestCase):
         self.assertIn("Stream does not exist!",
                       str(exp))
         
-        self.assertIsNone(ese_map[inlet_stream.index][2])
-        self.assertIsNone(ese_map[inlet_stream.index][3])
-        self.assertIsNone(ese_map[outlet_stream.index][0])
-        self.assertIsNone(ese_map[outlet_stream.index][1])
+        self.assertNotIn(inlet_stream.index, ese_map.keys())
+        self.assertNotIn(outlet_stream.index, ese_map.keys())

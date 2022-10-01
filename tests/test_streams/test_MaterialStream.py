@@ -370,7 +370,5 @@ class test_MaterialStream(unittest.TestCase):
         self.assertIn("Stream does not exist!",
                       str(exp))
         
-        self.assertIsNone(mse_map[inlet_stream.index][2])
-        self.assertIsNone(mse_map[inlet_stream.index][3])
-        self.assertIsNone(mse_map[outlet_stream.index][0])
-        self.assertIsNone(mse_map[outlet_stream.index][1]) 
+        self.assertNotIn(inlet_stream.index, mse_map.keys())
+        self.assertNotIn(outlet_stream.index, mse_map.keys())
