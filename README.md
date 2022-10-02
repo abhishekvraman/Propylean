@@ -1,6 +1,6 @@
 [![Build](https://github.com/abhishekvraman/Propylean/actions/workflows/python-package.yml/badge.svg?branch=main)](https://github.com/abhishekvraman/Propylean/actions/workflows/python-package.yml)
 [![License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/abhishekvraman/Propylean/blob/main/LICENSE)
-[![PythonVersions](https://img.shields.io/pypi/pyversions/propylean.svg)]https://pypi.python.org/pypi/propylean)
+[![PythonVersions](https://img.shields.io/pypi/pyversions/propylean.svg?style=flat)](https://pypi.python.org/pypi/propylean)
 # Propylean
 #### The open-source analytics and calculation package for chemical process industries.
 
