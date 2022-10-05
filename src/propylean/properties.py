@@ -1,11 +1,12 @@
-import pandas as pd
+from pandas import Series, DataFrame
 from propylean.validators import _Validators
+from warnings import warn
 class _Property(object):
     def __init__(self, value=None, unit=None, time_series=None):
         _Validators.validate_arg_prop_value_type("value", value, (int, float))
         _Validators.validate_arg_prop_value_type("unit", unit, str)
         _Validators.validate_arg_prop_value_type("time_series", time_series, 
-            (pd.Series, pd.DataFrame, dict))
+            (Series, DataFrame, dict))
         self._value = value
         self._unit = unit
         self._time_series = time_series
@@ -37,15 +38,15 @@ class _Property(object):
     @time_series.setter
     def time_series(self, time_series):
         _Validators.validate_arg_prop_value_type("time_series", time_series, 
-            (pd.Series, pd.DataFrame, dict))
+            (Series, DataFrame, dict))
             
         if isinstance(time_series, dict):
-            time_series = pd.Series(data=time_series, index=list(time_series.keys()))
-        elif isinstance(time_series, pd.DataFrame):
+            time_series = Series(data=time_series, index=list(time_series.keys()))
+        elif isinstance(time_series, DataFrame):
             if len(time_series.columns) == 2:
                 time_index = time_series[time_series.columns[0]]
                 data = time_series[time_series.columns[1]]
-                time_series = pd.DataFrame(data=list(data), index=time_index)
+                time_series = DataFrame(data=list(data), index=time_index)
 
             if len(time_series.columns) == 1:
                 time_series = time_series[time_series.columns[0]]
@@ -54,6 +55,15 @@ class _Property(object):
                 Should be either one with index as time-series or two with first column as time-series and second as property data.""")
 
         self._time_series = time_series
+
+    def __getattr__(self, name):
+        if not name.startswith("_") and self.time_series is None:
+            time_series = {0: self.value}
+            time_series = Series(data=time_series, index=list(time_series.keys()))
+            warn("Time series of the property is not set. Series attribute is considerd using single value of the property at time=0.")
+        else:
+            time_series = self.time_series
+        return getattr(time_series, name)
 
     def __repr__(self) -> str:
         return str(self.value) + ' ' + self.unit

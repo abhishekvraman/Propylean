@@ -461,7 +461,7 @@ def test_property_different_not_equal():
 
 @pytest.mark.positive
 @pytest.mark.time_series
-def test_propert_time_series_passed_series():
+def test_property_time_series_passed_series():
     p = properties._Property()
     idx = pd.date_range("2018-01-01", periods=5, freq="H")
     ts = pd.Series(range(len(idx)), index=idx)
@@ -471,7 +471,7 @@ def test_propert_time_series_passed_series():
 
 @pytest.mark.positive
 @pytest.mark.time_series
-def test_propert_time_series_passed_dataframe():
+def test_property_time_series_passed_dataframe():
     p = properties._Property()
     idx = pd.date_range("2018-01-01", periods=5, freq="H")
     ts = pd.DataFrame(range(len(idx)), index=idx)
@@ -488,7 +488,7 @@ def test_propert_time_series_passed_dataframe():
 
 @pytest.mark.positive
 @pytest.mark.time_series
-def test_propert_time_series_passed_dict():
+def test_property_time_series_passed_dict():
     p = properties._Property()
     idx = pd.date_range("2018-01-01", periods=5, freq="H")
     ts = pd.Series(range(len(idx)), index=idx)
@@ -499,6 +499,21 @@ def test_propert_time_series_passed_dict():
     p.time_series = data_dict
     assert ts.equals(p.time_series)
     assert p.time_series.equals(ts)
+
+@pytest.mark.positive
+@pytest.mark.time_series
+def test_property_time_series_series_property_arribute_match():
+    """
+    Property's attribute should match time_series attribute when
+    time_series provided.
+    """
+    p1 = properties._Property()
+    idx = pd.date_range("2018-01-01", periods=5, freq="H")
+    ts = pd.Series(range(len(idx)), index=idx)
+    p1.time_series = ts
+    prp = ["min", "max", "mean", "median", "mode"]
+    for p in prp:
+        assert getattr(p1, p) == getattr(p1.time_series, p)
 
 @pytest.mark.negative
 def test_time_series_incorrect_type_to_value():
