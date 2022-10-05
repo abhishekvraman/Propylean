@@ -34,7 +34,6 @@ jobs:
       run: |
         git clone https://github.com/abhishekvraman/Propylean.git
         cd Propylean
-        git checkout dev
         python -m build
         python -m pip install dist/propylean*.whl
     - name: Lint with flake8
