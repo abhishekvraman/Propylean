@@ -6,7 +6,7 @@ name: Propylean on MacOS
 on:
   push:
     branches: [ main ]
-  pull:
+  pull_request:
     branches: [ main ]
 
 jobs:
