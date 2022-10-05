@@ -1,4 +1,8 @@
-[![Propylean](https://github.com/abhishekvraman/Propylean/actions/workflows/python-package.yml/badge.svg?branch=main)](https://github.com/abhishekvraman/Propylean/actions/workflows/python-package.yml)
+[![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/abhishekvraman/Propylean/actions/workflows/build-windows.yml)
+[![macOS](https://img.shields.io/badge/mac%20os-000000?style=for-the-badge&logo=macos&logoColor=F0F0F0)](https://github.com/abhishekvraman/Propylean/actions/workflows/build-macos.yml)
+[![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)](https://github.com/abhishekvraman/Propylean/actions/workflows/build-ubuntu.yml)
+[![License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/abhishekvraman/Propylean/blob/main/LICENSE)
+[![PythonVersions](https://img.shields.io/pypi/pyversions/propylean.svg?style=flat)](https://pypi.python.org/pypi/propylean)
 # Propylean
 #### The open-source analytics and calculation package for chemical process industries.
 
