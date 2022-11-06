@@ -53,3 +53,10 @@ class Column(_VerticalVessels):
     @classmethod
     def list_objects(cls):
         return cls.items
+
+class FlareKOD(_HorizontalVessels):
+    items = []
+    def __init__(self, **inputs) -> None:
+        super().__init__(**inputs)
+        self._index = len(FlareKOD.items)
+        FlareKOD.items.append(self)
