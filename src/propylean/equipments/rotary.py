@@ -652,7 +652,7 @@ class CentrifugalCompressor(_PressureChangers):
             direction = 'in'
         return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
 
-class Expander(_PressureChangers):
+class TurboExpander(_PressureChangers):
     items = []
     def __init__(self, **inputs) -> None:
         super().__init__( **inputs)
