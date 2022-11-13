@@ -389,7 +389,7 @@ class PositiveDisplacementPump(_PressureChangers):
         return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
 # End of final classes of pumps
 
-# Start of final classes of Compressors and Expanders.
+# Start of final classes of Compressors and TurboExpanders.
 class CentrifugalCompressor(_PressureChangers):
     items = []
     def __init__(self, **inputs) -> None:
@@ -657,12 +657,12 @@ class TurboExpander(_PressureChangers):
     def __init__(self, **inputs) -> None:
         super().__init__( **inputs)
         del self.energy_in
-        self._index = len(Expander.items)
-        Expander.items.append(self)
+        self._index = len(TurboExpander.items)
+        TurboExpander.items.append(self)
     
     def __repr__(self):
         self = self._get_equipment_object(self)
-        return "Expander with tag: " + self.tag
+        return "TurboExpander with tag: " + self.tag
     def __hash__(self):
         return hash(self.__repr__())
 
@@ -680,7 +680,7 @@ class TurboExpander(_PressureChangers):
             isinstance(stream_object, streams.EnergyStream)) or
             stream_type in ['energy', 'power', 'e', 'p']):
             if direction is not None and 'in' in direction:
-                raise Exception('Expander only supports energy outlet.')
+                raise Exception('TurboExpander only supports energy outlet.')
             direction = 'out'
         return super().connect_stream(direction=direction, 
                                       stream_object=stream_object, 
@@ -693,7 +693,7 @@ class TurboExpander(_PressureChangers):
             isinstance(stream_object, streams.EnergyStream)) or
             stream_type in ['energy', 'power', 'e', 'p']):
             if direction is not None and 'in' in direction:
-                raise Exception('Expander only supports energy outlet.')
+                raise Exception('TurboExpander only supports energy outlet.')
             direction = 'out'
         return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
 
