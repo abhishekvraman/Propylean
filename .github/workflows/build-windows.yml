@@ -5,7 +5,7 @@ name: Propylean on Windows
 
 on:
   push:
-    branches: [ main ]
+    branches: [ maha_dev ]
 
 jobs:
   build:
@@ -34,8 +34,8 @@ jobs:
       run: |
         git clone https://github.com/abhishekvraman/Propylean.git
         cd Propylean
-        python -m build
-        python -m pip install dist/propylean-0.1.2-py3-none-any.whl
+        py -m build
+        py -m pip install dist/*.whl
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
