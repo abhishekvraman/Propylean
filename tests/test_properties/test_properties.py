@@ -9,11 +9,18 @@ def test_Length_instantiation_conversion():
     assert l.value == 0
     assert l.unit == 'm'
     l.value = 1000
+    l.max_val = 2000
+    l.min_val = 500
     l.unit = 'mm'
     assert l.value == 1000000
-    l = properties.Length(value = 1000, unit='foot')
+    assert l.max_val == 2000000
+    assert l.min_val == 500000
+
+    l = properties.Length(value=1000, unit='foot', max_val=2000, min_val=500)
     l.unit = 'yard'
     assert (l.value - 333.333333) < 0.00001
+    assert (l.max_val - 2 * 333.333333) < 0.00001
+    assert (l.min_val - 333.333333/2) < 0.00001
 
 @pytest.mark.negative
 def test_Length_incorrect_instantiation():
@@ -48,11 +55,17 @@ def test_Time_instantiation_conversion():
     assert t.value == 0
     assert t.unit == 'sec'
     t.value = 3600
+    t.max_val = 2 * t.value
+    t.min_val = t.value / 2
     t.unit = 'hour'
     assert t.value == 1
-    t = properties.Time(value = 1, unit='year')
+    assert t.max_val == 2
+    assert t.min_val == 0.5
+    t = properties.Time(value=1, unit='year', max_val=2, min_val=0.5)
     t.unit = 'month'
     assert (t.value - 12) < 0.00001
+    assert (t.max_val - 24) < 0.00001
+    assert (t.min_val - 6) < 0.00001
     
 @pytest.mark.negative
 def test_Time_incorrect_instantiation():
@@ -81,8 +94,10 @@ def test_Time_incorrect_type_to_unit():
 
 @pytest.mark.positive
 def test_Pressure_instantiation_conversion():
-    pressure = properties.Pressure(value=101325)
+    pressure = properties.Pressure(value=101325, min_val=101325/2, max_val=101325*2)
     assert pressure.value == 101325
+    assert pressure.max_val == 2*101325
+    assert pressure.min_val == 101325/2
     assert pressure.unit == 'Pa'
     pressure.unit = 'atm'
     assert abs(pressure.value - 1) <= 0.0001
@@ -123,8 +138,10 @@ def test_Pressure_incorrect_type_to_unit():
 
 @pytest.mark.positive
 def test_Temperature_instantiation_conversion():
-    temp = properties.Temperature(value=300)
+    temp = properties.Temperature(value=300, max_val=340, min_val=285)
     assert temp.value == 300
+    assert temp.max_val == 340
+    assert temp.min_val == 285
     assert temp.unit == 'K'
     temp.unit = 'F'
     assert abs(temp.value - 80.33) < 0.000001
@@ -170,9 +187,11 @@ def test_Temperature_incorrect_type_to_unit():
 
 @pytest.mark.positive
 def test_MassFlowRate_instantiation_conversion():
-    mfr = properties.MassFlowRate(value=10)
+    mfr = properties.MassFlowRate(value=10, max_val=20, min_val=5)
     mfr.unit = 'g/s'
     assert mfr.value == 10000
+    assert mfr.max_val == 20000
+    assert mfr.min_val == 5000
     mfr = properties.MassFlowRate(value=10)
     assert mfr.value == 10
     assert mfr.unit == 'kg/s'
@@ -216,11 +235,13 @@ def test_MassFlowRate_incorrect_type_to_unit():
 
 @pytest.mark.positive
 def test_MolarFlowRate_instantiation_conversion():
-    mfr = properties.MolarFlowRate(value=10)
+    mfr = properties.MolarFlowRate(value=10, max_val=20, min_val=5)
     assert mfr.value == 10
     assert mfr.unit == 'mol/s'
     mfr.unit = 'lbmol/h'
     assert abs(mfr.value - 79.3664) <= 0.01
+    assert abs(mfr.max_val - 2*79.3664) <= 0.01
+    assert abs(mfr.min_val - 79.3664/2) <= 0.01
     mfr = properties.MolarFlowRate(value=10, unit='kmol/d') # changed to 10 ton/d
     assert mfr.unit == 'kmol/d'
     mfr.value = 100 #changed to 100 kmol/day
@@ -259,11 +280,13 @@ def test_MolarFlowRate_incorrect_type_to_unit():
 
 @pytest.mark.positive
 def test_VolumeFlowRate_instantiation_conversion():
-    vf = properties.VolumetricFlowRate(10)
+    vf = properties.VolumetricFlowRate(10, max_val=20, min_val=5)
     assert vf.value == 10
     assert vf.unit == 'm^3/s'
     vf.unit = 'gal/min'
     assert abs(vf.value - 158502.972) < 1
+    assert abs(vf.max_val - 2 * 158502.972) < 1
+    assert abs(vf.min_val - 158502.972 / 2) < 1
     vf = properties.VolumetricFlowRate(100, 'lit/h')
     assert vf.unit == 'lit/h'
     vf.unit = 'ft^3/d'
@@ -317,9 +340,11 @@ def test_Power_instantiation_conversion():
     power.unit = 'hp'
     assert abs(power.value - 13596.21617304) <0.0001
 
-    power = properties.Power(25000000, 'cal/s')
+    power = properties.Power(25000000, 'cal/s', max_val=2*25000000, min_val=25000000/2)
     power.unit = 'GWh/d'
     assert abs(power.value - 2.5120) <0.0001
+    assert abs(power.max_val - 2*2.5120) <0.0001
+    assert abs(power.min_val - 2.5120/2) <0.0001
 
 @pytest.mark.negative
 def test_Power_instantiation_conversion():
@@ -352,11 +377,13 @@ def test_Power_incorrect_type_to_unit():
 
 @pytest.mark.positive
 def test_property_density():
-    d1 = properties.Density(1000)
+    d1 = properties.Density(1000, max_val=2000, min_val=500)
     assert d1.value == 1000
     assert d1.unit == "kg/m^3"
     d1.unit = "lbm/ft^3"
     assert abs(d1.value-62.479) < 0.01
+    assert abs(d1.max_val-2*62.479) < 0.01
+    assert abs(d1.min_val-62.479/2) < 0.01
 
 @pytest.mark.negative
 def test_Density_incorrect_type_to_value():

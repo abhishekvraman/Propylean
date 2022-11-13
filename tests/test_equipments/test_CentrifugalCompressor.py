@@ -156,7 +156,8 @@ class test_CentrifugalCompressor(unittest.TestCase):
         self.assertEqual(compressor.outlet_temperature.unit, outlet_stream.temperature.unit)
         self.assertEqual(compressor.outlet_mass_flowrate, outlet_stream.mass_flowrate)
         # Test intlet properties are calculated accordingly.
-        self.assertEqual(compressor.inlet_pressure, compressor.outlet_pressure-compressor.differential_pressure)
+        self.assertAlmostEqual(compressor.inlet_pressure.value, (compressor.outlet_pressure-compressor.differential_pressure).value, 5)
+        self.assertEqual(compressor.inlet_pressure.unit, compressor.outlet_pressure.unit, compressor.differential_pressure.unit)
         self.assertLess(compressor.inlet_temperature.value, compressor.outlet_temperature.value)
         self.assertEqual(compressor.inlet_mass_flowrate, compressor.outlet_mass_flowrate)
 

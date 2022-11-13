@@ -98,10 +98,3 @@ class HotOilExpansionVessel(_HorizontalVessels):
         super().__init__(**inputs)
         self._index = len(HotOilExpansionVessel.items)
         HotOilExpansionVessel.items.append(self)
-
-class FlareKOD(_HorizontalVessels):
-    items = []
-    def __init__(self, **inputs) -> None:
-        super().__init__(**inputs)
-        self._index = len(FlareKOD.items)
-        FlareKOD.items.append(self)

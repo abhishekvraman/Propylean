@@ -1,13 +1,16 @@
 from pandas import Series, DataFrame
 from propylean.validators import _Validators
+from propylean.constants import ConversionFactors
 from warnings import warn
 class _Property(object):
-    def __init__(self, value=None, unit=None, time_series=None):
+    def __init__(self, value=None, unit=None, time_series=None, min_val=None, max_val=None):
         _Validators.validate_arg_prop_value_type("value", value, (int, float))
         _Validators.validate_arg_prop_value_type("unit", unit, str)
         _Validators.validate_arg_prop_value_type("time_series", time_series, 
             (Series, DataFrame, dict))
         self._value = value
+        self._min_val = min_val
+        self._max_val = max_val
         self._unit = unit
         self._time_series = time_series
     def __eq__(self, other):
@@ -23,6 +26,22 @@ class _Property(object):
     def value(self, value):
         _Validators.validate_arg_prop_value_type("value", value, (int, float))
         self._value = value
+    
+    @property
+    def max_val(self):
+        return self._max_val
+    @max_val.setter
+    def max_val(self, value):
+        _Validators.validate_arg_prop_value_type("max_val", value, (int, float))
+        self._max_val = value
+    
+    @property
+    def min_val(self):
+        return self._min_val
+    @min_val.setter
+    def min_val(self, value):
+        _Validators.validate_arg_prop_value_type("min_val", value, (int, float))
+        self._min_val = value
     
     @property
     def unit(self):
@@ -59,8 +78,12 @@ class _Property(object):
     def __getattr__(self, name):
         if not name.startswith("_") and self.time_series is None:
             time_series = {0: self.value}
+            if self.min_val is not None:
+                time_series[1] = self.min_val
+            if self.max_val is not None:
+                time_series[2] = self.max_val
             time_series = Series(data=time_series, index=list(time_series.keys()))
-            warn("Time series of the property is not set. Series attribute is considerd using single value of the property at time=0.")
+            warn("Time series of the property is not set. Series attribute is considerd using 'value', 'max_val', or 'min_val' if provided.")
         else:
             time_series = self.time_series
         return getattr(time_series, name)
@@ -90,28 +113,33 @@ class _Property(object):
             return self.value == other.value
         else:
             return False
+    
+    def _convert_values_for_unit_change(self, unit, invert_factor=False):
+        """
+        Internal function to convert all values (min, norm and max values) for any unit change.
+        """
+        conversion_factor = getattr(ConversionFactors, self.__class__.__name__.upper())
+        conversion_factor = conversion_factor[unit] / conversion_factor[self._unit]
+        if invert_factor:
+            conversion_factor = 1 / conversion_factor
+        if self._value is not None:
+            self._value *= conversion_factor
+        if self._max_val is not None:
+            self._max_val *= conversion_factor
+        if self._min_val is not None:
+            self._min_val *= conversion_factor 
+        self._unit = unit
 
 class Length(_Property):
-    def __init__(self, value=0, unit='m'):
-        super().__init__(value,unit)
+    def __init__(self, value=0, unit='m', time_series=None, min_val=None, max_val=None):
+        super().__init__(value, unit, time_series=time_series, max_val=max_val, min_val=min_val)
         self.unit = unit
 
     @_Property.unit.setter
     def unit(self, unit):
         _Validators.validate_arg_prop_value_type("unit", unit, (str))
         try:
-            conversion_factors = {
-                                'foot': 1/3.28083,
-                                'yard': 1/1.09361,
-                                'mile': 1/0.000621371,
-                                'cm': 1/100,
-                                'inch': 1/39.3701,
-                                'km':10^3,
-                                'mm': 1/1000,
-                                'm': 1
-                                }
-            self._value =  conversion_factors[self._unit] * self._value / conversion_factors[unit]
-            self._unit = unit
+            self._convert_values_for_unit_change(unit, True)
         except KeyError:
             raise Exception('''Selected unit is not supported or a correct unit of Length.
                                Supported units are:
@@ -129,25 +157,15 @@ class Length(_Property):
             raise
 
 class Time(_Property):
-    def __init__(self, value = 0, unit= 'sec'):
-        super().__init__(value,unit)
+    def __init__(self, value=0, unit='sec', time_series=None, min_val=None, max_val=None):
+        super().__init__(value, unit, time_series=time_series, max_val=max_val, min_val=min_val)
         self.unit = unit
 
     @_Property.unit.setter
     def unit(self, unit):
         _Validators.validate_arg_prop_value_type("unit", unit, (str))
         try:
-            conversion_factors = {
-                                'year': (3600*24*30*12),
-                                'month': (3600*24*30),
-                                'week': (3600*24*7),
-                                'day': (3600*24),
-                                'hour':3600,
-                                'min': 60,
-                                'sec': 1
-                                }
-            self._value =  conversion_factors[self._unit] * self._value / conversion_factors[unit]
-            self._unit = unit
+            self._convert_values_for_unit_change(unit, True)
         except KeyError:
             raise Exception('''Selected unit is not supported or a correct unit of Time.
                                Supported units are:
@@ -164,29 +182,15 @@ class Time(_Property):
             raise
     
 class Pressure(_Property):
-    def __init__(self, value = 101325, unit= 'Pa'):
-        super().__init__(value,unit)
+    def __init__(self, value=101325, unit='Pa', time_series=None, min_val=None, max_val=None):
+        super().__init__(value, unit, time_series=time_series, max_val=max_val, min_val=min_val)
         self.unit = unit
 
     @_Property.unit.setter
     def unit(self, unit):
         _Validators.validate_arg_prop_value_type("unit", unit, (str))
         try:
-            conversion_factors = {'atm': 101320,
-                                'bar': 100000,
-                                'psi': 6893,
-                                'kPa': 1000,
-                                'MPa': 1000000,
-                                'kg/cm^2': 98070,
-                                'ata': 98070,
-                                'Torr': 133.3,
-                                'mm Hg': 133.3,
-                                'in water':2490,
-                                'm water': 0.00981,
-                                'Pa': 1
-                                }
-            self._value =  conversion_factors[self._unit] * self._value / conversion_factors[unit]
-            self._unit = unit
+            self._convert_values_for_unit_change(unit, True)
         except KeyError:
             raise Exception('''Selected unit is not supported or a correct unit of Length.
                                Supported units are:
@@ -208,8 +212,8 @@ class Pressure(_Property):
             raise
 
 class Temperature(_Property):
-    def __init__(self, value = 298, unit= 'K'):
-        super().__init__(value,unit)
+    def __init__(self, value=298, unit='K', time_series=None, min_val=None, max_val=None):
+        super().__init__(value, unit, time_series=time_series, max_val=max_val, min_val=min_val)
         self.unit = unit
     
     @_Property.unit.setter
@@ -267,28 +271,15 @@ class Temperature(_Property):
         return subtraction
         
 class MassFlowRate(_Property):
-    def __init__(self, value=0, unit='kg/s'):
-        super().__init__(value, unit)
+    def __init__(self, value=0, unit='kg/s', time_series=None, min_val=None, max_val=None):
+        super().__init__(value, unit, time_series=time_series, max_val=max_val, min_val=min_val)
         self.unit = unit
     
     @_Property.unit.setter
     def unit(self, unit):
         _Validators.validate_arg_prop_value_type("unit", unit, (str))
         try:
-            conversion_factors = {'g/s': 1000,
-                                'kg/min': 1/(1/60),
-                                'kg/d': 1*(24*60*60),
-                                'kg/h': 1*(60*60),
-                                'lb/s': 2.204,
-                                'lb/min': 2.204*60,
-                                'lb/h': 2.204*(60*60),
-                                'lb/d': 2.204*(60*60*24),
-                                'ton/h': 0.001*(60*60),
-                                'ton/d': 0.001*(60*60*24),
-                                'kg/s': 1
-                                }
-            self._value =  conversion_factors[unit] * self._value / conversion_factors[self._unit]
-            self._unit = unit
+            self._convert_values_for_unit_change(unit)
         except KeyError:
             raise Exception('''Selected unit is not supported or a correct unit of Mass Flow Rate.
                                Supported units are:
@@ -312,21 +303,15 @@ class MassFlowRate(_Property):
         return super().__add__(other)
 
 class Mass(_Property):
-    def __init__(self, value=0, unit='kg'):
-        super().__init__(value, unit)
+    def __init__(self, value=0, unit='kg', time_series=None, min_val=None, max_val=None):
+        super().__init__(value, unit, time_series=time_series, max_val=max_val, min_val=min_val)
         self.unit = unit
     
     @_Property.unit.setter
     def unit(self, unit):
         _Validators.validate_arg_prop_value_type("unit", unit, (str))
         try:
-            conversion_factors = {'g': 1000,
-                                'lb': 2.204,
-                                'ton': 0.001,
-                                'kg': 1
-                                }
-            self._value =  conversion_factors[unit] * self._value / conversion_factors[self._unit]
-            self._unit = unit
+            self._convert_values_for_unit_change(unit)
         except KeyError:
             raise Exception('''Selected unit is not supported or a correct unit of Mass Flow Rate.
                                Supported units are:
@@ -343,19 +328,14 @@ class Mass(_Property):
         return super().__add__(other)
 
 class MolecularWeigth(_Property):
-    def __init__(self, value = 0, unit= 'g/mol'):
-        super().__init__(value, unit)
+    def __init__(self, value=0, unit='g/mol', time_series=None, min_val=None, max_val=None):
+        super().__init__(value, unit, time_series=time_series, max_val=max_val, min_val=min_val)
         self.unit = unit
     @_Property.unit.setter
     def unit(self, unit):
         _Validators.validate_arg_prop_value_type("unit", unit, (str))
         try:
-            conversion_factors = {
-                                  'kg/mol': 0.001,
-                                  'g/mol': 1
-                                }
-            self._value =  conversion_factors[unit] * self._value / conversion_factors[self._unit]
-            self._unit = unit
+            self._convert_values_for_unit_change(unit)
         except KeyError:
             raise Exception('''Selected unit is not supported or a correct unit of Molecular Weight.
                                Following are the supported units:
@@ -367,27 +347,15 @@ class MolecularWeigth(_Property):
             raise
 
 class MolarFlowRate(_Property):
-    def __init__(self, value = 1, unit= 'mol/s'):
-        super().__init__(value,unit)
+    def __init__(self, value=1, unit='mol/s', time_series=None, min_val=None, max_val=None):
+        super().__init__(value, unit, time_series=time_series, max_val=max_val, min_val=min_val)
         self.unit = unit
     
     @_Property.unit.setter
     def unit(self, unit):
         _Validators.validate_arg_prop_value_type("unit", unit, (str))
         try:
-            conversion_factors = {'lbmol/h': 7.93664,
-                                'mol/min': 1*60,
-                                'mol/d': 1*(24*60*60),
-                                'mol/h': 1*(60*60),
-                                'lbmol/s': 7.93664*3600,
-                                'lbmol/min': 7.93664*60,
-                                'lbmol/d': 7.93664*24,
-                                'kmol/h': 1/1000*(60*24),
-                                'kmol/d': 1000*(60*60*24),
-                                'mol/s': 1
-                                }
-            self._value =  conversion_factors[unit] * self._value / conversion_factors[self._unit]
-            self._unit = unit
+            self._convert_values_for_unit_change(unit)
         except KeyError:
             raise Exception('''Selected unit is not supported or a correct unit of Molar Flow Rate.
                                Supported units are:
@@ -406,33 +374,14 @@ class MolarFlowRate(_Property):
             raise
 
 class VolumetricFlowRate(_Property):
-    def __init__(self, value = 1, unit= 'm^3/s'):
-        super().__init__(value,unit)
+    def __init__(self, value = 1, unit='m^3/s', time_series=None, min_val=None, max_val=None):
+        super().__init__(value, unit, time_series=time_series, max_val=max_val, min_val=min_val)
         self.unit = unit
     @_Property.unit.setter
     def unit(self, unit):
         _Validators.validate_arg_prop_value_type("unit", unit, (str))
         try:
-            conversion_factors = {'ft^3/s': 35.3146,
-                                'cm^3/s': 1000000,
-                                'm^3/min': 60,
-                                'm^3/h': 3600,
-                                'm^3/d': 3600*24,
-                                'ft^3/min': 35.3146*60,
-                                'ft^3/h': 35.3146*60*60,
-                                'ft^3/d': 35.3146*60*60*24,
-                                'gal/s': 264.172,
-                                'gal/min': 264.172*60,
-                                'gal/h': 264.172*60*60,
-                                'gal/d': 264.172*60*60*24,
-                                'lit/s': 1000,
-                                'lit/min': 60000,
-                                'lit/h': 3600000,
-                                'lit/d': 3600000*24,
-                                'm^3/s': 1
-                                }
-            self._value =  conversion_factors[unit] * self._value / conversion_factors[self._unit]
-            self._unit = unit
+            self._convert_values_for_unit_change(unit)
         except KeyError:
             raise Exception('''Selected unit is not supported or a correct unit of Volumetric Flow Rate.
                                Following are the supported units:
@@ -459,21 +408,14 @@ class VolumetricFlowRate(_Property):
             raise
 
 class Volume(_Property):
-    def __init__(self, value = 0, unit= 'm^3'):
-        super().__init__(value,unit)
+    def __init__(self, value = 0, unit= 'm^3', time_series=None, min_val=None, max_val=None):
+        super().__init__(value, unit, time_series=time_series, max_val=max_val, min_val=min_val)
         self.unit = unit
     @_Property.unit.setter
     def unit(self, unit):
         _Validators.validate_arg_prop_value_type("unit", unit, (str))
         try:
-            conversion_factors = {'ft^3': 35.3146,
-                                'cm^3': 1000000,
-                                'gal': 264.172,
-                                'lit': 1000,
-                                'm^3': 1
-                                }
-            self._value =  conversion_factors[unit] * self._value / conversion_factors[self._unit]
-            self._unit = unit
+            self._convert_values_for_unit_change(unit)
         except KeyError:
             raise Exception('''Selected unit is not supported or a correct unit of Volumetric Flow Rate.
                                Following are the supported units:
@@ -488,19 +430,14 @@ class Volume(_Property):
             raise
 
 class Density(_Property):
-    def __init__(self, value = 0, unit= 'kg/m^3'):
-        super().__init__(value, unit)
+    def __init__(self, value = 0, unit= 'kg/m^3', time_series=None, min_val=None, max_val=None):
+        super().__init__(value, unit, time_series=time_series, max_val=max_val, min_val=min_val)
         self.unit = unit
     @_Property.unit.setter
     def unit(self, unit):
         _Validators.validate_arg_prop_value_type("unit", unit, (str))
         try:
-            conversion_factors = {'g/cm^3': 0.001,
-                                'lbm/ft^3': 0.062479,
-                                'kg/m^3': 1
-                                }
-            self._value =  conversion_factors[unit] * self._value / conversion_factors[self._unit]
-            self._unit = unit
+            self._convert_values_for_unit_change(unit)
         except KeyError:
             raise Exception('''Selected unit is not supported or a correct unit of Density.
                                Following are the supported units:
@@ -513,19 +450,14 @@ class Density(_Property):
             raise
 
 class DViscosity(_Property):
-    def __init__(self, value = 0, unit= 'Pa-s'):
-        super().__init__(value, unit)
+    def __init__(self, value = 0, unit= 'Pa-s', time_series=None, min_val=None, max_val=None):
+        super().__init__(value, unit, time_series=time_series, max_val=max_val, min_val=min_val)
         self.unit = unit
     @_Property.unit.setter
     def unit(self, unit):
         _Validators.validate_arg_prop_value_type("unit", unit, (str))
         try:
-            conversion_factors = {'lb/(ft-s)': 1.4881,
-                                'cP': 1000,
-                                'Pa-s': 1
-                                }
-            self._value =  conversion_factors[unit] * self._value / conversion_factors[self._unit]
-            self._unit = unit
+            self._convert_values_for_unit_change(unit)
         except KeyError:
             raise Exception('''Selected unit is not supported or a correct unit of Dynamic Viscosity.
                                Following are the supported units:
@@ -538,38 +470,15 @@ class DViscosity(_Property):
             raise
 
 class Power(_Property):
-    def __init__(self, value = 0, unit= 'W'):
-        super().__init__(value,unit)
+    def __init__(self, value = 0, unit= 'W', time_series=None, min_val=None, max_val=None):
+        super().__init__(value, unit, time_series=time_series, max_val=max_val, min_val=min_val)
         self.unit = unit
 
     @_Property.unit.setter
     def unit(self, unit):
         _Validators.validate_arg_prop_value_type("unit", unit, (str))
         try:
-            conversion_factors = {'BTU/h': 0.293071070172222,
-                                'BTU/min': 17.5842642103333,
-                                'BTU/s': 1055.05585262,
-                                'cal/h': 0.001163,
-                                'cal/s': 4.1868,
-                                'erg/h': 2.777778E-11,
-                                'erg/min': 1.666667E-9,
-                                'erg/s': 1E-7,
-                                'hp': 735.49875,
-                                'MMBTU/h': 293071.070172222,
-                                'MMBTU/min': 17584264.2103333,
-                                'MMBTU/s': 1055055852.62,
-                                'kW': 1000,
-                                'MW': 1000000,
-                                'GW': 1000000000,
-                                'TW': 1000000000000,
-                                'kWh/d': 41.667,
-                                'MWh/d': 41666.67,
-                                'GWh/d': 41666666.67,
-                                'TWh/d': 41666666666.67,
-                                'W': 1
-                                }
-            self._value = conversion_factors[self._unit] * self._value / conversion_factors[unit]
-            self._unit = unit
+            self._convert_values_for_unit_change(unit, True)
         except KeyError:
             raise Exception('''Selected unit is not supported or a correct unit of Power. 
                                Following units are supported:
@@ -600,19 +509,14 @@ class Power(_Property):
             raise
 
 class Frequency(_Property):
-    def __init__(self, value = 0, unit= 'Hz'):
-        super().__init__(value, unit)
+    def __init__(self, value=0, unit='Hz', time_series=None, min_val=None, max_val=None):
+        super().__init__(value, unit, time_series=time_series, max_val=max_val, min_val=min_val)
         self.unit = unit
     @_Property.unit.setter
     def unit(self, unit):
         _Validators.validate_arg_prop_value_type("unit", unit, (str))
         try:
-            conversion_factors = {'/hour': 3600,
-                                '/min': 60,
-                                'Hz': 1
-                                }
-            self._value =  conversion_factors[unit] * self._value / conversion_factors[self._unit]
-            self._unit = unit
+            self._convert_values_for_unit_change(unit)
         except KeyError:
             raise Exception('''Selected unit is not supported or a correct unit of Dynamic Viscosity.
                                Following are the supported units:
