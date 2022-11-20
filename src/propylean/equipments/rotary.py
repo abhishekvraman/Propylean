@@ -1,9 +1,7 @@
-from propylean.equipments.generic_equipment_classes import _PressureChangers
+from propylean.equipments.generic_equipment_classes import _PressureChangers, _GasPressureChangers
 from propylean import streams
-from propylean.settings import Settings
-from propylean.constants import Constants
 import propylean.properties as prop
-import fluids.compressible as compressible_fluid
+
 from math import pow
 from propylean.validators import _Validators
 
@@ -165,6 +163,7 @@ class CentrifugalPump(_PressureChangers):
         return self.power
     @energy_in.setter
     def energy_in(self, value):
+        # This is needed for property matching with the stream.
         _Validators.validate_arg_prop_value_type("energy_in", value, (prop.Power, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
@@ -390,7 +389,7 @@ class PositiveDisplacementPump(_PressureChangers):
 # End of final classes of pumps
 
 # Start of final classes of Compressors and TurboExpanders.
-class CentrifugalCompressor(_PressureChangers):
+class CentrifugalCompressor(_GasPressureChangers):
     items = []
     def __init__(self, **inputs) -> None:
         """ 
@@ -451,8 +450,6 @@ class CentrifugalCompressor(_PressureChangers):
             Centrifugal Compressor with tag: P1
         """
         super().__init__( **inputs)
-        self.adiabatic_efficiency = 0.7 if 'efficiency' not in inputs else inputs['efficiency']
-        self.polytropic_exponent = 1.4 if 'polytropic_exponent' not in inputs else inputs['polytropic_exponent']
         del self.energy_out
         self._index = len(CentrifugalCompressor.items)
         CentrifugalCompressor.items.append(self)
@@ -465,161 +462,23 @@ class CentrifugalCompressor(_PressureChangers):
     
     @property
     def temperature_increase(self):
-        self = self._get_equipment_object(self)
-        k = self.polytropic_exponent
-        if (self._inlet_material_stream_index is not None or
-           self._outlet_material_stream_index is not None):
-            is_inlet = False if self._inlet_material_stream_index is None else True
-            k = self._connected_stream_property_getter(is_inlet, "material", "isentropic_exponent")
-            if Settings.compression_process == "Polytropic":
-                k = compressible_fluid.polytropic_exponent(k=k, eta_p=self.polytropic_efficiency)
-
-        T1 = self.inlet_temperature
-        P1 = self.inlet_pressure
-        P2 = self.outlet_pressure
-        T1.unit = "K"
-        P1.unit = P2.unit ="Pa"
-        eta = self.efficiency
-        value = prop.Temperature(compressible_fluid.isentropic_T_rise_compression(T1.value, P1.value, P2.value, k, eta))
-        value = value - T1
-        value.unit = self.inlet_temperature.unit
-        return value
-
-    @property
-    def efficiency(self):
-        self = self._get_equipment_object(self)
-        if Settings.compression_process == "Polytropic":
-            return self.polytropic_efficiency
-        else:
-            return self.adiabatic_efficiency
-    @efficiency.setter
-    def efficiency(self, value):
-        _Validators.validate_arg_prop_value_type("efficiency", value, (int, float))
-        self = self._get_equipment_object(self)
-        if value < 0:
-            raise Exception("Please enter a positive value for efficiency")
-        elif value <= 1:
-            value = value
-        else:
-            value = value/100
-        if Settings.compression_process.lower() in ["adiabatic", "isentropic"]:
-            self.adiabatic_efficiency = value
-        else:
-            self.polytropic_efficiency = value
-            
-        self._efficiency = value
-
-    @property
-    def adiabatic_efficiency(self):
-        self = self._get_equipment_object(self)
-        return self._adiabatic_efficiency
-    @adiabatic_efficiency.setter
-    def adiabatic_efficiency(self, value):
-        _Validators.validate_arg_prop_value_type("adiabatic_efficiency", value, (int, float))
-        self = self._get_equipment_object(self)
-        if value ==  None:
-            value = 0.7
-        self._adiabatic_efficiency = value
-        self._update_equipment_object(self)
+        return super().temperature_change
     
-    @property
-    def polytropic_efficiency(self):
-        self = self._get_equipment_object(self)
-        if (self._inlet_material_stream_index is not None or
-           self._outlet_material_stream_index is not None):
-            is_inlet = False if self._inlet_material_stream_index is None else True
-            isentropic_exponent = self._connected_stream_property_getter(is_inlet, "material", "isentropic_exponent")
-            return compressible_fluid.isentropic_efficiency(P1 = self._inlet_pressure.value,
-                                                            P2 = self._outlet_pressure.value,
-                                                            k = isentropic_exponent,
-                                                            eta_s = self.adiabatic_efficiency)
-        else:
-            return self.efficiency
-
-    @polytropic_efficiency.setter
-    def polytropic_efficiency(self, value):
-        _Validators.validate_arg_prop_value_type("polytropic_efficiency", value, (int, float))
-        self = self._get_equipment_object(self)
-        is_inlet = False if self._intlet_material_stream_index is None else True
-        isentropic_exponent = self._connected_stream_property_getter(is_inlet, "material", "isentropic_exponent")
-        self.adiabatic_efficiency = compressible_fluid.isentropic_efficiency(P1 = self._inlet_pressure.value,
-                                                                             P2 = self._outlet_pressure.value,
-                                                                             k = isentropic_exponent,
-                                                                             eta_p = value)
-        self._update_equipment_object(self)
-    
-    @property
-    def polytropic_exponent(self):
-        self = self._get_equipment_object(self)
-        if (self._inlet_material_stream_index is None and
-            self._outlet_material_stream_index is None):
-            return self._polytropic_exponent
-        is_inlet = False if self._inlet_material_stream_index is None else True
-        k = self._connected_stream_property_getter(is_inlet, "material", "isentropic_exponent")
-        return compressible_fluid.polytropic_exponent(k=k, eta_p=self.polytropic_efficiency)
-    @polytropic_exponent.setter
-    def polytropic_exponent(self, value):
-        _Validators.validate_arg_prop_value_type("polytropic_exponent", value, (int, float))
-        self = self._get_equipment_object(self)
-        if (self._inlet_material_stream_index is None and
-            self._outlet_material_stream_index is None):
-            self._polytropic_exponent = value
-        else:
-            raise Exception("""Polytropic Exponent cannot be set as Compressor is connected to a MaterialStream object.\n
-                               Update Isentropic Exponent of the stream object instead.""")
-
-    @property
-    def power(self):
-        self = self._get_equipment_object(self)
-        is_inlet = False if self._inlet_material_stream_index is None else True
-        isentropic_exponent = self._connected_stream_property_getter(is_inlet, "material", "isentropic_exponent")
-        Z = self._connected_stream_property_getter(is_inlet, "material", "Z_g")
-        MW = self._connected_stream_property_getter(is_inlet, "material", "molecular_weight")
-        work = compressible_fluid.isentropic_work_compression(T1 = self.inlet_temperature.value,
-                                                              k = isentropic_exponent,
-                                                              Z = Z,
-                                                              P1 = self._inlet_pressure.value,
-                                                              P2 = self._outlet_pressure.value,
-                                                              eta = self.adiabatic_efficiency)
-        return prop.Power(work * self.inlet_mass_flowrate.value / MW.value)
-    
-    @property
-    def head(self):
-        if (self._inlet_material_stream_index is None or
-            self._outlet_material_stream_index is None):
-            raise Exception("Head calculations only supported when Compressor is connected to a MaterialStream object.")
-        if Settings.compressor_process.lower() in ["adiabatic", "isentropic"]:
-            isentropic_exponent = self._connected_stream_property_getter(True, "material", "isentropic_exponent")
-            ratio = (isentropic_exponent - 1)/isentropic_exponent
-        else:
-            ratio = (self.polytropic_exponent - 1)/self.polytropic_exponent
-        
-        P1 = self.inlet_pressure
-        P2 = self.outlet_pressure
-        P1.unit = "Pa"
-        P2.unit = "Pa"
-        Zi = self._connected_stream_property_getter(True, "material", "Z_g")
-        Zo = self._connected_stream_property_getter(False, "material", "Z_g")
-        Z = (Zi + Zo)/2
-        T1 = self.inlet_temperature
-        T1.unit = "K"
-        MW = self._connected_stream_property_getter(True, "material", "molecular_weight")
-        head = Z * Constants.R * T1.value * (pow((P2.value/P1.value), ratio) - 1)/(ratio * MW.value)
-        return prop.Length(head)
-        
     @property
     def energy_in(self):
         return self.power
     @energy_in.setter
     def energy_in(self, value):
+        # This is needed for property matching with the stream.
         _Validators.validate_arg_prop_value_type("energy_in", value, (prop.Power, int, float, tuple))
+        _Validators.validate_non_negative_value("energy_in", value)
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
         if unit is None:
             unit = self.energy_in.unit
         self._energy_in = prop.Power(value, unit)
         self._update_equipment_object(self)
-
+    
     @classmethod
     def list_objects(cls):
         return cls.items
@@ -652,7 +511,7 @@ class CentrifugalCompressor(_PressureChangers):
             direction = 'in'
         return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
 
-class TurboExpander(_PressureChangers):
+class TurboExpander(_GasPressureChangers):
     items = []
     def __init__(self, **inputs) -> None:
         super().__init__( **inputs)
@@ -665,6 +524,30 @@ class TurboExpander(_PressureChangers):
         return "TurboExpander with tag: " + self.tag
     def __hash__(self):
         return hash(self.__repr__())
+
+    @property
+    def temperature_decrease(self):
+        return super().temperature_change
+    @property
+    def temperature_increase(self):
+        t_increase = super().temperature_change
+        t_increase.value *= -1
+        return t_increase
+
+    @property
+    def energy_out(self):
+        return self.power
+    @energy_out.setter
+    def energy_out(self, value):
+        # This is needed for property matching with the stream.
+        _Validators.validate_arg_prop_value_type("energy_out", value, (prop.Power, int, float, tuple))
+        _Validators.validate_non_negative_value("energy_out", value)
+        self = self._get_equipment_object(self)
+        value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
+        if unit is None:
+            unit = self.energy_in.unit
+        self._energy_in = prop.Power(value, unit)
+        self._update_equipment_object(self)
 
     @classmethod
     def list_objects(cls):

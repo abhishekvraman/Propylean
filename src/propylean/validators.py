@@ -22,6 +22,7 @@ class _Validators(object):
         if value is not None and not isinstance(value, correct_types):
             raise Exception("""Incorrect type '{0}' provided to '{1}'. Should be '{2}'.
             """.format(type(value), arg_prop_name, str(correct_types)))
+        return True
     
     @classmethod
     def validate_arg_prop_value_list(cls, arg_prop_name, value, correct_values):
@@ -49,6 +50,7 @@ class _Validators(object):
         if value not in correct_values:
             raise Exception("""Incorrect value '{0}' provided to '{1}'. Should be among '{2}'.
             """.format(str(value), arg_prop_name, str(correct_values)))
+        return True
 
     @classmethod
     def validate_arg_prop_value_range(cls, arg_prop_name, value, range, exclude=None):
@@ -90,4 +92,31 @@ class _Validators(object):
                 """.format(str(value), arg_prop_name, str(range)))   
             elif exclude == "right" and (value < range[0] or value >= range[1]):
                 raise Exception("""Incorrect value '{0}' provided to '{1}'. Should be between '{2}' exculding the right boundary.
-                """.format(str(value), arg_prop_name, str(range)))                   
+                """.format(str(value), arg_prop_name, str(range)))
+        return True                   
+
+    @classmethod
+    def validate_non_negative_value(self, arg_prop_name, value):
+        """
+        DESCRIPTION:
+            Function to validate values passed to properties or args is 
+            non-negative. That is greater than Zero.
+            .
+        PARAMETERS:    
+            arg_prop_name:
+                Required: Yes
+                Type: String  
+                Description: Name of the argument or property.
+            value:
+                Required: Yes
+                Type: Any 
+                Description: Value of the argument or property.
+        """
+        if not isinstance(value, (int, float, tuple)):
+            value = value.value
+        elif isinstance(value, tuple):
+            value = value[0]
+        if value < 0:
+            raise Exception("""Value passed to '{0}' should be greater than 0.
+            Value provided is {1}.""".format(arg_prop_name, value))
+        return True
