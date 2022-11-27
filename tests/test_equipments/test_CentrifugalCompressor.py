@@ -401,14 +401,6 @@ class test_CentrifugalCompressor(unittest.TestCase):
         self.assertIn("Incorrect type '<class 'list'>' provided to 'outlet_temperature'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
                       str(exp)) 
 
-    @pytest.mark.negative
-    def test_CentrifugalCompressor_temperature_increase_incorrect_type_to_value(self):
-        with pytest.raises(Exception) as exp:
-            m4 = CentrifugalCompressor()
-            m4.temperature_increase = []
-        self.assertIn("can\'t set attribute \'temperature_increase\'",
-                      str(exp)) 
-
                                                      
     @pytest.mark.negative
     def test_CentrifugalCompressor_design_temperature_incorrect_type_to_value(self):
