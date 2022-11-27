@@ -399,15 +399,6 @@ class test_TurboExpander(unittest.TestCase):
             m4.outlet_temperature = []
         self.assertIn("Incorrect type '<class 'list'>' provided to 'outlet_temperature'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
                       str(exp)) 
-
-    @pytest.mark.negative
-    def test_TurboExpander_temperature_decrease_incorrect_type_to_value(self):
-        with pytest.raises(Exception) as exp:
-            m4 = TurboExpander()
-            m4.temperature_decrease = []
-        self.assertIn("can\'t set attribute \'temperature_decrease\'",
-                      str(exp)) 
-
                                                      
     @pytest.mark.negative
     def test_TurboExpander_design_temperature_incorrect_type_to_value(self):
