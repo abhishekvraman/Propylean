@@ -35,7 +35,7 @@ jobs:
         git clone https://github.com/abhishekvraman/Propylean.git
         cd Propylean
         python -m build
-        python -m pip install dist/propylean-0.2.2-py3-none-any.whl
+        python -m pip install dist/propylean-0.2.3-py3-none-any.whl
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names

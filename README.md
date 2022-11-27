@@ -43,6 +43,7 @@ https://github.com/abhishekvraman/Propylean/wiki/Getting-started-with-Propylean
     1. CentrifugalPump
     2. PositiveDisplacementPump
     3. CentrifugalCompressor
+    4. TurboExpander
 * equipments.static
     1. PipeSegment
 * equipments.storage

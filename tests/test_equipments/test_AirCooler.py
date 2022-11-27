@@ -488,8 +488,8 @@ class test_AirCooler(unittest.TestCase):
 
         self.assertIsNone(ese_map[energy_in.index][2])
         self.assertIsNone(ese_map[energy_in.index][3])
-        self.assertIsNone(ese_map[energy_out.index][0])
-        self.assertIsNone(ese_map[energy_out.index][1])   
+        self.assertIsNone(ese_map[energy_in.index][0])
+        self.assertIsNone(ese_map[energy_in.index][1])   
 
     @pytest.mark.delete 
     def test_aircooler_stream_equipment_delete_without_connection(self):
@@ -529,5 +529,5 @@ class test_AirCooler(unittest.TestCase):
 
         self.assertIsNone(ese_map[energy_in.index][2])
         self.assertIsNone(ese_map[energy_in.index][3])
-        self.assertIsNone(ese_map[energy_out.index][0])
-        self.assertIsNone(ese_map[energy_out.index][1]) 
+        self.assertIsNone(ese_map[energy_in.index][0])
+        self.assertIsNone(ese_map[energy_in.index][1]) 
