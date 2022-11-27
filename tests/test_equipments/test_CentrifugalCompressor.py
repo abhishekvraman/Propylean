@@ -91,18 +91,13 @@ class test_CentrifugalCompressor(unittest.TestCase):
                                differential_pressure=(10, 'bar'))
         compressor.inlet_temperature = (50, 'C')
         self.assertEqual(compressor.inlet_temperature, prop.Temperature(50, 'C'))
-        self.assertEqual(compressor.outlet_temperature, prop.Temperature(50, 'C'))
     
     @pytest.mark.positive
     def test_CentrifugalCompressor_setting_outlet_temperature(self):
         compressor = CentrifugalCompressor(tag="compressor_9",
                                differential_pressure=(10, 'bar'))
         compressor.outlet_temperature = (130, 'F')
-        self.assertLess(abs(compressor.inlet_temperature.value-130), 0.0001)
-        self.assertEqual(compressor.inlet_temperature.unit, 'F')
-        self.assertAlmostEqual(compressor.outlet_temperature.value, compressor.inlet_temperature.value, 3)
-        self.assertEqual(compressor.outlet_temperature.unit, compressor.inlet_temperature.unit, 3)
-        self.assertEqual(compressor.outlet_temperature.unit, 'F')
+        self.assertEqual(compressor.outlet_temperature, prop.Temperature(129.99999, 'F'))
     
     @pytest.mark.positive
     def test_CentrifugalCompressor_setting_inlet_mass_flowrate(self):
@@ -224,9 +219,11 @@ class test_CentrifugalCompressor(unittest.TestCase):
         compressor_inlet.Z_g = 0.94024
         compressor_inlet.molecular_weight = prop.MolecularWeigth(16.043, 'g/mol')
         # Test connection is made.
-        self.assertTrue(compressor.connect_stream(compressor_inlet, "in", stream_governed=False))
-        self.assertTrue(compressor.connect_stream(compressor_power))
+        self.assertTrue(compressor.connect_stream(compressor_inlet, "in", stream_governed=True))
+        self.assertTrue(compressor.connect_stream(compressor_power, stream_governed=False))
         # Test inlet properties of compressor are equal to outlet stream's.
+        self.assertGreater(compressor_power.amount.value, 0)
+        self.assertGreater(compressor.power.value, 0)
         self.assertAlmostEqual(compressor.power.value, compressor_power.amount.value)
         self.assertEqual(compressor.power.unit, compressor_power.amount.unit)
     
@@ -405,11 +402,11 @@ class test_CentrifugalCompressor(unittest.TestCase):
                       str(exp)) 
 
     @pytest.mark.negative
-    def test_CentrifugalCompressor_temperature_decrease_incorrect_type_to_value(self):
+    def test_CentrifugalCompressor_temperature_increase_incorrect_type_to_value(self):
         with pytest.raises(Exception) as exp:
             m4 = CentrifugalCompressor()
-            m4.temperature_decrease = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'temperature_decrease'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+            m4.temperature_increase = []
+        self.assertIn("can\'t set attribute \'temperature_increase\'",
                       str(exp)) 
 
                                                      
@@ -533,7 +530,9 @@ class test_CentrifugalCompressor(unittest.TestCase):
         self.assertEqual(mse_map[outlet_stream.index][1], comp.__class__) 
 
         self.assertEqual(ese_map[energy_in.index][2], comp.index)
-        self.assertEqual(ese_map[energy_in.index][3], comp.__class__)   
+        self.assertEqual(ese_map[energy_in.index][3], comp.__class__)
+        self.assertIsNone(ese_map[energy_in.index][0])
+        self.assertIsNone(ese_map[energy_in.index][1])   
 
         comp.disconnect_stream(inlet_stream)
         comp.disconnect_stream(outlet_stream)
@@ -549,7 +548,9 @@ class test_CentrifugalCompressor(unittest.TestCase):
         self.assertIsNone(mse_map[outlet_stream.index][1]) 
 
         self.assertIsNone(ese_map[energy_in.index][2])
-        self.assertIsNone(ese_map[energy_in.index][3])  
+        self.assertIsNone(ese_map[energy_in.index][3]) 
+        self.assertIsNone(ese_map[energy_in.index][1])
+        self.assertIsNone(ese_map[energy_in.index][0])  
 
     @pytest.mark.delete 
     def test_comp_stream_equipment_delete_without_connection(self):
