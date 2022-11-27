@@ -202,6 +202,7 @@ class CentrifugalPump(_PressureChangers):
             if direction is not None and 'out' in direction:
                 raise Exception('CentrifugalPump only supports energy inlet.')
             direction = 'in'
+            stream_type = "e"
         return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
 
 
@@ -385,6 +386,7 @@ class PositiveDisplacementPump(_PressureChangers):
             if direction is not None and 'out' in direction:
                 raise Exception('PositiveDisplacementPump only supports energy inlet.')
             direction = 'in'
+            stream_type = "e"
         return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
 # End of final classes of pumps
 
@@ -496,6 +498,7 @@ class CentrifugalCompressor(_GasPressureChangers):
                 raise Exception('CentrifugalCompressor only supports energy inlet.')
             direction = 'in'
             stream_governed = False
+            stream_type = "e"
         return super().connect_stream(direction=direction, 
                                       stream_object=stream_object, 
                                       stream_tag=stream_tag, 
@@ -509,6 +512,7 @@ class CentrifugalCompressor(_GasPressureChangers):
             if direction is not None and 'out' in direction:
                 raise Exception('CentrifugalCompressor only supports energy inlet.')
             direction = 'in'
+            stream_type = 'e'
         return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
 
 class TurboExpander(_GasPressureChangers):
@@ -545,8 +549,8 @@ class TurboExpander(_GasPressureChangers):
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
         if unit is None:
-            unit = self.energy_in.unit
-        self._energy_in = prop.Power(value, unit)
+            unit = self.energy_out.unit
+        self._energy_out = prop.Power(value, unit)
         self._update_equipment_object(self)
 
     @classmethod
@@ -565,6 +569,8 @@ class TurboExpander(_GasPressureChangers):
             if direction is not None and 'in' in direction:
                 raise Exception('TurboExpander only supports energy outlet.')
             direction = 'out'
+            stream_type = 'e'
+            stream_governed = False
         return super().connect_stream(direction=direction, 
                                       stream_object=stream_object, 
                                       stream_tag=stream_tag, 
@@ -578,6 +584,7 @@ class TurboExpander(_GasPressureChangers):
             if direction is not None and 'in' in direction:
                 raise Exception('TurboExpander only supports energy outlet.')
             direction = 'out'
+            stream_type = 'e'
         return super().disconnect_stream(stream_object, direction, stream_tag, stream_type)
 
 # End of final classes of compressors

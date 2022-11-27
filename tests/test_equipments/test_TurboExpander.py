@@ -91,18 +91,14 @@ class test_TurboExpander(unittest.TestCase):
                                differential_pressure=(10, 'bar'))
         expander.inlet_temperature = (50, 'C')
         self.assertEqual(expander.inlet_temperature, prop.Temperature(50, 'C'))
-        self.assertEqual(expander.outlet_temperature, prop.Temperature(50, 'C'))
+        
     
     @pytest.mark.positive
     def test_TurboExpander_setting_outlet_temperature(self):
         expander = TurboExpander(tag="expander_9",
                                differential_pressure=(100, 'bar'))
-        expander.outlet_temperature = (130, 'F')
-        self.assertGreater(abs(expander.inlet_temperature.value-130), 0.0001)
-        self.assertEqual(expander.inlet_temperature.unit, 'F')
-        self.assertAlmostEqual(expander.outlet_temperature.value, expander.inlet_temperature.value, 3)
-        self.assertEqual(expander.outlet_temperature.unit, expander.inlet_temperature.unit, 3)
-        self.assertEqual(expander.outlet_temperature.unit, 'F')
+        expander.outlet_temperature = (129.99999, 'F')
+        self.assertEqual(expander.outlet_temperature, prop.Temperature(129.99999, 'F'))
     
     @pytest.mark.positive
     def test_TurboExpander_setting_inlet_mass_flowrate(self):
@@ -224,8 +220,8 @@ class test_TurboExpander(unittest.TestCase):
         expander_inlet.Z_g = 0.94024
         expander_inlet.molecular_weight = prop.MolecularWeigth(16.043, 'g/mol')
         # Test connection is made.
-        self.assertTrue(expander.connect_stream(expander_inlet, "in", stream_governed=False))
-        self.assertTrue(expander.connect_stream(expander_power))
+        self.assertTrue(expander.connect_stream(expander_inlet, "in", stream_governed=True))
+        self.assertTrue(expander.connect_stream(expander_power, stream_governed=False))
         # Test inlet properties of expander are equal to outlet stream's.
         self.assertAlmostEqual(expander.power.value, expander_power.amount.value)
         self.assertEqual(expander.power.unit, expander_power.amount.unit)
@@ -409,7 +405,7 @@ class test_TurboExpander(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = TurboExpander()
             m4.temperature_decrease = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'temperature_decrease'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("can\'t set attribute \'temperature_decrease\'",
                       str(exp)) 
 
                                                      
@@ -516,12 +512,12 @@ class test_TurboExpander(unittest.TestCase):
         inlet_stream.Z_g = 0.94024
         inlet_stream.molecular_weight = prop.MolecularWeigth(16.043, 'g/mol')
         outlet_stream = MaterialStream()
-        energy_out = EnergyStream()
-        energy_in = EnergyStream()
+        energy_out = EnergyStream(tag="9999")
+        energy_in = EnergyStream(tag="uyyth")
 
         comp.connect_stream(inlet_stream, direction="in", stream_governed=True)
         comp.connect_stream(outlet_stream, direction="out", stream_governed=False)
-        comp.connect_stream(energy_out, direction="out")
+        
         with pytest.raises(Exception) as exp:
             comp.connect_stream(energy_in, direction="in")
         self.assertIn("TurboExpander only supports energy outlet.",
@@ -531,25 +527,35 @@ class test_TurboExpander(unittest.TestCase):
         self.assertEqual(mse_map[inlet_stream.index][3], comp.__class__)
         self.assertEqual(mse_map[outlet_stream.index][0], comp.index)
         self.assertEqual(mse_map[outlet_stream.index][1], comp.__class__) 
-
-        self.assertEqual(ese_map[energy_out.index][2], comp.index)
-        self.assertEqual(ese_map[energy_out.index][3], comp.__class__)   
+        
+        self.assertIsNotNone(comp.index)
+        comp.connect_stream(energy_out)
+        self.assertEqual(ese_map[energy_out.index][0], comp.index)
+        self.assertEqual(ese_map[energy_out.index][1], comp.__class__) 
+        self.assertIsNone(ese_map[energy_out.index][2])
+        self.assertIsNone(ese_map[energy_out.index][3])   
 
         comp.disconnect_stream(inlet_stream)
         comp.disconnect_stream(outlet_stream)
-        comp.disconnect_stream(energy_out, direction="out")
+        
         with pytest.raises(Exception) as exp:
-            comp.disconnect_stream(energy_out, direction="out")  
-        self.assertIn("TurboExpander only supports energy inlet.",
+            comp.disconnect_stream(energy_out, direction="in")  
+        self.assertIn("TurboExpander only supports energy outlet.",
                       str(exp))
+        
 
         self.assertIsNone(mse_map[inlet_stream.index][2])
         self.assertIsNone(mse_map[inlet_stream.index][3])
         self.assertIsNone(mse_map[outlet_stream.index][0])
         self.assertIsNone(mse_map[outlet_stream.index][1]) 
-
+        print(ese_map)
+        print(energy_out.index)
+        comp.disconnect_stream(energy_out)
+        print(ese_map[energy_out.index])
         self.assertIsNone(ese_map[energy_out.index][2])
-        self.assertIsNone(ese_map[energy_out.index][3])  
+        self.assertIsNone(ese_map[energy_out.index][3]) 
+        self.assertIsNone(ese_map[energy_out.index][1])
+        self.assertIsNone(ese_map[energy_out.index][0])  
 
     @pytest.mark.delete 
     def test_comp_stream_equipment_delete_without_connection(self):
@@ -572,8 +578,7 @@ class test_TurboExpander(unittest.TestCase):
         inlet_stream.Z_g = 0.94024
         inlet_stream.molecular_weight = prop.MolecularWeigth(16.043, 'g/mol')
         outlet_stream = MaterialStream()
-        energy_out = EnergyStream()
-        energy_out = EnergyStream()
+        energy_out = EnergyStream(tag="0909809")
 
         comp.connect_stream(inlet_stream, direction="in", stream_governed=True)
         comp.connect_stream(outlet_stream, direction="out", stream_governed=False)
@@ -593,3 +598,5 @@ class test_TurboExpander(unittest.TestCase):
 
         self.assertIsNone(ese_map[energy_out.index][2])
         self.assertIsNone(ese_map[energy_out.index][3])
+        self.assertIsNone(ese_map[energy_out.index][0])
+        self.assertIsNone(ese_map[energy_out.index][1])

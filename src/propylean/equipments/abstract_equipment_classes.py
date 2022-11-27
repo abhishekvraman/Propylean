@@ -615,24 +615,24 @@ class _EquipmentOneInletOutlet(object):
             if direction.lower() in ['in', 'inlet']:
                 if (self._inlet_material_stream_tag is None or 
                    self._inlet_material_stream_index is None):
-                   warnings.warn("Inlet already has no connection.")
+                   warnings.warn("Material Inlet already has no connection.")
                    return 
             else:
                 if (self._outlet_material_stream_tag is None or 
                    self._outlet_material_stream_index is None):
-                   warnings.warn("Outlet already has no connection.")
+                   warnings.warn("Material Outlet already has no connection.")
                    return 
                   
         else:
             if direction.lower() in ['in', 'inlet']:
                 if (self._inlet_energy_stream_tag is None or 
                    self._inlet_energy_stream_index is None):
-                   warnings.warn("Inlet already has no connection.")
+                   warnings.warn("Energy Inlet already has no connection.")
                    return 
             else:
                 if (self._outlet_energy_stream_tag is None or 
                    self._outlet_energy_stream_index is None):
-                   warnings.warn("Outlet already has no connection.")
+                   warnings.warn("Energy Outlet already has no connection.")
                    return       
 
         self._is_disconnection = True
@@ -715,7 +715,7 @@ class _EquipmentOneInletOutlet(object):
                 and old_equipment_type is not None):
                 old_equipment_obj = old_equipment_type.list_objects()[old_equipment_index]
                 old_equipment_obj.disconnect_stream(stream_type=stream_type, direction='in' if is_inlet else 'out')
-                raise Warning("Equipment type " + str(old_equipment_type) +
+                warnings.warn("Equipment type " + str(old_equipment_type) +
                               " with tag " + old_equipment_obj.tag + 
                               " was disconnected from stream type " + str(stream_type) +
                               " with tag " + str(self.get_stream_tag(stream_type,
@@ -729,9 +729,9 @@ class _EquipmentOneInletOutlet(object):
             except Exception as e:
                 raise Exception("Error occured in equipment-stream mapping:", e)
 
-        if stream_type == 'material':
+        if stream_type in ['material', 'm']:
             _material_stream_equipment_map = stream_equipment_map
-        else:
+        elif stream_type in ['energy', 'e']:
             _energy_stream_equipment_map = stream_equipment_map
         return True
 
@@ -880,9 +880,13 @@ class _EquipmentOneInletOutlet(object):
         
         if stream_type.lower() in ['m', 'material', 'mass']:
             stream_index = self._inlet_material_stream_index if is_inlet else self._outlet_material_stream_index
+            if stream_index is None:
+                raise Exception("Equipment not connected to MaterialStream!")
             stream_object = streams.MaterialStream.list_objects()[stream_index]  
         else:
             stream_index = self._inlet_energy_stream_index if is_inlet else self._outlet_energy_stream_index
+            if stream_index is None:
+                raise Exception("Equipment not connected to EnergyStream!")
             stream_object = streams.EnergyStream.list_objects()[stream_index]
             return stream_object.amount
         
