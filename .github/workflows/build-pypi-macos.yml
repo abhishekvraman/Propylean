@@ -1,4 +1,4 @@
-# This workflow will installPropylean from PyPI on all platfomrs and run tests.
+# This workflow will installPropylean from PyPI on macos and run tests.
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
 name: Propylean from PyPI on all platforms
@@ -10,7 +10,7 @@ on:
 jobs:
   build:
 
-    runs-on: [macos-latest, ubuntu-latest, windows-latest]
+    runs-on: macos-latest
     strategy:
       fail-fast: false
       matrix:
