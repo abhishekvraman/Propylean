@@ -2,6 +2,7 @@ from pandas import Series, DataFrame
 from propylean.validators import _Validators
 from propylean.constants import ConversionFactors
 from warnings import warn
+
 class _Property(object):
     def __init__(self, value=None, unit=None, time_series=None, min_val=None, max_val=None):
         _Validators.validate_arg_prop_value_type("value", value, (int, float))
@@ -29,7 +30,7 @@ class _Property(object):
     
     @property
     def max_val(self):
-        return self._max_val
+        return self._max_val if self._max_val is not None else self._value
     @max_val.setter
     def max_val(self, value):
         _Validators.validate_arg_prop_value_type("max_val", value, (int, float))
@@ -37,7 +38,7 @@ class _Property(object):
     
     @property
     def min_val(self):
-        return self._min_val
+        return self._min_val if self._min_val is not None else self._value
     @min_val.setter
     def min_val(self, value):
         _Validators.validate_arg_prop_value_type("min_val", value, (int, float))
@@ -94,12 +95,18 @@ class _Property(object):
     def __add__(self, other):
         if self.unit != other.unit:
             other.unit = self.unit
-        return type(self)(self.value + other.value, self.unit) 
+        return type(self)(value=self.value + other.value, 
+                          unit=self.unit,
+                          min_val=self.max_val + other.min_val,
+                          max_val=self.max_val + other.max_val)
     
     def __sub__(self, other):
         if self.unit != other.unit:
             other.unit = self.unit
-        return type(self)(self.value - other.value, self.unit)
+        return type(self)(value=self.value - other.value,
+                          unit=self.unit,
+                          min_val=self.min_val - other.min_val, 
+                          max_val=self.max_val - other.min_val)
     
     def __truediv__(self, other):
         if self.unit != other.unit:

@@ -59,7 +59,6 @@ class _EquipmentOneInletOutlet(object):
         else:
             self.tag = inputs['tag']
         self.dynamic_state = False if 'dynamic_state' not in inputs else False
-        # TODO: Design pressure calcs
 
         #Flow properties
         self._inlet_mass_flowrate = prop.MassFlowRate() 
