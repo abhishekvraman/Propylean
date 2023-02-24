@@ -2,6 +2,7 @@ from pandas import Series, DataFrame
 from propylean.validators import _Validators
 from propylean.constants import ConversionFactors
 from warnings import warn
+
 class _Property(object):
     def __init__(self, value=None, unit=None, time_series=None, min_val=None, max_val=None):
         _Validators.validate_arg_prop_value_type("value", value, (int, float))
@@ -29,7 +30,7 @@ class _Property(object):
     
     @property
     def max_val(self):
-        return self._max_val
+        return self._max_val if self._max_val is not None else self._value
     @max_val.setter
     def max_val(self, value):
         _Validators.validate_arg_prop_value_type("max_val", value, (int, float))
@@ -37,7 +38,7 @@ class _Property(object):
     
     @property
     def min_val(self):
-        return self._min_val
+        return self._min_val if self._min_val is not None else self._value
     @min_val.setter
     def min_val(self, value):
         _Validators.validate_arg_prop_value_type("min_val", value, (int, float))
@@ -94,12 +95,18 @@ class _Property(object):
     def __add__(self, other):
         if self.unit != other.unit:
             other.unit = self.unit
-        return type(self)(self.value + other.value, self.unit) 
+        return type(self)(value=self.value + other.value, 
+                          unit=self.unit,
+                          min_val=self.max_val + other.min_val,
+                          max_val=self.max_val + other.max_val)
     
     def __sub__(self, other):
         if self.unit != other.unit:
             other.unit = self.unit
-        return type(self)(self.value - other.value, self.unit)
+        return type(self)(value=self.value - other.value,
+                          unit=self.unit,
+                          min_val=self.min_val - other.min_val, 
+                          max_val=self.max_val - other.min_val)
     
     def __truediv__(self, other):
         if self.unit != other.unit:
@@ -539,3 +546,29 @@ class Components(object):
         if self.type==other.type and self.fractions==other.fractions:
             return True
         return False
+
+class Efficiency(_Property):
+    def __init__(self, value=1, time_series=None, min_val=1, max_val=1):
+        super().__init__(value=value, unit=None, time_series=time_series, max_val=max_val, min_val=min_val)
+        if value <= 0 or min_val <= 0 or max_val <= 0:
+            raise Exception("Provide a positive value for efficiency.")
+        else:
+            if value > 1:
+                self.value =  value/100
+                warn("Efficiency value set to {} considering value provided in percent.".format(value/100))
+            if max_val > 1:
+                self.max_val = max_val/100
+                warn("Efficiency max_val set to {} considering value provided in percent.".format(max_val/100))
+            if min_val > 1:
+                self.min_val = min_val/100
+                warn("Efficiency min_val set to {} considering value provided in percent.".format(min_val/100))
+    
+    def __repr__(self) -> str:
+        return str(self.value * 100) + "%"
+    
+    @property
+    def unit(self):
+        return None
+    @unit.setter
+    def unit(self, unit):
+        raise Exception("Efficiency is dimensionless.") 

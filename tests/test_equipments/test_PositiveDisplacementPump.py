@@ -43,7 +43,7 @@ class test_PositiveDisplacementPump(unittest.TestCase):
         self.assertEqual(pump.tag, "PDPump_3")
         self.assertEqual(pump.differential_pressure, prop.Pressure(100, 'bar'))
         self.assertEqual(pump.NPSHr, prop.Length(4, 'm'))
-        self.assertEqual(pump.efficiency, 0.70)
+        self.assertEqual(pump.efficiency, prop.Efficiency(0.70))
     
     @pytest.mark.positive
     @pytest.mark.instantiation
