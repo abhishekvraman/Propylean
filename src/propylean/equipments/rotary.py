@@ -152,7 +152,7 @@ class CentrifugalPump(_PressureChangers):
     def power(self):
         self = self._get_equipment_object(self)
         self.hydraulic_power.unit = "W"
-        value = self.hydraulic_power.value / self.efficiency
+        value = self.hydraulic_power.value / self.efficiency.value
         return prop.Power(value, "W")
     @power.setter
     def power(self, value):
@@ -337,7 +337,7 @@ class PositiveDisplacementPump(_PressureChangers):
         vol_flow.unit = "gal/min"
         old_dp_unit = self.differential_pressure.unit
         self.differential_pressure.unit = 'psi'
-        value = vol_flow.value * self.differential_pressure.value /(1714 * self.efficiency)
+        value = vol_flow.value * self.differential_pressure.value /(1714 * self.efficiency.value)
         return prop.Power(value, "hp")
     @power.setter
     def power(self, value):

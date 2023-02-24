@@ -43,8 +43,9 @@ class test_CentrifugalCompressor(unittest.TestCase):
         self.assertEqual(compressor.differential_pressure, prop.Pressure(10, 'bar'))
         # By defaul setting is adiabatic/isentropic
         Settings.compressor_process = "isenTROpiC"
-        self.assertEqual(compressor.efficiency, 0.6)
-        self.assertEqual(compressor.adiabatic_efficiency, 0.6)
+        eff = prop.Efficiency(0.6)
+        self.assertEqual(compressor.efficiency, eff)
+        self.assertEqual(compressor.adiabatic_efficiency, eff)
     
     @pytest.mark.positive
     @pytest.mark.instantiation
@@ -53,8 +54,9 @@ class test_CentrifugalCompressor(unittest.TestCase):
                                            efficiency=0.6)
         self.assertEqual(compressor.differential_pressure, prop.Pressure(10, 'bar'))
         Settings.compressor_process = "polYtROpic"
-        self.assertEqual(compressor.efficiency, 0.6)
-        self.assertEqual(compressor.polytropic_efficiency, 0.6)
+        eff = prop.Efficiency(0.6)
+        self.assertEqual(compressor.efficiency, eff)
+        self.assertEqual(compressor.polytropic_efficiency, eff)
     
     @pytest.mark.positive
     @pytest.mark.instantiation

@@ -548,3 +548,28 @@ def test_time_series_incorrect_type_to_value():
         l = properties.Length(10)
         l.time_series = []
     assert "Incorrect type '<class 'list'>' provided to 'time_series'. Should be '(<class 'pandas.core.series.Series'>, <class 'pandas.core.frame.DataFrame'>, <class 'dict'>)" in str(exp)
+
+@pytest.mark.positive
+def test_property_Efficiency():
+    e1 = properties.Efficiency(value=70, min_val=60, max_val=80)
+    assert e1.value == 0.70
+    assert e1.min_val == 0.60
+    assert e1.max_val == 0.80
+
+@pytest.mark.negative
+def test_Efficiency_incorrect_type_to_value():
+    with pytest.raises(Exception) as exp:
+        properties.Efficiency([10])
+    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    with pytest.raises(Exception) as exp:
+        l = properties.Efficiency()
+        l.value = []
+    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+
+@pytest.mark.negative
+def test_Efficiency_setting_unit(): 
+    with pytest.raises(Exception) as exp:
+        l = properties.Efficiency()
+        l.unit = 10
+    assert "Efficiency is dimensionless." in str(exp)
+   

@@ -43,8 +43,9 @@ class test_TurboExpander(unittest.TestCase):
         self.assertEqual(expander.differential_pressure, prop.Pressure(10, 'bar'))
         # By defaul setting is adiabatic/isentropic
         Settings.expander_process = "isenTROpiC"
-        self.assertEqual(expander.efficiency, 0.6)
-        self.assertEqual(expander.adiabatic_efficiency, 0.6)
+        eff = prop.Efficiency(0.6)
+        self.assertEqual(expander.efficiency, eff)
+        self.assertEqual(expander.adiabatic_efficiency, eff)
     
     @pytest.mark.positive
     @pytest.mark.instantiation
@@ -53,8 +54,9 @@ class test_TurboExpander(unittest.TestCase):
                                            efficiency=0.6)
         self.assertEqual(expander.differential_pressure, prop.Pressure(10, 'bar'))
         Settings.expander_process = "polYtROpic"
-        self.assertEqual(expander.efficiency, 0.6)
-        self.assertEqual(expander.polytropic_efficiency, 0.6)
+        eff = prop.Efficiency(0.6)
+        self.assertEqual(expander.efficiency, eff)
+        self.assertEqual(expander.polytropic_efficiency, eff)
     
     @pytest.mark.positive
     @pytest.mark.instantiation
