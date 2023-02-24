@@ -546,3 +546,29 @@ class Components(object):
         if self.type==other.type and self.fractions==other.fractions:
             return True
         return False
+
+class Efficiency(_Property):
+    def __init__(self, value=1, time_series=None, min_val=1, max_val=1):
+        super().__init__(value=value, unit=None, time_series=time_series, max_val=max_val, min_val=min_val)
+        if value <= 0 or min_val <= 0 or max_val <= 0:
+            raise Exception("Provide a positive value for efficiency.")
+        else:
+            if value > 1:
+                self.value =  value/100
+                warn("Efficiency value set to {} considering value provided in percent.".format(value/100))
+            if max_val > 1:
+                self.max_val = max_val/100
+                warn("Efficiency max_val set to {} considering value provided in percent.".format(max_val/100))
+            if min_val > 1:
+                self.min_val = min_val/100
+                warn("Efficiency min_val set to {} considering value provided in percent.".format(min_val/100))
+    
+    def __repr__(self) -> str:
+        return str(self.value * 100) + "%"
+    
+    @property
+    def unit(self):
+        return None
+    @unit.setter
+    def unit(self, unit):
+        raise Exception("Efficiency is dimensionless.") 

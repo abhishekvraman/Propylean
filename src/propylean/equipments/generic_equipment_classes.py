@@ -6,6 +6,7 @@ from pandas import DataFrame
 from propylean.validators import _Validators
 from math import pi, sqrt, acos
 import fluids.compressible as compressible_fluid
+from warnings import warn
 
 # Defining generic class for all types of pressure changers like Pumps, Compressors and Expanders.
 class _PressureChangers(_EquipmentOneInletOutlet):
@@ -25,9 +26,9 @@ class _PressureChangers(_EquipmentOneInletOutlet):
                 
                 efficiency:
                     Required: No
-                    Type: int or float (recommended)
+                    Type: int or float or Efficiency (recommended)
                     Acceptable values: Non-negative integer
-                    Default value: 100%    
+                    Default value: 1    
                     Description: Efficiency of the equipment.
 
                 performance_curve:
@@ -75,7 +76,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         if 'performance_curve' in inputs:
             self.performace_curve = inputs['performance_curve']
         
-        self.efficiency = 100 if 'efficiency' not in inputs else inputs['efficiency']
+        self.efficiency = 1 if 'efficiency' not in inputs else inputs['efficiency']
         
     @property
     def suction_pressure(self):
@@ -127,14 +128,16 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         return self._efficiency
     @efficiency.setter
     def efficiency(self, value):
-        _Validators.validate_arg_prop_value_type("efficiency", value, (int, float))
+        _Validators.validate_arg_prop_value_type("efficiency", value, (int, float, prop.Efficiency))
+        value, _ = self._tuple_property_value_unit_returner(value, prop.Efficiency)
         self = self._get_equipment_object(self)
-        if value < 0:
+        if value <= 0:
             raise Exception("Provide a positive value for efficiency.")
         elif value <= 1:
-            self._efficiency = value
+            self._efficiency = prop.Efficiency(value)
         else:
-            self._efficiency = value/100
+            self._efficiency = prop.Efficiency(value/100)
+            warn("Efficiency set to {} considering value provided in percent.".format(value/100))
         self._update_equipment_object(self)
     
     @property
@@ -231,7 +234,7 @@ class _GasPressureChangers(_PressureChangers):
         P2 = self.outlet_pressure
         T1.unit = "K"
         P1.unit = P2.unit ="Pa"
-        eta = self.efficiency
+        eta = self.efficiency.value
         value = prop.Temperature(compressible_fluid.isentropic_T_rise_compression(T1.value, P1.value, P2.value, k, eta))
         value = value - T1
         value.unit = self.inlet_temperature.unit
@@ -246,7 +249,8 @@ class _GasPressureChangers(_PressureChangers):
             return self.adiabatic_efficiency
     @efficiency.setter
     def efficiency(self, value):
-        _Validators.validate_arg_prop_value_type("efficiency", value, (int, float))
+        _Validators.validate_arg_prop_value_type("efficiency", value, (int, float, prop.Efficiency))
+        value, _ = self._tuple_property_value_unit_returner(value, prop.Efficiency)
         self = self._get_equipment_object(self)
         if value < 0:
             raise Exception("Provide a positive value for efficiency.")
@@ -267,11 +271,12 @@ class _GasPressureChangers(_PressureChangers):
         return self._adiabatic_efficiency
     @adiabatic_efficiency.setter
     def adiabatic_efficiency(self, value):
-        _Validators.validate_arg_prop_value_type("adiabatic_efficiency", value, (int, float))
+        _Validators.validate_arg_prop_value_type("adiabatic_efficiency", value, (int, float, prop.Efficiency))
+        value, _ = self._tuple_property_value_unit_returner(value, prop.Efficiency)
         self = self._get_equipment_object(self)
         if value == None:
             value = 0.7
-        self._adiabatic_efficiency = value
+        self._adiabatic_efficiency = prop.Efficiency(value)
         self._update_equipment_object(self)
     
     @property
@@ -281,15 +286,17 @@ class _GasPressureChangers(_PressureChangers):
             self._outlet_material_stream_index is not None):
             is_inlet = False if self._inlet_material_stream_index is None else True
             isentropic_exponent = self._connected_stream_property_getter(is_inlet, "material", "isentropic_exponent")
-            return compressible_fluid.isentropic_efficiency(P1 = self._inlet_pressure.value,
+            pol_eff = compressible_fluid.isentropic_efficiency(P1 = self._inlet_pressure.value,
                                                             P2 = self._outlet_pressure.value,
                                                             k = isentropic_exponent,
-                                                            eta_s = self.adiabatic_efficiency)
+                                                            eta_s = self.adiabatic_efficiency.value)
+            return prop.Efficiency(pol_eff)
         else:
             return self.efficiency
     @polytropic_efficiency.setter
     def polytropic_efficiency(self, value):
-        _Validators.validate_arg_prop_value_type("polytropic_efficiency", value, (int, float))
+        _Validators.validate_arg_prop_value_type("polytropic_efficiency", value, (int, float, prop.Efficiency))
+        value, _ = self._tuple_property_value_unit_returner(value, prop.Efficiency)
         self = self._get_equipment_object(self)
         is_inlet = False if self._intlet_material_stream_index is None else True
         isentropic_exponent = self._connected_stream_property_getter(is_inlet, "material", "isentropic_exponent")
@@ -307,7 +314,7 @@ class _GasPressureChangers(_PressureChangers):
             return self._polytropic_exponent
         is_inlet = False if self._inlet_material_stream_index is None else True
         k = self._connected_stream_property_getter(is_inlet, "material", "isentropic_exponent")
-        return compressible_fluid.polytropic_exponent(k=k, eta_p=self.polytropic_efficiency)
+        return compressible_fluid.polytropic_exponent(k=k, eta_p=self.polytropic_efficiency.value)
     @polytropic_exponent.setter
     def polytropic_exponent(self, value):
         _Validators.validate_arg_prop_value_type("polytropic_exponent", value, (int, float))
@@ -331,7 +338,7 @@ class _GasPressureChangers(_PressureChangers):
                                                               Z = Z,
                                                               P1 = self._inlet_pressure.value,
                                                               P2 = self._outlet_pressure.value,
-                                                              eta = self.adiabatic_efficiency)
+                                                              eta = self.adiabatic_efficiency.value)
         return prop.Power(work * self.inlet_mass_flowrate.value / MW.value)
     
     @property
@@ -1048,12 +1055,13 @@ class _Exchangers(_EquipmentOneInletOutlet):
         return self._efficiency
     @efficiency.setter
     def efficiency(self, value):
-        _Validators.validate_arg_prop_value_type("efficiency", value, (int, float))
+        _Validators.validate_arg_prop_value_type("efficiency", value, (int, float, prop.Efficiency))
+        value, _ = self._tuple_property_value_unit_returner(value, prop.Efficiency)
         self = self._get_equipment_object(self)
         if value < 0:
             raise Exception("Provide a positive value for efficiency.")
         elif value <= 1:
-            self._efficiency = value
+            self._efficiency = prop.Efficiency(value)
         else:
-            self._efficiency = value/100
+            self._efficiency = prop.Efficiency(value/100)
         self._update_equipment_object(self)

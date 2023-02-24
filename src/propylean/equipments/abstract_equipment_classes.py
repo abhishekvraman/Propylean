@@ -8,7 +8,7 @@ _material_stream_equipment_map = dict()
 global _energy_stream_equipment_map
 _energy_stream_equipment_map = dict()
 
-#Defining generic base class for all equipments with one inlet and outlet
+# Defining generic base class for all equipments with one inlet and outlet.
 class _EquipmentOneInletOutlet(object):
     items = []
     def __init__(self, **inputs) -> None:
@@ -285,7 +285,7 @@ class _EquipmentOneInletOutlet(object):
         return self._inlet_mass_flowrate - self._outlet_mass_flowrate                             
     @inventory_change_rate.setter
     def inventory_change_rate(self, value):
-        raise Exception("Dynamic simulation is not yet supported.")
+        raise Exception("Dynamic process is not yet supported.")
         _Validators.validate_arg_prop_value_type("inventory_change_rate", value, (int))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.MassFlowRate)
@@ -349,7 +349,6 @@ class _EquipmentOneInletOutlet(object):
     @classmethod
     def _update_equipment_object(cls, obj):
         _Validators.validate_arg_prop_value_type("obj", obj, cls)
-        
         try:
             cls.items[obj.index] = obj
         except:
@@ -364,7 +363,8 @@ class _EquipmentOneInletOutlet(object):
     def get_stream_tag(self, stream_type, direction):
         """ 
         DESCRIPTION:
-            Method to get stream tag using steam type and the direction.
+            Method to tsg ogf stream connected to the equipment using steam 
+            type and the direction.
         
         PARAMETERS:
             stream_type:
@@ -372,12 +372,12 @@ class _EquipmentOneInletOutlet(object):
                 Type: str
                 Acceptable values: 'm', 'mass', 'e', 'energy'
                 Description: Type of stream user wants to get tag of.
-            
             direction:
                 Required: Yes
                 Type: str
                 Acceptable values: 'in', 'out', 'inlet' or 'outlet'
                 Description: Direction of stream with respect to equipment user wants to get tag of.
+       
         RETURN VALUE:
             Type: str
             Description: Tag value of stream user has assigned to the stream
@@ -944,6 +944,34 @@ class _EquipmentOneInletOutlet(object):
         return False
     
     def _tuple_property_value_unit_returner(self, value, property_type):
+        """ 
+            DESCRIPTION:
+                Internal function to get value and unit from either tuple,
+                property, float or int based on how user has provided.
+            
+            PARAMETERS:
+                value:
+                    Required: Yes
+                    Type: tuple or property or int or float
+                    Default value: Not Applicable
+                    Description: Value provided by the user
+                
+                property_type:
+                    Required: Yes
+                    Type: Propylean property
+                    Description: Type of property.
+
+            
+            RETURN VALUE:
+                Type: Tuple
+            
+            ERROR RAISED:
+                Type:
+                Description: 
+            
+            SAMPLE USE CASES:
+                self._tuple_property_value_unit_returner(prop.Length(10, "cm"), prop.Length)  
+        """
         if isinstance(value, tuple):
             return value[0], value[1]
         elif isinstance(value, property_type):
