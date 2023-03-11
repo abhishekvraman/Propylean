@@ -59,7 +59,7 @@ class ControlValve(_EquipmentOneInletOutlet):
         Psat = self._connected_stream_property_getter(is_inlet, "material", "Psat")
         Pc = self._connected_stream_property_getter(is_inlet, "material", "Pc")
         if phase == 'l':
-            return cv_calculations.size_control_valve_l(density.value, Psat, Pc, d_viscosity.value,
+            return cv_calculations.size_control_valve_l(density.value, Psat.value, Pc.value, d_viscosity.value,
                                                         P1.value, P2.value, 
                                                         self.inlet_mass_flowrate.value/density.value)
         elif phase == 'g' or phase == 'l/g':

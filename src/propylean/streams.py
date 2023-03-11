@@ -396,7 +396,7 @@ class MaterialStream(Stream):
         return self._isentropic_exponent
     @isentropic_exponent.setter
     def isentropic_exponent(self, value):
-        _Validators.validate_arg_prop_value_type("isentropic_exponent", value, (int, float, prop.Dimensionless))
+        _Validators.validate_arg_prop_value_type("isentropic_exponent", value, ( prop.Dimensionless, int, float))
         if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
@@ -448,7 +448,7 @@ class MaterialStream(Stream):
         return self._Z
     @Z.setter
     def Z(self, value):
-        _Validators.validate_arg_prop_value_type("Z", value, (int, float, prop.Dimensionless))
+        _Validators.validate_arg_prop_value_type("Z", value, (prop.Dimensionless, int, float))
         if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
@@ -461,7 +461,7 @@ class MaterialStream(Stream):
         return self._Z_g
     @Z_g.setter
     def Z_g(self, value):
-        _Validators.validate_arg_prop_value_type("Z_g", value, (int, float, prop.Dimensionless))
+        _Validators.validate_arg_prop_value_type("Z_g", value, (prop.Dimensionless, int, float))
         if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
@@ -474,7 +474,7 @@ class MaterialStream(Stream):
         return self._Z_l
     @Z_l.setter
     def Z_l(self, value):
-        _Validators.validate_arg_prop_value_type("Z_l", value, (int, float, prop.Dimensionless))
+        _Validators.validate_arg_prop_value_type("Z_l", value, (prop.Dimensionless, int, float))
         if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
