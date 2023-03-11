@@ -20,8 +20,8 @@ class _Validators(object):
                 Description: Correct types of the argument or property.
         """
         if value is not None and not isinstance(value, correct_types):
-            raise Exception("""Incorrect type '{0}' provided to '{1}'. Should be '{2}'.
-            """.format(value.__class__.__name__, arg_prop_name, correct_types.__class__.__name__))
+            raise Exception("Incorrect type '{0}' provided to '{1}'. Should be {2}."\
+                            .format(value.__class__.__name__, arg_prop_name, tuple(c_type.__name__ for c_type in correct_types)))
         return True
     
     @classmethod
