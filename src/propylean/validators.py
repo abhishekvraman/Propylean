@@ -21,7 +21,7 @@ class _Validators(object):
         """
         if value is not None and not isinstance(value, correct_types):
             raise Exception("""Incorrect type '{0}' provided to '{1}'. Should be '{2}'.
-            """.format(type(value), arg_prop_name, str(correct_types)))
+            """.format(value.__class__.__name__, arg_prop_name, correct_types.__class__.__name__))
         return True
     
     @classmethod

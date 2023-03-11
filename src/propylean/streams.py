@@ -1,6 +1,7 @@
 from thermo import Mixture
 import propylean.properties as prop
 from propylean.validators import _Validators
+from statistics import fmean
 
 class Stream(object):
    
@@ -75,7 +76,7 @@ class Stream(object):
             return value, None
 
 
-class EnergyStream (Stream):
+class EnergyStream(Stream):
     items = [] 
     def __init__(self, tag=None, amount=(0, 'W')):
         super().__init__(tag)
@@ -110,7 +111,7 @@ class EnergyStream (Stream):
     def delete(self):
         """ 
         DESCRIPTION:
-            Method to delete an MaterialStream object.
+            Method to delete an EnergyStream object.
         
         PARAMETERS:
             None
@@ -395,7 +396,7 @@ class MaterialStream(Stream):
         return self._isentropic_exponent
     @isentropic_exponent.setter
     def isentropic_exponent(self, value):
-        _Validators.validate_arg_prop_value_type("isentropic_exponent", value, (int, float))
+        _Validators.validate_arg_prop_value_type("isentropic_exponent", value, (int, float, prop.Dimensionless))
         if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
@@ -447,7 +448,7 @@ class MaterialStream(Stream):
         return self._Z
     @Z.setter
     def Z(self, value):
-        _Validators.validate_arg_prop_value_type("Z", value, (int, float))
+        _Validators.validate_arg_prop_value_type("Z", value, (int, float, prop.Dimensionless))
         if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
@@ -460,7 +461,7 @@ class MaterialStream(Stream):
         return self._Z_g
     @Z_g.setter
     def Z_g(self, value):
-        _Validators.validate_arg_prop_value_type("Z_g", value, (int, float))
+        _Validators.validate_arg_prop_value_type("Z_g", value, (int, float, prop.Dimensionless))
         if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
@@ -473,7 +474,7 @@ class MaterialStream(Stream):
         return self._Z_l
     @Z_l.setter
     def Z_l(self, value):
-        _Validators.validate_arg_prop_value_type("Z_l", value, (int, float))
+        _Validators.validate_arg_prop_value_type("Z_l", value, (int, float, prop.Dimensionless))
         if MaterialStream.property_package:
             raise Exception("Property cannot be changed when using a Property Package.")
         self = self._get_stream_object(self)
@@ -498,7 +499,7 @@ class MaterialStream(Stream):
         self.pressure.unit = old_p_unit
         self.temperature.unit = old_t_unit
         
-        # Assigning Phase
+        # Assigning Phase.
         phase = mx.phase
         if phase is not None:
             self.phase = phase
@@ -537,34 +538,33 @@ class MaterialStream(Stream):
         #Assiging Compressibility Factor Z
         Z = mx.Z
         if Z is not None:
-            self.Z = Z
+            self.Z = prop.Dimensionless(value=Z, name="Compressibility factor (Z)")
         
         Z_l = mx.Zl
         if Z_l is not None:
-            self.Z_l = Z_l
+            self.Z_l = prop.Dimensionless(value=Z_l, name="Compressibility factor of mixture in liquid phase (Z_l)")
         
         Z_g = mx.Zg
         if Z_g is not None:
-            self.Z_g = Z_g
+            self.Z_g = prop.Dimensionless(value=Z_g, name="Compressibility factor of mixture gaseous phase (Z_g)")
         
-        # Assigning Isnetropic Exponent
+        # Assigning Isnetropic Exponent.
         isentropic_exponent = mx.isentropic_exponent
         if isentropic_exponent is not None:
-            self.isentropic_exponent = isentropic_exponent
+            self.isentropic_exponent = prop.Dimensionless(value=isentropic_exponent, name="Isentropic Exponent")
         
-        # Assiging Psat and Pc
+        # Assigning Psat and Pc.
         Psat_indiv = mx.Psats
         Psat = None
         if len(Psat_indiv)==1:
             Psat = Psat_indiv[0]
         else:
-            import statistics
-            Psat = statistics.fmean(Psat_indiv)
+            Psat = fmean(Psat_indiv)
         if Psat is not None:
-            self.Psat = Psat
+            self.Psat = prop.Pressure(Psat, unit="Pa")
         Pc = mx.Pc
         if Pc is not None:
-            self.Pc = Pc
+            self.Pc = prop.Pressure(Pc, unit="Pa")
 
     @classmethod
     def list_objects(cls):
@@ -572,7 +572,7 @@ class MaterialStream(Stream):
     
     def __repr__(self) -> str:
         self = self._get_stream_object(self)
-        return 'Material Stream Tag: ' + self.tag
+        return 'Material Stream with tag: ' + self.tag
     
     def delete(self):
         """ 

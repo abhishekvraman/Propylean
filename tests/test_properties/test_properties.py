@@ -31,11 +31,11 @@ def test_Length_incorrect_instantiation():
 def test_Length_incorrect_type_to_value():
     with pytest.raises(Exception) as exp:
         properties.Length([10])
-    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    assert "Incorrect type 'list' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
     with pytest.raises(Exception) as exp:
         l = properties.Length()
         l.value = []
-    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    assert "Incorrect type 'list' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
 
 
 @pytest.mark.negative
@@ -76,11 +76,11 @@ def test_Time_incorrect_instantiation():
 def test_Time_incorrect_type_to_value():
     with pytest.raises(Exception) as exp:
         properties.Time([10])
-    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    assert "Incorrect type 'list' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
     with pytest.raises(Exception) as exp:
         l = properties.Time()
         l.value = []
-    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    assert "Incorrect type 'list' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
 
 @pytest.mark.negative
 def test_Time_incorrect_type_to_unit():
@@ -119,11 +119,11 @@ def test_Pressure_incorrect_instantiation_conversion():
 def test_Pressure_incorrect_type_to_value():
     with pytest.raises(Exception) as exp:
         properties.Pressure([10])
-    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    assert "Incorrect type 'list' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
     with pytest.raises(Exception) as exp:
         l = properties.Pressure()
         l.value = []
-    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    assert "Incorrect type 'list' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
 
 @pytest.mark.negative
 def test_Pressure_incorrect_type_to_unit():
@@ -169,11 +169,11 @@ def test_Temperature_incorrect_instantiation_conversion():
 def test_Temperature_incorrect_type_to_value():
     with pytest.raises(Exception) as exp:
         properties.Temperature([10])
-    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    assert "Incorrect type 'list' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
     with pytest.raises(Exception) as exp:
         l = properties.Temperature()
         l.value = []
-    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    assert "Incorrect type 'list' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
 
 @pytest.mark.negative
 def test_Temperature_incorrect_type_to_unit():
@@ -216,11 +216,11 @@ def test_MassFlowRate_incorrect_instantiatio_conversion():
 def test_MassFlowRate_incorrect_type_to_value():
     with pytest.raises(Exception) as exp:
         properties.MassFlowRate([10])
-    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    assert "Incorrect type 'list' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
     with pytest.raises(Exception) as exp:
         l = properties.MassFlowRate()
         l.value = []
-    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    assert "Incorrect type 'list' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
 
 @pytest.mark.negative
 def test_MassFlowRate_incorrect_type_to_unit():
@@ -261,11 +261,11 @@ def test_MolarFlowRate_incorrect_instantiation_conversion():
 def test_MolarFlowRate_incorrect_type_to_value():
     with pytest.raises(Exception) as exp:
         properties.MolarFlowRate([10])
-    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    assert "Incorrect type 'list' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
     with pytest.raises(Exception) as exp:
         l = properties.MolarFlowRate()
         l.value = []
-    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    assert "Incorrect type 'list' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
 
 @pytest.mark.negative
 def test_MolarFlowRate_incorrect_type_to_unit():
@@ -305,11 +305,11 @@ def test_VolumeFlowRate_incorrect_instantiation_conversion():
 def test_VolumetricFlowRate_incorrect_type_to_value():
     with pytest.raises(Exception) as exp:
         properties.VolumetricFlowRate([10])
-    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    assert "Incorrect type 'list' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
     with pytest.raises(Exception) as exp:
         l = properties.VolumetricFlowRate()
         l.value = []
-    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    assert "Incorrect type 'list' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
 
 @pytest.mark.negative
 def test_VolumetricFlowRate_incorrect_type_to_unit():
@@ -358,11 +358,11 @@ def test_Power_instantiation_conversion():
 def test_Power_incorrect_type_to_value():
     with pytest.raises(Exception) as exp:
         properties.Power([10])
-    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    assert "Incorrect type 'list' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
     with pytest.raises(Exception) as exp:
         l = properties.Power()
         l.value = []
-    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    assert "Incorrect type 'list' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
 
 @pytest.mark.negative
 def test_Power_incorrect_type_to_unit():
@@ -389,11 +389,11 @@ def test_property_density():
 def test_Density_incorrect_type_to_value():
     with pytest.raises(Exception) as exp:
         properties.Density([10])
-    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    assert "Incorrect type 'list' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
     with pytest.raises(Exception) as exp:
         l = properties.Density()
         l.value = []
-    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    assert "Incorrect type 'list' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
 
 @pytest.mark.negative
 def test_Desnisty_incorrect_type_to_unit():
@@ -418,11 +418,11 @@ def test_property_dviscosity():
 def test_DViscosity_incorrect_type_to_value():
     with pytest.raises(Exception) as exp:
         properties.DViscosity([10])
-    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    assert "Incorrect type 'list' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
     with pytest.raises(Exception) as exp:
         l = properties.DViscosity()
         l.value = []
-    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    assert "Incorrect type 'list' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
 
 @pytest.mark.negative
 def test_DViscosity_incorrect_type_to_unit():
@@ -547,7 +547,7 @@ def test_time_series_incorrect_type_to_value():
     with pytest.raises(Exception) as exp:
         l = properties.Length(10)
         l.time_series = []
-    assert "Incorrect type '<class 'list'>' provided to 'time_series'. Should be '(<class 'pandas.core.series.Series'>, <class 'pandas.core.frame.DataFrame'>, <class 'dict'>)" in str(exp)
+    assert "Incorrect type 'list' provided to 'time_series'. Should be '(<class 'pandas.core.series.Series'>, <class 'pandas.core.frame.DataFrame'>, <class 'dict'>)" in str(exp)
 
 @pytest.mark.positive
 def test_property_Efficiency():
@@ -560,16 +560,42 @@ def test_property_Efficiency():
 def test_Efficiency_incorrect_type_to_value():
     with pytest.raises(Exception) as exp:
         properties.Efficiency([10])
-    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    assert "Incorrect type 'list' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
     with pytest.raises(Exception) as exp:
         l = properties.Efficiency()
         l.value = []
-    assert "Incorrect type '<class 'list'>' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    assert "Incorrect type 'list' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
 
 @pytest.mark.negative
 def test_Efficiency_setting_unit(): 
     with pytest.raises(Exception) as exp:
-        l = properties.Efficiency()
+        l = properties.Efficiency(0.75)
         l.unit = 10
-    assert "Efficiency is dimensionless." in str(exp)
+    assert "Efficiency does not have unit." in str(exp)
+
+@pytest.mark.positive
+def test_property_Dimensionless():
+    re1 = properties.Dimensionless(value=70, min_val=60, max_val=80, name="Renolds Number")
+    assert re1.value == 70
+    assert re1.min_val == 60
+    assert re1.max_val == 80
+    assert re1.name == "Renolds Number"
+
+
+@pytest.mark.negative
+def test_Dimensionless_incorrect_type_to_value():
+    with pytest.raises(Exception) as exp:
+        properties.Dimensionless([10])
+    assert "Incorrect type 'list' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+    with pytest.raises(Exception) as exp:
+        l = properties.Dimensionless()
+        l.value = []
+    assert "Incorrect type 'list' provided to 'value'. Should be '(<class 'int'>, <class 'float'>)" in str(exp)
+
+@pytest.mark.negative
+def test_Dimensionless_setting_unit(): 
+    with pytest.raises(Exception) as exp:
+        l = properties.Dimensionless(name="Reynolds Number")
+        l.unit = 10
+    assert "Reynolds Number does not have unit." in str(exp)
    
