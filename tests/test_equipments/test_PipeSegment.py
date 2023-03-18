@@ -390,7 +390,7 @@ class test_PipeSegment(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = PipeSegment(segment_type=13, ID=(18, 'mm'), shape=(20, 18))
             m4.inlet_pressure = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'inlet_pressure'. Should be '(<class 'propylean.properties.Pressure'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'inlet_pressure'. Should be '('Pressure', 'int', 'float', 'tuple')'",
                       str(exp))
 
     @pytest.mark.negative
@@ -398,7 +398,7 @@ class test_PipeSegment(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = PipeSegment(segment_type=13, ID=(18, 'mm'), shape=(20, 18))
             m4.outlet_pressure = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'outlet_pressure'. Should be '(<class 'propylean.properties.Pressure'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'outlet_pressure'. Should be '('Pressure', 'int', 'float', 'tuple')'",
                       str(exp)) 
 
                             
@@ -407,7 +407,7 @@ class test_PipeSegment(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = PipeSegment(segment_type=13, ID=(18, 'mm'), shape=(20, 18))
             m4.design_pressure = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'design_pressure'. Should be '(<class 'propylean.properties.Pressure'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'design_pressure'. Should be '('Pressure', 'int', 'float', 'tuple')'",
                       str(exp)) 
 
     @pytest.mark.negative
@@ -415,7 +415,7 @@ class test_PipeSegment(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = PipeSegment(segment_type=13, ID=(18, 'mm'), shape=(20, 18))
             m4.inlet_temperature = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'inlet_temperature'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'inlet_temperature'. Should be '('Temperature', 'int', 'float', 'tuple')'",
                       str(exp))
 
     @pytest.mark.negative
@@ -423,7 +423,7 @@ class test_PipeSegment(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = PipeSegment(segment_type=13, ID=(18, 'mm'), shape=(20, 18))
             m4.outlet_temperature = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'outlet_temperature'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'outlet_temperature'. Should be '('Temperature', 'int', 'float', 'tuple')'",
                       str(exp)) 
 
     @pytest.mark.negative
@@ -431,7 +431,7 @@ class test_PipeSegment(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = PipeSegment(segment_type=13, ID=(18, 'mm'), shape=(20, 18))
             m4.temperature_decrease = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'temperature_decrease'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'temperature_decrease'. Should be '('Temperature', 'int', 'float', 'tuple')'",
                       str(exp)) 
 
     @pytest.mark.negative
@@ -439,7 +439,7 @@ class test_PipeSegment(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = PipeSegment(segment_type=13, ID=(18, 'mm'), shape=(20, 18))
             m4.temperature_increase = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'temperature_increase'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'temperature_increase'. Should be '('Temperature', 'int', 'float', 'tuple')'",
                       str(exp))                                                      
 
     @pytest.mark.negative
@@ -447,7 +447,7 @@ class test_PipeSegment(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = PipeSegment(segment_type=13, ID=(18, 'mm'), shape=(20, 18))
             m4.design_temperature = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'design_temperature'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'design_temperature'. Should be '('Temperature', 'int', 'float', 'tuple')'",
                       str(exp)) 
 
     @pytest.mark.negative
@@ -455,7 +455,7 @@ class test_PipeSegment(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = PipeSegment(segment_type=13, ID=(18, 'mm'), shape=(20, 18))
             m4.inlet_mass_flowrate = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'inlet_mass_flowrate'. Should be '(<class 'propylean.properties.MassFlowRate'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'inlet_mass_flowrate'. Should be '('MassFlowRate', 'int', 'float', 'tuple')'",
                       str(exp))                   
 
     @pytest.mark.negative
@@ -463,7 +463,7 @@ class test_PipeSegment(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = PipeSegment(segment_type=13, ID=(18, 'mm'), shape=(20, 18))
             m4.outlet_mass_flowrate = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'outlet_mass_flowrate'. Should be '(<class 'propylean.properties.MassFlowRate'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'outlet_mass_flowrate'. Should be '('MassFlowRate', 'int', 'float', 'tuple')'",
                       str(exp))
 
     @pytest.mark.negative
@@ -471,7 +471,7 @@ class test_PipeSegment(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = PipeSegment(segment_type=13, ID=(18, 'mm'), shape=(20, 18))
             m4.energy_in = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'energy_in'. Should be '(<class 'propylean.properties.Power'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'energy_in'. Should be '('Power', 'int', 'float', 'tuple')'",
                       str(exp))      
 
     @pytest.mark.negative
@@ -479,7 +479,7 @@ class test_PipeSegment(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = PipeSegment(segment_type=13, ID=(18, 'mm'), shape=(20, 18))
             m4.energy_out = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'energy_out'. Should be '(<class 'propylean.properties.Power'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'energy_out'. Should be '('Power', 'int', 'float', 'tuple')'",
                       str(exp))
 
     @pytest.mark.negative
@@ -487,7 +487,7 @@ class test_PipeSegment(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = PipeSegment(segment_type=13, ID=(18, 'mm'), shape=(20, 18))
             m4.length = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'length'. Should be '(<class 'propylean.properties.Length'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'length'. Should be '('Length', 'int', 'float', 'tuple')'",
                       str(exp))                  
 
     @pytest.mark.negative
@@ -495,7 +495,7 @@ class test_PipeSegment(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = PipeSegment(segment_type=13, ID=[18, 'mm'], shape=(20, 18))
             
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'ID'. Should be '(<class 'propylean.properties.Length'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'ID'. Should be '('Length', 'int', 'float', 'tuple')'",
                       str(exp))                    
 
     @pytest.mark.negative
@@ -503,7 +503,7 @@ class test_PipeSegment(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = PipeSegment(segment_type=13, ID=(18, 'mm'), shape=(20, 18))
             m4.OD = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'OD'. Should be '(<class 'propylean.properties.Length'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'OD'. Should be '('Length', 'int', 'float', 'tuple')'",
                       str(exp))                  
 
     @pytest.mark.negative
@@ -511,7 +511,7 @@ class test_PipeSegment(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = PipeSegment(segment_type=13, ID=(18, 'mm'), shape=(20, 18))
             m4.elevation = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'elevation'. Should be '(<class 'propylean.properties.Length'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'elevation'. Should be '('Length', 'int', 'float', 'tuple')'",
                       str(exp))                   
 
     @pytest.mark.negative
@@ -519,12 +519,12 @@ class test_PipeSegment(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = PipeSegment(segment_type=[13], ID=(18, 'mm'), shape=(20, 18))
             
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'segment_type'. Should be '<class 'int'>'",
+        self.assertIn("Incorrect type 'list' provided to 'segment_type'. Should be 'int'",
                       str(exp))  
         with pytest.raises(Exception) as exp:
             m4 = PipeSegment(length=(10, "m"), ID=(18, 'mm'), shape=(20, 18))
             m4.segment_type = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'segment_type'. Should be '<class 'int'>'",
+        self.assertIn("Incorrect type 'list' provided to 'segment_type'. Should be 'int'",
                       str(exp))                                  
 
     @pytest.mark.negative
@@ -533,7 +533,7 @@ class test_PipeSegment(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = PipeSegment(length=(10, "m"), ID=(18, 'mm'), shape=(20, 18))
             m4.material = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'material'. Should be '<class 'int'>'",
+        self.assertIn("Incorrect type 'list' provided to 'material'. Should be 'int'",
                       str(exp))                    
 
     @pytest.mark.negative
@@ -545,22 +545,22 @@ class test_PipeSegment(unittest.TestCase):
             
         with pytest.raises(Exception) as exp:
             cv.connect_stream([inlet_stream], 'in', stream_governed=True)
-        self.assertIn("Incorrect type \'<class \'list\'>\' provided to \'stream_object\'. Should be \'(<class \'propylean.streams.MaterialStream\'>, <class \'propylean.streams.EnergyStream\'>)\'.\\n            ",
+        self.assertIn("Incorrect type \'list\' provided to \'stream_object\'. Should be \'('MaterialStream', 'EnergyStream')\'",
                       str(exp)) 
         
         with pytest.raises(Exception) as exp:
             cv.connect_stream(inlet_stream, ['in'], stream_governed=True)
-        self.assertIn("Incorrect type \'<class \'list\'>\' provided to \'direction\'. Should be \'<class \'str\'>\'.\\n            ",
+        self.assertIn("Incorrect type \'list\' provided to \'direction\'. Should be \'str\'",
                       str(exp)) 
         with pytest.raises(Exception) as exp:
             cv.connect_stream(inlet_stream, 'in', stream_governed=[True])
-        self.assertIn("Incorrect type \'<class \'list\'>\' provided to \'stream_governed\'. Should be \'<class \'bool\'>\'.\\n            ",
+        self.assertIn("Incorrect type \'list\' provided to \'stream_governed\'. Should be \'bool\'",
                       str(exp)) 
 
         cv.connect_stream(inlet_stream, 'in', stream_governed=True)
         with pytest.raises(Exception) as exp:
             cv.disconnect_stream(stream_tag=["Inlet_cv_19"])
-        self.assertIn("Incorrect type \'<class \'list\'>\' provided to \'stream_tag\'. Should be \'<class \'str\'>\'.\\n            ",
+        self.assertIn("Incorrect type \'list\' provided to \'stream_tag\'. Should be \'str\'",
                       str(exp))    
 
     @pytest.mark.negative
