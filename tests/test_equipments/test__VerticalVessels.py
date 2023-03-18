@@ -428,7 +428,7 @@ class test__VerticalVessels(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = _VerticalVessels()
             m4.inlet_pressure = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'inlet_pressure'. Should be '(<class 'propylean.properties.Pressure'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'inlet_pressure'. Should be '('Pressure', 'int', 'float', 'tuple')'",
                       str(exp))
 
     @pytest.mark.negative
@@ -436,7 +436,7 @@ class test__VerticalVessels(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = _VerticalVessels()
             m4.outlet_pressure = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'outlet_pressure'. Should be '(<class 'propylean.properties.Pressure'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'outlet_pressure'. Should be '('Pressure', 'int', 'float', 'tuple')'",
                       str(exp)) 
 
     @pytest.mark.negative
@@ -444,7 +444,7 @@ class test__VerticalVessels(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = _VerticalVessels()
             m4.pressure_drop = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'pressure_drop'. Should be '(<class 'propylean.properties.Pressure'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'pressure_drop'. Should be '('Pressure', 'int', 'float', 'tuple')'",
                       str(exp))                                    
 
     @pytest.mark.negative
@@ -452,7 +452,7 @@ class test__VerticalVessels(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = _VerticalVessels()
             m4.design_pressure = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'design_pressure'. Should be '(<class 'propylean.properties.Pressure'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'design_pressure'. Should be '('Pressure', 'int', 'float', 'tuple')'",
                       str(exp)) 
 
     @pytest.mark.negative
@@ -460,7 +460,7 @@ class test__VerticalVessels(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = _VerticalVessels()
             m4.inlet_temperature = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'inlet_temperature'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'inlet_temperature'. Should be '('Temperature', 'int', 'float', 'tuple')'",
                       str(exp))
 
     @pytest.mark.negative
@@ -468,7 +468,7 @@ class test__VerticalVessels(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = _VerticalVessels()
             m4.outlet_temperature = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'outlet_temperature'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'outlet_temperature'. Should be '('Temperature', 'int', 'float', 'tuple')'",
                       str(exp)) 
 
     @pytest.mark.negative
@@ -476,7 +476,7 @@ class test__VerticalVessels(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = _VerticalVessels()
             m4.temperature_decrease = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'temperature_decrease'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'temperature_decrease'. Should be '('Temperature', 'int', 'float', 'tuple')'",
                       str(exp)) 
 
     @pytest.mark.negative
@@ -484,7 +484,7 @@ class test__VerticalVessels(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = _VerticalVessels()
             m4.temperature_increase = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'temperature_increase'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'temperature_increase'. Should be '('Temperature', 'int', 'float', 'tuple')'",
                       str(exp))                                                      
 
     @pytest.mark.negative
@@ -492,7 +492,7 @@ class test__VerticalVessels(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = _VerticalVessels()
             m4.design_temperature = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'design_temperature'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'design_temperature'. Should be '('Temperature', 'int', 'float', 'tuple')'",
                       str(exp)) 
 
     @pytest.mark.negative
@@ -500,7 +500,7 @@ class test__VerticalVessels(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = _VerticalVessels()
             m4.inlet_mass_flowrate = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'inlet_mass_flowrate'. Should be '(<class 'propylean.properties.MassFlowRate'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'inlet_mass_flowrate'. Should be '('MassFlowRate', 'int', 'float', 'tuple')'",
                       str(exp))                   
 
     @pytest.mark.negative
@@ -508,7 +508,7 @@ class test__VerticalVessels(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = _VerticalVessels()
             m4.outlet_mass_flowrate = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'outlet_mass_flowrate'. Should be '(<class 'propylean.properties.MassFlowRate'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'outlet_mass_flowrate'. Should be '('MassFlowRate', 'int', 'float', 'tuple')'",
                       str(exp))
 
     @pytest.mark.negative
@@ -516,7 +516,7 @@ class test__VerticalVessels(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = _VerticalVessels()
             m4.energy_in = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'energy_in'. Should be '(<class 'propylean.properties.Power'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'energy_in'. Should be '('Power', 'int', 'float', 'tuple')'",
                       str(exp))      
 
     @pytest.mark.negative
@@ -524,7 +524,7 @@ class test__VerticalVessels(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = _VerticalVessels()
             m4.energy_out = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'energy_out'. Should be '(<class 'propylean.properties.Power'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'energy_out'. Should be '('Power', 'int', 'float', 'tuple')'",
                       str(exp))                               
 
     @pytest.mark.negative
@@ -533,12 +533,12 @@ class test__VerticalVessels(unittest.TestCase):
             Veritcal_vessel = _VerticalVessels(
                                                ID=[4, "m"], length=(10, "m"),
                                                head_type="flat")
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'ID'. Should be '(<class 'propylean.properties.Length'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'ID'. Should be '('Length', 'int', 'float', 'tuple')'",
                       str(exp))
         with pytest.raises(Exception) as exp:
             m4 = _VerticalVessels()
             m4.ID = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'ID'. Should be '(<class 'propylean.properties.Length'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'ID'. Should be '('Length', 'int', 'float', 'tuple')'",
                       str(exp))
 
     @pytest.mark.negative
@@ -547,12 +547,12 @@ class test__VerticalVessels(unittest.TestCase):
             Veritcal_vessel = _VerticalVessels(
                                                ID=(4, "m"), length=[10, "m"],
                                                head_type="flat")
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'length'. Should be '(<class 'propylean.properties.Length'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'length'. Should be '('Length', 'int', 'float', 'tuple')'",
                       str(exp))
         with pytest.raises(Exception) as exp:
             m4 = _VerticalVessels()
             m4.length = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'length'. Should be '(<class 'propylean.properties.Length'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'length'. Should be '('Length', 'int', 'float', 'tuple')'",
                       str(exp))                  
 
     @pytest.mark.negative
@@ -561,12 +561,12 @@ class test__VerticalVessels(unittest.TestCase):
             Veritcal_vessel = _VerticalVessels(
                                                ID=(4, "m"), length=(10, "m"),
                                                head_type=["flat"])
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'head_type'. Should be '<class 'str'>'",
+        self.assertIn("Incorrect type 'list' provided to 'head_type'. Should be 'str'",
                       str(exp))
         with pytest.raises(Exception) as exp:
             m4 = _VerticalVessels()
             m4.head_type = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'head_type'. Should be '<class 'str'>'",
+        self.assertIn("Incorrect type 'list' provided to 'head_type'. Should be 'str'",
                       str(exp))
 
     @pytest.mark.negative
@@ -574,7 +574,7 @@ class test__VerticalVessels(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = _VerticalVessels()
             m4.LLLL = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'LLLL'. Should be '(<class 'propylean.properties.Length'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'LLLL'. Should be '('Length', 'int', 'float', 'tuple')'",
                       str(exp))                    
 
     @pytest.mark.negative
@@ -582,7 +582,7 @@ class test__VerticalVessels(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = _VerticalVessels()
             m4.LLL = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'LLL'. Should be '(<class 'propylean.properties.Length'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'LLL'. Should be '('Length', 'int', 'float', 'tuple')'",
                       str(exp))                   
 
     @pytest.mark.negative
@@ -590,7 +590,7 @@ class test__VerticalVessels(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = _VerticalVessels()
             m4.NLL = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'NLL'. Should be '(<class 'propylean.properties.Length'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'NLL'. Should be '('Length', 'int', 'float', 'tuple')'",
                       str(exp))                   
 
     @pytest.mark.negative
@@ -598,7 +598,7 @@ class test__VerticalVessels(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = _VerticalVessels()
             m4.HLL = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'HLL'. Should be '(<class 'propylean.properties.Length'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'HLL'. Should be '('Length', 'int', 'float', 'tuple')'",
                       str(exp))                   
 
     @pytest.mark.negative
@@ -606,7 +606,7 @@ class test__VerticalVessels(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = _VerticalVessels()
             m4.HHLL = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'HHLL'. Should be '(<class 'propylean.properties.Length'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'HHLL'. Should be '('Length', 'int', 'float', 'tuple')'",
                       str(exp))   
 
     @pytest.mark.negative
@@ -614,7 +614,7 @@ class test__VerticalVessels(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = _VerticalVessels()
             m4.operating_temperature = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'operating_temperature'. Should be '(<class 'propylean.properties.Temperature'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'operating_temperature'. Should be '('Temperature', 'int', 'float', 'tuple')'",
                       str(exp))  
 
     @pytest.mark.negative
@@ -622,7 +622,7 @@ class test__VerticalVessels(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = _VerticalVessels()
             m4.operating_pressure = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'operating_pressure'. Should be '(<class 'propylean.properties.Pressure'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'operating_pressure'. Should be '('Pressure', 'int', 'float', 'tuple')'",
                       str(exp))      
 
     @pytest.mark.negative
@@ -631,12 +631,12 @@ class test__VerticalVessels(unittest.TestCase):
             Vertical_vessel = _VerticalVessels(
                                                ID=(4, "m"), length=(10, "m"),
                                                head_type="flatop")
-        self.assertIn("Incorrect value \'flatop\' provided to \'head_type\'. Should be among \'[\'hemispherical\', \'elliptical\', \'torispherical\', \'flat\']\'.\\n            ",
+        self.assertIn("Incorrect value \'flatop\' provided to \'head_type\'. Should be among \'[\'hemispherical\', \'elliptical\', \'torispherical\', \'flat\']\'",
                       str(exp))
         with pytest.raises(Exception) as exp:
             m4 = _VerticalVessels()
             m4.head_type = "flatop"
-        self.assertIn("Incorrect value \'flatop\' provided to \'head_type\'. Should be among \'[\'hemispherical\', \'elliptical\', \'torispherical\', \'flat\']\'.\\n            ",
+        self.assertIn("Incorrect value \'flatop\' provided to \'head_type\'. Should be among \'[\'hemispherical\', \'elliptical\', \'torispherical\', \'flat\']\'",
                       str(exp))     
 
     @pytest.mark.negative
@@ -647,22 +647,22 @@ class test__VerticalVessels(unittest.TestCase):
             
         with pytest.raises(Exception) as exp:
             cv.connect_stream([inlet_stream], 'in', stream_governed=True)
-        self.assertIn("Incorrect type \'<class \'list\'>\' provided to \'stream_object\'. Should be \'(<class \'propylean.streams.MaterialStream\'>, <class \'propylean.streams.EnergyStream\'>)\'.\\n            ",
+        self.assertIn("Incorrect type \'list\' provided to \'stream_object\'. Should be \'('MaterialStream', 'EnergyStream')\'",
                       str(exp)) 
         
         with pytest.raises(Exception) as exp:
             cv.connect_stream(inlet_stream, ['in'], stream_governed=True)
-        self.assertIn("Incorrect type \'<class \'list\'>\' provided to \'direction\'. Should be \'<class \'str\'>\'.\\n            ",
+        self.assertIn("Incorrect type \'list\' provided to \'direction\'. Should be \'str\'",
                       str(exp)) 
         with pytest.raises(Exception) as exp:
             cv.connect_stream(inlet_stream, 'in', stream_governed=[True])
-        self.assertIn("Incorrect type \'<class \'list\'>\' provided to \'stream_governed\'. Should be \'<class \'bool\'>\'.\\n            ",
+        self.assertIn("Incorrect type \'list\' provided to \'stream_governed\'. Should be \'bool\'",
                       str(exp)) 
 
         cv.connect_stream(inlet_stream, 'in', stream_governed=True)
         with pytest.raises(Exception) as exp:
             cv.disconnect_stream(stream_tag=["Inlet_cv_19"])
-        self.assertIn("Incorrect type \'<class \'list\'>\' provided to \'stream_tag\'. Should be \'<class \'str\'>\'.\\n            ",
+        self.assertIn("Incorrect type \'list\' provided to \'stream_tag\'. Should be \'str\'",
                       str(exp))    
 
     @pytest.mark.negative
@@ -683,7 +683,7 @@ class test__VerticalVessels(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = _VerticalVessels()
             m4.get_inventory([])
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'type'. Should be '<class \'str\'>",
+        self.assertIn("Incorrect type 'list' provided to 'type'. Should be 'str",
                       str(exp))   
     @pytest.mark.negative
     @pytest.mark.get_inventory

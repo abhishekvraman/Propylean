@@ -32,13 +32,13 @@ class test_EnergyStream(unittest.TestCase):
     def test_EnergyStream_incorrect_assignment(self):
         with pytest.raises(Exception) as exp:
             e5 = EnergyStream("gggg", [])
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'amount'. Should be '(<class 'propylean.properties.Power'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'amount'. Should be '('Power', 'int', 'float', 'tuple')'",
                       str(exp)) 
 
         with pytest.raises(Exception) as exp:
             e5 = EnergyStream()
             e5.amount = []
-        self.assertIn("Incorrect type '<class 'list'>' provided to 'amount'. Should be '(<class 'propylean.properties.Power'>, <class 'int'>, <class 'float'>, <class 'tuple'>)'",
+        self.assertIn("Incorrect type 'list' provided to 'amount'. Should be '('Power', 'int', 'float', 'tuple')'",
                       str(exp))     
 
     @pytest.mark.delete 
