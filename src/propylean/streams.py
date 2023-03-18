@@ -4,7 +4,6 @@ from propylean.validators import _Validators
 from statistics import fmean
 
 class Stream(object):
-   
     def __init__(self, tag=None, **inputs) -> None:
         self._tag = None
         self._to_equipment_tag = None
@@ -79,6 +78,40 @@ class Stream(object):
 class EnergyStream(Stream):
     items = [] 
     def __init__(self, tag=None, amount=(0, 'W')):
+        """ 
+        DESCRIPTION:
+            Final class for creating objects to represent material
+            which is flows in a process plant.
+        
+        PARAMETERS:
+            tag:
+                Required: No
+                Type: string
+                Acceptable values: Tag which is not assigned.
+                Description: Tag to be given to a material stream.
+
+            amount:
+                Required: No
+                Type: int/float or tuple(value, unit) or Power(recommended)
+                Default value: 0 W
+                Description: Specifies the rate of energy or Power.
+                
+        RETURN VALUE:
+            Type: EnergyStream
+            Description: Returns an object of type EnergyStream which is equivalent 
+                         energy flowrate or Power.
+        
+        ERROR RAISED:
+            Type:
+            Description:
+        
+        SAMPLE USE CASES:
+            from propylean.streams import EnergyStream
+            # or
+            from propylean import EnergyStream
+            heating = EnergyStream(tag="stream heating")
+            heating.amount =  prop.Power(25, "C")
+        """
         super().__init__(tag)
         self._amount = prop.Power() 
         self.amount = amount
@@ -142,41 +175,172 @@ class EnergyStream(Stream):
 class MaterialStream(Stream):
     property_package = None
     items = [] 
-    def __init__(self,tag = None,
-                 mass_flowrate = 0,
-                 pressure = 101325,
-                 temperature = 298):
-                 
-                 super().__init__(tag)
-                 self._mass_flowrate = prop.MassFlowRate()
-                 self._pressure = prop.Pressure()
-                 self._temperature = prop.Temperature()
-                 
-                 self.mass_flowrate = mass_flowrate
-                 self.temperature = temperature
-                 self.pressure = pressure
-                 self._density = prop.Density()
-                 self._density_l = prop.Density()
-                 self._density_g = prop.Density()
-                 self._density_s = prop.Density()
-                 self._d_viscosity = prop.DViscosity()
-                 self._d_viscosity_l = prop.DViscosity()
-                 self._d_viscosity_g = prop.DViscosity()
-                 self._components = prop.Components()
+    def __init__(self, tag=None, mass_flowrate=0, pressure=101325,
+                 temperature=298):
+        """ 
+        DESCRIPTION:
+            Final class for creating objects to represent material
+            which is flows in a process plant.
+        
+        PARAMETERS:
+            tag:
+                Required: No
+                Type: string
+                Acceptable values: Tag which is not assigned.
+                Description: Tag to be given to a material stream.
 
-                 self._vol_flowrate = prop.VolumetricFlowRate()
-                 self._mol_flowrate = prop.MolarFlowRate()
-                 self._molecular_weight = prop.MolecularWeigth()
-                 self._Z = 1
-                 self._Z_g = 1
-                 self._Z_l = 0
-                 self._isentropic_exponent = 1.3
-                 self._phase = None
-                 self._Psat = None
-                 self._Pc = None
+            mass_flowrate:
+                Required: No
+                Type: int/float or tuple(value, unit) or MassFlowRate(recommended)
+                Default value: 0 kg/s
+                Description: Specifies the mass flowrate of the material.
+            
+            pressure:
+                Required: No
+                Type: int/float or tuple(value, unit) or Pressure(recommended)
+                Default value: 0 kg/s
+                Description: Specifies the pressure of the material stream.
+            
+            Temperature:
+                Required: No
+                Type: int/float or tuple(value, unit) or Temperature(recommended)
+                Default value: 0 kg/s
+                Description: Specifies the temperature of the material stream.
+            
+        
+        PROPERTIES:
+            mol_flowrate:
+                The molar flowrate of the material stream. 
+                This property cannot be set but is derived from mass flowrate and molecular weight.
+                Type: MolarFlowRate
+            
+            vol_flowrate:
+                The volumetic flowrate of the material stream. 
+                This property cannot be set but is derived from masnn flowrate and density.
+                Type: VolFlowRate  
 
-                 self._index = len(MaterialStream.items)
-                 MaterialStream.items.append(self)
+            Pc:
+                Critical pressure of the material stream.
+                Type: Pressure 
+
+            Psat:
+                Saturation pressure of the material stream.
+                Type: Pressure
+
+            Z_g:
+                The gas phase compressibility of the material stream.
+                Type: Dimensionless
+
+            Z_l:
+                The liquid phase compressibility of the material stream.
+                Type: Dimensionless
+
+            components:
+                The components of the mixture in the material stream. Can be mixture of various pure compunds in mol fraction, mass fraction or volume fraction. Set this property using propylean.properties.components class.
+                Type: Components
+            
+            d_viscosity:
+                The dynamic viscosity of the material stream in mixed phase.
+                Type: DViscosity
+            
+            d_viscosity_g:
+                The dynamic viscosity of the material stream in gas phase.
+                Type: DViscosity  
+
+            d_viscosity_l:
+                The dynamic viscosity of the material stream in liquid phase.
+                Type: DViscosity
+
+            density:
+                The density of the material stream in mixed phase.
+                Type: Density
+
+            density_g:
+                The density of the material stream in gas phase.
+                Type: Density
+
+            density_l:
+                The density of the material stream in liquid phase.
+                Type: Density
+
+            isentropic_exponent:
+                The isentropic exponent or the specific heat ratio (Cp/Cv) of the material stream.
+                Type: Dimensionless
+
+            mass_flowrate:
+                Mass flowrate of the material stream.
+                Type: MassFlowRate
+
+            molecular_weight:
+                The molecular weight of the material stream.
+                Type: MassFlowRate
+
+            phase:
+                The phase of the material stream. "l" for liguid, "g" for gas, "l/g" for mixed phase as per fluids package.
+                Type: String
+            
+            pressure:
+                The pressure of the material stream. It is recommended to set it to help derive other properties.
+                Type: Pressure
+
+            temperature:
+                The temperature of the material stream. It is recommended to set it to help derive other properties.
+                Type: Temperature
+
+        
+        RETURN VALUE:
+            Type: MaterialStream
+            Description: Returns an object of type MaterialStream with all properties of
+                         a material flowing in a process plants.
+        
+        ERROR RAISED:
+            Type:
+            Description:
+        
+        SAMPLE USE CASES:
+            from propylean.streams import MaterialStream
+            # or
+            from propylean import MaterialStream
+            from propylean import properties as prop
+            sour_gas = MaterialStream(tag="sour_gas_from_fields")
+            sour_gas.temperature =  prop.Temperature(25, "C")
+            sour_gas.pressure = prop.Pressure(75, "bar")
+            mol_fractions = {"methane": 0.95, "Ethane": 0.2, "Butane": 0.1, "Propane": 0.05, "water":0.05, "Hydrogen Sulphide": 0.01}
+            sour_gas.components = prop.Components(mol_fractions, type="mol")
+
+            # Get the density of the sour_gas MaterialStream.
+            print(sour_gas.density)
+        """
+        super().__init__(tag)
+        self._mass_flowrate = prop.MassFlowRate()
+        self._pressure = prop.Pressure()
+        self._temperature = prop.Temperature()
+        
+        self.mass_flowrate = mass_flowrate
+        self.temperature = temperature
+        self.pressure = pressure
+        self._density = prop.Density()
+        self._density_l = prop.Density()
+        self._density_g = prop.Density()
+        self._density_s = prop.Density()
+        self._d_viscosity = prop.DViscosity()
+        self._d_viscosity_l = prop.DViscosity()
+        self._d_viscosity_g = prop.DViscosity()
+        self._components = prop.Components()
+
+        self._vol_flowrate = prop.VolumetricFlowRate()
+        self._mol_flowrate = prop.MolarFlowRate()
+        self._molecular_weight = prop.MolecularWeigth()
+        self._Z = 1
+        self._Z_g = 1
+        self._Z_l = 0
+        self._isentropic_exponent = 1.3
+        self._phase = None
+        self._Psat = None
+        self._Pc = None
+
+        self._index = len(MaterialStream.items)
+        MaterialStream.items.append(self)
         
     @property
     def pressure(self):

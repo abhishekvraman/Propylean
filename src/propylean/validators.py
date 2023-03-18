@@ -35,7 +35,6 @@ class _Validators(object):
         DESCRIPTION:
             Function to validate values passed to properties or args is 
             correct from list of values.
-            .
         PARAMETERS:    
             arg_prop_name:
                 Required: Yes
