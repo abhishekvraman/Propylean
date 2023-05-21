@@ -14,12 +14,14 @@ class _Property(object):
         self._max_val = max_val
         self._unit = unit
         self._time_series = time_series
+    
     def __eq__(self, other):
         if (isinstance(other, _Property) and
             self.value == other.value and
             self.unit == other.unit):
                 return True
         return False
+    
     @property
     def value(self):
         return self._value
