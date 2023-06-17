@@ -1,11 +1,11 @@
 from propylean.equipments.generic_equipment_classes import _EquipmentOneInletOutlet
 
 class _MeasuringInstruments(object):
-    def __init__(self,**inputs) -> None:
+    def __init__(self, measured_property, measurment_unit, **inputs) -> None:
         """ 
             DESCRIPTION:
-                Parent class for all instruments which has primary task to
-                measure observations.
+                Parent class for all instruments having primary task to
+                measure properties.
             
             PARAMETERS:
                 measured_property:
@@ -29,7 +29,7 @@ class _MeasuringInstruments(object):
                                        First representing minimum measured and second maximum. 
                     Default value: NA
                     Description: Specifies the range of instrument can measure.
-                
+                  
                 observed_series:
                     Required: No
                     Type: Series
@@ -49,7 +49,10 @@ class _MeasuringInstruments(object):
                 >>>         some_property = 20
                 
         """
-class FlowMeter(_EquipmentOneInletOutlet):
+        self.measured_property = measured_property
+        self.measured_unit = measurment_unit
+
+class FlowMeter(_EquipmentOneInletOutlet, _MeasuringInstruments):
     items = []
     def __init__(self, **inputs) -> None:
         super().__init__( **inputs)
@@ -67,3 +70,13 @@ class FlowMeter(_EquipmentOneInletOutlet):
     @classmethod
     def list_objects(cls):
         return cls.items
+
+class PressureGuage(_MeasuringInstruments):
+    items = []
+    def __init__(self) -> None:
+        pass
+
+class TemperatureGuage(_MeasuringInstruments):
+    items = []
+    def __init__(self) -> None:
+        pass
