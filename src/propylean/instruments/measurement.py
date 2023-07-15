@@ -29,11 +29,7 @@ class _MeasuringInstruments(object):
                                        First representing minimum measured and second maximum. 
                     Default value: NA
                     Description: Specifies the range of instrument can measure.
-                  
-                observed_series:
-                    Required: No
-                    Type: Series
-                    Description: Specifies the time series observed by the instrument.  
+                 
 
             RETURN VALUE:
                 Type: _MeasuringInstruments
@@ -51,6 +47,7 @@ class _MeasuringInstruments(object):
         """
         self.measured_property = measured_property
         self.measured_unit = measurment_unit
+        self.range = range
 
 class FlowMeter(_EquipmentOneInletOutlet, _MeasuringInstruments):
     items = []
