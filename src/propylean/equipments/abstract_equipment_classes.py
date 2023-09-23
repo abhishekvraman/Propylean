@@ -24,16 +24,8 @@ class _EquipmentOneInletOutlet(object):
                 Type: str
                 Acceptable values: Any string type
                 Default value: None
-                Description: Equipment tag the user wants to provide. If not provided, then tag is automatically generated
-            
-            dynamic_state:
-                Required: No
-                Type: bool
-                Acceptable values: True or False
-                Default value: False
-                Description: If equipment is in dynamic state and inventory is changing.
-                             TODO: Provide dynamic simulation capabilities.
-            
+                Description: Equipment tag the user wants to provide. If not provided, then tag is automatically generated.
+
             pressure_drop:
                 Required: No
                 Type: int or float (recommended)
@@ -54,15 +46,12 @@ class _EquipmentOneInletOutlet(object):
             >>> class NewEquipment(_EquipmentOneInletOutlet):
                 ......
         """
-        if 'tag' not in inputs:
-            self.tag = self._create_equipment_tag()  
-        else:
-            self.tag = inputs['tag']
-        self.dynamic_state = False if 'dynamic_state' not in inputs else False
+        self.tag = inputs.pop('tag', self._create_equipment_tag())
 
         #Flow properties
         self._inlet_mass_flowrate = prop.MassFlowRate() 
         self._outlet_mass_flowrate = prop.MassFlowRate()
+        self._inventory_change_rate = prop.MassFlowRate()
         self.design_flowrate = prop.MassFlowRate()
 
         #Pressure properties
@@ -280,13 +269,10 @@ class _EquipmentOneInletOutlet(object):
     @property
     def inventory_change_rate(self):
         self = self._get_equipment_object(self)
-        if not self.dynamic_state:
-            return prop.MassFlowRate(0, self.inlet_mass_flowrate.unit)            
-        return self._inlet_mass_flowrate - self._outlet_mass_flowrate                             
+        return self._inventory_change_rate
     @inventory_change_rate.setter
     def inventory_change_rate(self, value):
-        raise Exception("Dynamic process is not yet supported.")
-        _Validators.validate_arg_prop_value_type("inventory_change_rate", value, (int))
+        _Validators.validate_arg_prop_value_type("inventory_change_rate", value, (int, float, prop.MassFlowRate))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.MassFlowRate)
         if unit is None:

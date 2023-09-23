@@ -104,7 +104,7 @@ class _Validators(object):
         """
         DESCRIPTION:
             Function to validate values passed to properties or args is 
-            non-negative. That is greater than Zero.
+            non-negative. That is greater than or equal to Zero.
             .
         PARAMETERS:    
             arg_prop_name:
@@ -121,6 +121,63 @@ class _Validators(object):
         elif isinstance(value, tuple):
             value = value[0]
         if value < 0:
+            raise Exception("""Value passed to '{0}' should be greater than or equal to 0.
+            Value provided is {1}.""".format(arg_prop_name, value))
+        return True
+
+    @classmethod
+    def validate_positive_value(self, arg_prop_name, value):
+        """
+        DESCRIPTION:
+            Function to validate values passed to properties or args is 
+            Positive. That is greater than Zero.
+            .
+        PARAMETERS:    
+            arg_prop_name:
+                Required: Yes
+                Type: String  
+                Description: Name of the argument or property.
+            value:
+                Required: Yes
+                Type: Any 
+                Description: Value of the argument or property.
+        """
+        if not isinstance(value, (int, float, tuple)):
+            value = value.value
+        elif isinstance(value, tuple):
+            value = value[0]
+        if value <= 0:
             raise Exception("""Value passed to '{0}' should be greater than 0.
             Value provided is {1}.""".format(arg_prop_name, value))
         return True
+
+    @classmethod
+    def validate_child_class(self, arg_prop_name, child_class, parent_class, class_type):
+        """
+        DESCRIPTION:
+            Function to validate values passed by user is a child class
+            of parent class.
+        PARAMETERS:
+            arg_prop_name:
+                Required: Yes
+                Type: String  
+                Description: Name of the argument or property.
+            child_class:
+                Required: Yes
+                Type: propylean class  
+                Description: Final class passed by user as input.
+            parent_class:
+                Required: Yes
+                Type: propylean parent class
+                Description: Parent class which are not exposed to end user.
+            class_type:
+                Required: Yes
+                Type: String
+                Description: Type of parent class in language of chemical industry
+                             Example: "vessel" for _Vessels class.
+        """
+        if not isinstance(child_class, type):
+            raise Exception(f"Value of {arg_prop_name} should be a propylean class used to declare property or objects. For example Pressure or CentrifugalPump.")
+
+        if not issubclass(child_class, parent_class):
+            raise Exception(f"Invalid property class provided. Should be a class of type {class_type.__name__}")

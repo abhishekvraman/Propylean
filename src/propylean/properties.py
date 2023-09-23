@@ -1,19 +1,18 @@
-from pandas import Series, DataFrame
+from propylean.series import Series
 from propylean.validators import _Validators
 from propylean.constants import ConversionFactors
 from warnings import warn
 
 class _Property(object):
-    def __init__(self, value=None, unit=None, time_series=None, min_val=None, max_val=None):
+    def __init__(self, value=None, unit=None, series=None, min_val=None, max_val=None):
         _Validators.validate_arg_prop_value_type("value", value, (int, float))
         _Validators.validate_arg_prop_value_type("unit", unit, str)
-        _Validators.validate_arg_prop_value_type("time_series", time_series, 
-            (Series, DataFrame, dict))
+        _Validators.validate_arg_prop_value_type("series", series, Series)
         self._value = value
         self._min_val = min_val
         self._max_val = max_val
         self._unit = unit
-        self._time_series = time_series
+        self._series = series
     
     def __eq__(self, other):
         if (isinstance(other, _Property) and
@@ -55,41 +54,25 @@ class _Property(object):
         self._unit = unit
     
     @property
-    def time_series(self):
-        return self._time_series
-    @time_series.setter
-    def time_series(self, time_series):
-        _Validators.validate_arg_prop_value_type("time_series", time_series, 
-            (Series, DataFrame, dict))
-            
-        if isinstance(time_series, dict):
-            time_series = Series(data=time_series, index=list(time_series.keys()))
-        elif isinstance(time_series, DataFrame):
-            if len(time_series.columns) == 2:
-                time_index = time_series[time_series.columns[0]]
-                data = time_series[time_series.columns[1]]
-                time_series = DataFrame(data=list(data), index=time_index)
-
-            if len(time_series.columns) == 1:
-                time_series = time_series[time_series.columns[0]]
-            else:
-                raise Exception("""Incorrect number of columns provided in DataFrame.
-                Should be either one with index as time-series or two with first column as time-series and second as property data.""")
-
-        self._time_series = time_series
+    def series(self):
+        return self._series
+    @series.setter
+    def series(self, value):
+        _Validators.validate_arg_prop_value_type("series", value, Series)
+        self._series = value
 
     def __getattr__(self, name):
-        if not name.startswith("_") and self.time_series is None:
-            time_series = {0: self.value}
+        if not name.startswith("_") and self.series is None:
+            series = {0: self.value}
             if self.min_val is not None:
-                time_series[1] = self.min_val
+                series[1] = self.min_val
             if self.max_val is not None:
-                time_series[2] = self.max_val
-            time_series = Series(data=time_series, index=list(time_series.keys()))
+                series[2] = self.max_val
+            series = Series(data=series, index=list(series.keys()))
             warn("Time series of the property is not set. Series attribute is considerd using 'value', 'max_val', or 'min_val' if provided.")
         else:
-            time_series = self.time_series
-        return getattr(time_series, name)
+            series = self.series
+        return getattr(series, name)
 
     def __repr__(self) -> str:
         return str(self.value) + ' ' + self.unit
@@ -140,8 +123,8 @@ class _Property(object):
         self._unit = unit
 
 class Length(_Property):
-    def __init__(self, value=0, unit='m', time_series=None, min_val=None, max_val=None):
-        super().__init__(value, unit, time_series=time_series, max_val=max_val, min_val=min_val)
+    def __init__(self, value=0, unit='m', series=None, min_val=None, max_val=None):
+        super().__init__(value, unit, series=series, max_val=max_val, min_val=min_val)
         self.unit = unit
 
     @_Property.unit.setter
@@ -166,8 +149,8 @@ class Length(_Property):
             raise
 
 class Time(_Property):
-    def __init__(self, value=0, unit='sec', time_series=None, min_val=None, max_val=None):
-        super().__init__(value, unit, time_series=time_series, max_val=max_val, min_val=min_val)
+    def __init__(self, value=0, unit='sec', series=None, min_val=None, max_val=None):
+        super().__init__(value, unit, series=series, max_val=max_val, min_val=min_val)
         self.unit = unit
 
     @_Property.unit.setter
@@ -191,8 +174,8 @@ class Time(_Property):
             raise
     
 class Pressure(_Property):
-    def __init__(self, value=101325, unit='Pa', time_series=None, min_val=None, max_val=None):
-        super().__init__(value, unit, time_series=time_series, max_val=max_val, min_val=min_val)
+    def __init__(self, value=101325, unit='Pa', series=None, min_val=None, max_val=None):
+        super().__init__(value, unit, series=series, max_val=max_val, min_val=min_val)
         self.unit = unit
 
     @_Property.unit.setter
@@ -221,8 +204,8 @@ class Pressure(_Property):
             raise
 
 class Temperature(_Property):
-    def __init__(self, value=298, unit='K', time_series=None, min_val=None, max_val=None):
-        super().__init__(value, unit, time_series=time_series, max_val=max_val, min_val=min_val)
+    def __init__(self, value=298, unit='K', series=None, min_val=None, max_val=None):
+        super().__init__(value, unit, series=series, max_val=max_val, min_val=min_val)
         self.unit = unit
     
     @_Property.unit.setter
@@ -280,8 +263,8 @@ class Temperature(_Property):
         return subtraction
         
 class MassFlowRate(_Property):
-    def __init__(self, value=0, unit='kg/s', time_series=None, min_val=None, max_val=None):
-        super().__init__(value, unit, time_series=time_series, max_val=max_val, min_val=min_val)
+    def __init__(self, value=0, unit='kg/s', series=None, min_val=None, max_val=None):
+        super().__init__(value, unit, series=series, max_val=max_val, min_val=min_val)
         self.unit = unit
     
     @_Property.unit.setter
@@ -312,8 +295,8 @@ class MassFlowRate(_Property):
         return super().__add__(other)
 
 class Mass(_Property):
-    def __init__(self, value=0, unit='kg', time_series=None, min_val=None, max_val=None):
-        super().__init__(value, unit, time_series=time_series, max_val=max_val, min_val=min_val)
+    def __init__(self, value=0, unit='kg', series=None, min_val=None, max_val=None):
+        super().__init__(value, unit, series=series, max_val=max_val, min_val=min_val)
         self.unit = unit
     
     @_Property.unit.setter
@@ -337,8 +320,8 @@ class Mass(_Property):
         return super().__add__(other)
 
 class MolecularWeigth(_Property):
-    def __init__(self, value=0, unit='g/mol', time_series=None, min_val=None, max_val=None):
-        super().__init__(value, unit, time_series=time_series, max_val=max_val, min_val=min_val)
+    def __init__(self, value=0, unit='g/mol', series=None, min_val=None, max_val=None):
+        super().__init__(value, unit, series=series, max_val=max_val, min_val=min_val)
         self.unit = unit
     @_Property.unit.setter
     def unit(self, unit):
@@ -356,8 +339,8 @@ class MolecularWeigth(_Property):
             raise
 
 class MolarFlowRate(_Property):
-    def __init__(self, value=1, unit='mol/s', time_series=None, min_val=None, max_val=None):
-        super().__init__(value, unit, time_series=time_series, max_val=max_val, min_val=min_val)
+    def __init__(self, value=1, unit='mol/s', series=None, min_val=None, max_val=None):
+        super().__init__(value, unit, series=series, max_val=max_val, min_val=min_val)
         self.unit = unit
     
     @_Property.unit.setter
@@ -383,8 +366,8 @@ class MolarFlowRate(_Property):
             raise
 
 class VolumetricFlowRate(_Property):
-    def __init__(self, value = 1, unit='m^3/s', time_series=None, min_val=None, max_val=None):
-        super().__init__(value, unit, time_series=time_series, max_val=max_val, min_val=min_val)
+    def __init__(self, value = 1, unit='m^3/s', series=None, min_val=None, max_val=None):
+        super().__init__(value, unit, series=series, max_val=max_val, min_val=min_val)
         self.unit = unit
     @_Property.unit.setter
     def unit(self, unit):
@@ -417,8 +400,8 @@ class VolumetricFlowRate(_Property):
             raise
 
 class Volume(_Property):
-    def __init__(self, value = 0, unit= 'm^3', time_series=None, min_val=None, max_val=None):
-        super().__init__(value, unit, time_series=time_series, max_val=max_val, min_val=min_val)
+    def __init__(self, value = 0, unit= 'm^3', series=None, min_val=None, max_val=None):
+        super().__init__(value, unit, series=series, max_val=max_val, min_val=min_val)
         self.unit = unit
     @_Property.unit.setter
     def unit(self, unit):
@@ -439,8 +422,8 @@ class Volume(_Property):
             raise
 
 class Density(_Property):
-    def __init__(self, value = 0, unit= 'kg/m^3', time_series=None, min_val=None, max_val=None):
-        super().__init__(value, unit, time_series=time_series, max_val=max_val, min_val=min_val)
+    def __init__(self, value = 0, unit= 'kg/m^3', series=None, min_val=None, max_val=None):
+        super().__init__(value, unit, series=series, max_val=max_val, min_val=min_val)
         self.unit = unit
     @_Property.unit.setter
     def unit(self, unit):
@@ -459,8 +442,8 @@ class Density(_Property):
             raise
 
 class DViscosity(_Property):
-    def __init__(self, value = 0, unit= 'Pa-s', time_series=None, min_val=None, max_val=None):
-        super().__init__(value, unit, time_series=time_series, max_val=max_val, min_val=min_val)
+    def __init__(self, value = 0, unit= 'Pa-s', series=None, min_val=None, max_val=None):
+        super().__init__(value, unit, series=series, max_val=max_val, min_val=min_val)
         self.unit = unit
     @_Property.unit.setter
     def unit(self, unit):
@@ -479,8 +462,8 @@ class DViscosity(_Property):
             raise
 
 class Power(_Property):
-    def __init__(self, value = 0, unit= 'W', time_series=None, min_val=None, max_val=None):
-        super().__init__(value, unit, time_series=time_series, max_val=max_val, min_val=min_val)
+    def __init__(self, value = 0, unit= 'W', series=None, min_val=None, max_val=None):
+        super().__init__(value, unit, series=series, max_val=max_val, min_val=min_val)
         self.unit = unit
 
     @_Property.unit.setter
@@ -518,8 +501,8 @@ class Power(_Property):
             raise
 
 class Frequency(_Property):
-    def __init__(self, value=0, unit='Hz', time_series=None, min_val=None, max_val=None):
-        super().__init__(value, unit, time_series=time_series, max_val=max_val, min_val=min_val)
+    def __init__(self, value=0, unit='Hz', series=None, min_val=None, max_val=None):
+        super().__init__(value, unit, series=series, max_val=max_val, min_val=min_val)
         self.unit = unit
     @_Property.unit.setter
     def unit(self, unit):
@@ -550,8 +533,8 @@ class Components(object):
         return False
 
 class Dimensionless(_Property):
-    def __init__(self, value=None, name=None, time_series=None, min_val=None, max_val=None):
-        super().__init__(value=value, unit=None, time_series=time_series, max_val=max_val, min_val=min_val)
+    def __init__(self, value=None, name=None, series=None, min_val=None, max_val=None):
+        super().__init__(value=value, unit=None, series=series, max_val=max_val, min_val=min_val)
         self._name = name
     
     @property
@@ -572,8 +555,8 @@ class Dimensionless(_Property):
         return "{} with value {}".format(self.name, self.value)
 
 class Efficiency(Dimensionless):
-    def __init__(self, value=1, time_series=None, min_val=0, max_val=1):
-        super().__init__(value=value, name="Efficiency", time_series=time_series, max_val=max_val, min_val=min_val)
+    def __init__(self, value=1, series=None, min_val=0, max_val=1):
+        super().__init__(value=value, name="Efficiency", series=series, max_val=max_val, min_val=min_val)
         if value < 0 or min_val < 0 or max_val < 0:
             raise Exception("Provide a non-negative value for efficiency.")
         else:
