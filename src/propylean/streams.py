@@ -19,7 +19,7 @@ class Stream(object):
         self = self._get_stream_object(self)
         if value is None:
             value = self._create_stream_tag()
-        if self._check_tag_assigned(value):
+        elif self._check_tag_assigned(value):
             raise Exception("Tag already assinged!")
         self._tag = value
         self._update_stream_object(self)
