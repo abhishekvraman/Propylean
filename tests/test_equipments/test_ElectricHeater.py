@@ -305,7 +305,7 @@ class test_ElectricHeater(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = ElectricHeater()
             m4.inlet_pressure = []
-        self.assertIn("Incorrect type 'list' provided to 'inlet_pressure'. Should be '('Pressure', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'inlet_pressure'. Can be any one from '('Pressure', 'int', 'float', 'tuple')'",
                       str(exp))
 
     @pytest.mark.negative
@@ -313,7 +313,7 @@ class test_ElectricHeater(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = ElectricHeater()
             m4.outlet_pressure = []
-        self.assertIn("Incorrect type 'list' provided to 'outlet_pressure'. Should be '('Pressure', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'outlet_pressure'. Can be any one from '('Pressure', 'int', 'float', 'tuple')'",
                       str(exp)) 
 
     @pytest.mark.negative
@@ -321,7 +321,7 @@ class test_ElectricHeater(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = ElectricHeater()
             m4.pressure_drop = []
-        self.assertIn("Incorrect type 'list' provided to 'pressure_drop'. Should be '('Pressure', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'pressure_drop'. Can be any one from '('Pressure', 'int', 'float', 'tuple')'",
                       str(exp))                                    
 
     @pytest.mark.negative
@@ -329,7 +329,7 @@ class test_ElectricHeater(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = ElectricHeater()
             m4.design_pressure = []
-        self.assertIn("Incorrect type 'list' provided to 'design_pressure'. Should be '('Pressure', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'design_pressure'. Can be any one from '('Pressure', 'int', 'float', 'tuple')'",
                       str(exp)) 
 
     @pytest.mark.negative
@@ -337,7 +337,7 @@ class test_ElectricHeater(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = ElectricHeater()
             m4.inlet_temperature = []
-        self.assertIn("Incorrect type 'list' provided to 'inlet_temperature'. Should be '('Temperature', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'inlet_temperature'. Can be any one from '('Temperature', 'int', 'float', 'tuple')'",
                       str(exp))
 
     @pytest.mark.negative
@@ -345,7 +345,7 @@ class test_ElectricHeater(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = ElectricHeater()
             m4.outlet_temperature = []
-        self.assertIn("Incorrect type 'list' provided to 'outlet_temperature'. Should be '('Temperature', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'outlet_temperature'. Can be any one from '('Temperature', 'int', 'float', 'tuple')'",
                       str(exp)) 
 
     @pytest.mark.negative
@@ -353,7 +353,7 @@ class test_ElectricHeater(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = ElectricHeater()
             m4.temperature_decrease = []
-        self.assertIn("Incorrect type 'list' provided to 'temperature_decrease'. Should be '('Temperature', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'temperature_decrease'. Can be any one from '('Temperature', 'int', 'float', 'tuple')'",
                       str(exp)) 
 
     @pytest.mark.negative
@@ -361,7 +361,7 @@ class test_ElectricHeater(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = ElectricHeater()
             m4.temperature_increase = []
-        self.assertIn("Incorrect type 'list' provided to 'temperature_increase'. Should be '('Temperature', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'temperature_increase'. Can be any one from '('Temperature', 'int', 'float', 'tuple')'",
                       str(exp))                                                      
 
     @pytest.mark.negative
@@ -369,7 +369,7 @@ class test_ElectricHeater(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = ElectricHeater()
             m4.design_temperature = []
-        self.assertIn("Incorrect type 'list' provided to 'design_temperature'. Should be '('Temperature', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'design_temperature'. Can be any one from '('Temperature', 'int', 'float', 'tuple')'",
                       str(exp)) 
 
     @pytest.mark.negative
@@ -377,7 +377,7 @@ class test_ElectricHeater(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = ElectricHeater()
             m4.inlet_mass_flowrate = []
-        self.assertIn("Incorrect type 'list' provided to 'inlet_mass_flowrate'. Should be '('MassFlowRate', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'inlet_mass_flowrate'. Can be any one from '('MassFlowRate', 'int', 'float', 'tuple')'",
                       str(exp))                   
 
     @pytest.mark.negative
@@ -385,7 +385,7 @@ class test_ElectricHeater(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = ElectricHeater()
             m4.outlet_mass_flowrate = []
-        self.assertIn("Incorrect type 'list' provided to 'outlet_mass_flowrate'. Should be '('MassFlowRate', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'outlet_mass_flowrate'. Can be any one from '('MassFlowRate', 'int', 'float', 'tuple')'",
                       str(exp))
 
     @pytest.mark.negative
@@ -393,7 +393,7 @@ class test_ElectricHeater(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = ElectricHeater()
             m4.energy_in = []
-        self.assertIn("Incorrect type 'list' provided to 'energy_in'. Should be '('Power', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'energy_in'. Can be any one from '('Power', 'int', 'float', 'tuple')'",
                       str(exp))      
 
     @pytest.mark.negative
@@ -401,7 +401,7 @@ class test_ElectricHeater(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = ElectricHeater()
             m4.energy_out = []
-        self.assertIn("Incorrect type 'list' provided to 'energy_out'. Should be '('Power', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'energy_out'. Can be any one from '('Power', 'int', 'float', 'tuple')'",
                       str(exp))
 
     @pytest.mark.negative
@@ -413,7 +413,7 @@ class test_ElectricHeater(unittest.TestCase):
             
         with pytest.raises(Exception) as exp:
             cv.connect_stream([inlet_stream], 'in', stream_governed=True)
-        self.assertIn("Incorrect type \'list\' provided to \'stream_object\'. Should be \'('MaterialStream', 'EnergyStream')\'",
+        self.assertIn("Incorrect type \'list\' provided to \'stream_object\'. Can be any one from \'('MaterialStream', 'EnergyStream')\'",
                       str(exp)) 
         
         with pytest.raises(Exception) as exp:

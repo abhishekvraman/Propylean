@@ -1,4 +1,3 @@
-from propylean.series import Series
 from propylean.validators import _Validators
 from propylean.constants import ConversionFactors
 from warnings import warn
@@ -7,7 +6,7 @@ class _Property(object):
     def __init__(self, value=None, unit=None, series=None, min_val=None, max_val=None):
         _Validators.validate_arg_prop_value_type("value", value, (int, float))
         _Validators.validate_arg_prop_value_type("unit", unit, str)
-        _Validators.validate_arg_prop_value_type("series", series, Series)
+        # _Validators.validate_arg_prop_value_type("series", series, Series)
         self._value = value
         self._min_val = min_val
         self._max_val = max_val
@@ -53,26 +52,27 @@ class _Property(object):
         _Validators.validate_arg_prop_value_type("unit", unit, (str))
         self._unit = unit
     
-    @property
-    def series(self):
-        return self._series
-    @series.setter
-    def series(self, value):
-        _Validators.validate_arg_prop_value_type("series", value, Series)
-        self._series = value
+    # A series cannot be a property of physical property.
+    # @property
+    # def series(self):
+    #     return self._series
+    # @series.setter
+    # def series(self, value):
+    #     _Validators.validate_arg_prop_value_type("series", value, Series)
+    #     self._series = value
 
-    def __getattr__(self, name):
-        if not name.startswith("_") and self.series is None:
-            series = {0: self.value}
-            if self.min_val is not None:
-                series[1] = self.min_val
-            if self.max_val is not None:
-                series[2] = self.max_val
-            series = Series(data=series, index=list(series.keys()))
-            warn("Time series of the property is not set. Series attribute is considerd using 'value', 'max_val', or 'min_val' if provided.")
-        else:
-            series = self.series
-        return getattr(series, name)
+    # def __getattr__(self, name):
+    #     if not name.startswith("_") and self.series is None:
+    #         series = {0: self.value}
+    #         if self.min_val is not None:
+    #             series[1] = self.min_val
+    #         if self.max_val is not None:
+    #             series[2] = self.max_val
+    #         series = Series(data=series, index=list(series.keys()))
+    #         warn("Time series of the property is not set. Series attribute is considerd using 'value', 'max_val', or 'min_val' if provided.")
+    #     else:
+    #         series = self.series
+    #     return getattr(series, name)
 
     def __repr__(self) -> str:
         return str(self.value) + ' ' + self.unit

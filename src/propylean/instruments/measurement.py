@@ -69,7 +69,7 @@ class _MeasuringInstruments(object):
                 
         """
         self._measured_property = measured_property
-        self._measured_unit = measured_unit
+        self.measured_unit = measured_unit
         self._i_range = inputs.pop("i_range", None)
         self._resolution = inputs.pop("resolution", None)
         if self._resolution is not None:
@@ -125,8 +125,8 @@ class _MeasuringInstruments(object):
             i += 1
         return tag
     def _check_tag_assigned(cls, tag):
-        for equipment in cls.items:
-            if tag == equipment.tag:
+        for instru in cls.items:
+            if tag == instru.tag:
                 return True
         return False
     
@@ -152,6 +152,12 @@ class _MeasuringInstruments(object):
     def measured_unit(self, value):
         #Need to get list of units based on measured_property and validate.
         self = self._get_instrument_object(self)
+        _Validators.validate_arg_prop_value_type(arg_prop_name="measured_unit",
+                                                 value=value,
+                                                 correct_types=str)
+        # Validate the unit.
+        self.measured_property(unit=value)
+
         self._measured_unit = value
         self._update_instrument_object(self)
     
@@ -172,7 +178,7 @@ class _MeasuringInstruments(object):
         return self._resolution
     @resolution.setter
     def resolution(self, value):
-        _Validators.validate_arg_prop_value_type("resolution", value, (float, int))
+        _Validators.validate_arg_prop_value_type("resolution", value, (int, float))
         _Validators.validate_positive_value("resolution", value)
         self = self._get_instrument_object(self)
         self._resolution = value
@@ -199,8 +205,8 @@ class PressureGuage(_MeasuringInstruments):
     items = []
     def __init__(self, measured_unit="Pa", **inputs) -> None:
         super().__init__(measured_property=Pressure, measured_unit=measured_unit, **inputs)
-        self._index = len(TemperatureGuage.items)
-        TemperatureGuage.items.append(self)
+        self._index = len(PressureGuage.items)
+        PressureGuage.items.append(self)
 
     def __repr__(self):
         self = self._get_instrument_object(self)
@@ -211,6 +217,11 @@ class PressureGuage(_MeasuringInstruments):
     @classmethod
     def list_objects(cls):
         return cls.items
+    
+    @_MeasuringInstruments.measured_property.setter
+    def measured_property(self, value):
+        raise Exception("Cannot set measured_property of PressureGuage")
+
 
 class TemperatureGuage(_MeasuringInstruments):
     items = []
@@ -229,7 +240,16 @@ class TemperatureGuage(_MeasuringInstruments):
     def list_objects(cls):
         return cls.items
 
-class FlowMeter(_EquipmentOneInletOutlet):
+    @_MeasuringInstruments.measured_property.setter
+    def measured_property(self, value):
+        raise Exception("Cannot set measured_property of TemperatureGuage")
+
+class FlowMeter(_EquipmentOneInletOutlet): 
+    """
+      Eventhough Flow meter is an instrument, it kind of acts like an
+      inline equipment as it shares properties and is connected to equipments(pipes)
+      on both inlet and outlet.
+    """ 
     items = []
     def __init__(self, **inputs) -> None:
         super().__init__( **inputs)
@@ -239,7 +259,7 @@ class FlowMeter(_EquipmentOneInletOutlet):
         FlowMeter.items.append(self)
 
     def __repr__(self):
-        self = self._get_instrument_object(self)
+        self = self._get_equipment_object(self) 
         return "Flow Meter with tag: " + self.tag   
     def __hash__(self):
         return hash(self.__repr__())
