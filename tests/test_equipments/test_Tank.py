@@ -23,7 +23,7 @@ class test_Tank(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = Tank()
             m4.inlet_pressure = []
-        self.assertIn("Incorrect type 'list' provided to 'inlet_pressure'. Should be '('Pressure', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'inlet_pressure'. Can be any one from '('Pressure', 'int', 'float', 'tuple')'",
                       str(exp))
 
     @pytest.mark.negative
@@ -31,7 +31,7 @@ class test_Tank(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = Tank()
             m4.outlet_pressure = []
-        self.assertIn("Incorrect type 'list' provided to 'outlet_pressure'. Should be '('Pressure', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'outlet_pressure'. Can be any one from '('Pressure', 'int', 'float', 'tuple')'",
                       str(exp)) 
 
     @pytest.mark.negative
@@ -39,7 +39,7 @@ class test_Tank(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = Tank()
             m4.pressure_drop = []
-        self.assertIn("Incorrect type 'list' provided to 'pressure_drop'. Should be '('Pressure', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'pressure_drop'. Can be any one from '('Pressure', 'int', 'float', 'tuple')'",
                       str(exp))                                    
 
     @pytest.mark.negative
@@ -47,7 +47,7 @@ class test_Tank(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = Tank()
             m4.design_pressure = []
-        self.assertIn("Incorrect type 'list' provided to 'design_pressure'. Should be '('Pressure', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'design_pressure'. Can be any one from '('Pressure', 'int', 'float', 'tuple')'",
                       str(exp)) 
 
     @pytest.mark.negative
@@ -55,7 +55,7 @@ class test_Tank(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = Tank()
             m4.inlet_temperature = []
-        self.assertIn("Incorrect type 'list' provided to 'inlet_temperature'. Should be '('Temperature', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'inlet_temperature'. Can be any one from '('Temperature', 'int', 'float', 'tuple')'",
                       str(exp))
 
     @pytest.mark.negative
@@ -63,7 +63,7 @@ class test_Tank(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = Tank()
             m4.outlet_temperature = []
-        self.assertIn("Incorrect type 'list' provided to 'outlet_temperature'. Should be '('Temperature', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'outlet_temperature'. Can be any one from '('Temperature', 'int', 'float', 'tuple')'",
                       str(exp)) 
 
     @pytest.mark.negative
@@ -71,7 +71,7 @@ class test_Tank(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = Tank()
             m4.temperature_decrease = []
-        self.assertIn("Incorrect type 'list' provided to 'temperature_decrease'. Should be '('Temperature', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'temperature_decrease'. Can be any one from '('Temperature', 'int', 'float', 'tuple')'",
                       str(exp)) 
 
     @pytest.mark.negative
@@ -79,7 +79,7 @@ class test_Tank(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = Tank()
             m4.temperature_increase = []
-        self.assertIn("Incorrect type 'list' provided to 'temperature_increase'. Should be '('Temperature', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'temperature_increase'. Can be any one from '('Temperature', 'int', 'float', 'tuple')'",
                       str(exp))                                                      
 
     @pytest.mark.negative
@@ -87,7 +87,7 @@ class test_Tank(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = Tank()
             m4.design_temperature = []
-        self.assertIn("Incorrect type 'list' provided to 'design_temperature'. Should be '('Temperature', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'design_temperature'. Can be any one from '('Temperature', 'int', 'float', 'tuple')'",
                       str(exp)) 
 
     @pytest.mark.negative
@@ -95,7 +95,7 @@ class test_Tank(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = Tank()
             m4.inlet_mass_flowrate = []
-        self.assertIn("Incorrect type 'list' provided to 'inlet_mass_flowrate'. Should be '('MassFlowRate', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'inlet_mass_flowrate'. Can be any one from '('MassFlowRate', 'int', 'float', 'tuple')'",
                       str(exp))                   
 
     @pytest.mark.negative
@@ -103,7 +103,7 @@ class test_Tank(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = Tank()
             m4.outlet_mass_flowrate = []
-        self.assertIn("Incorrect type 'list' provided to 'outlet_mass_flowrate'. Should be '('MassFlowRate', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'outlet_mass_flowrate'. Can be any one from '('MassFlowRate', 'int', 'float', 'tuple')'",
                       str(exp))
 
     @pytest.mark.negative
@@ -111,7 +111,7 @@ class test_Tank(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = Tank()
             m4.energy_in = []
-        self.assertIn("Incorrect type 'list' provided to 'energy_in'. Should be '('Power', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'energy_in'. Can be any one from '('Power', 'int', 'float', 'tuple')'",
                       str(exp))      
 
     @pytest.mark.negative
@@ -119,31 +119,31 @@ class test_Tank(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = Tank()
             m4.energy_out = []
-        self.assertIn("Incorrect type 'list' provided to 'energy_out'. Should be '('Power', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'energy_out'. Can be any one from '('Power', 'int', 'float', 'tuple')'",
                       str(exp))                      
 
     @pytest.mark.negative
     def test_Tank_ID_incorrect_type_to_value(self):
         with pytest.raises(Exception) as exp:
             horizontal_vessel = Tank(ID=[4, "m"], length=(10, "m"))
-        self.assertIn("Incorrect type 'list' provided to 'ID'. Should be '('Length', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'ID'. Can be any one from '('Length', 'int', 'float', 'tuple')'",
                       str(exp))
         with pytest.raises(Exception) as exp:
             m4 = Tank()
             m4.ID = []
-        self.assertIn("Incorrect type 'list' provided to 'ID'. Should be '('Length', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'ID'. Can be any one from '('Length', 'int', 'float', 'tuple')'",
                       str(exp))
 
     @pytest.mark.negative
     def test_Tank_length_incorrect_type_to_value(self):
         with pytest.raises(Exception) as exp:
             horizontal_vessel = Tank(ID=(4, "m"), length=[10, "m"])
-        self.assertIn("Incorrect type 'list' provided to 'length'. Should be '('Length', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'length'. Can be any one from '('Length', 'int', 'float', 'tuple')'",
                       str(exp))
         with pytest.raises(Exception) as exp:
             m4 = Tank()
             m4.length = []
-        self.assertIn("Incorrect type 'list' provided to 'length'. Should be '('Length', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'length'. Can be any one from '('Length', 'int', 'float', 'tuple')'",
                       str(exp))                  
 
      
@@ -153,7 +153,7 @@ class test_Tank(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = Tank()
             m4.LLLL = []
-        self.assertIn("Incorrect type 'list' provided to 'LLLL'. Should be '('Length', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'LLLL'. Can be any one from '('Length', 'int', 'float', 'tuple')'",
                       str(exp))                    
 
     @pytest.mark.negative
@@ -161,7 +161,7 @@ class test_Tank(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = Tank()
             m4.LLL = []
-        self.assertIn("Incorrect type 'list' provided to 'LLL'. Should be '('Length', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'LLL'. Can be any one from '('Length', 'int', 'float', 'tuple')'",
                       str(exp))                   
 
     @pytest.mark.negative
@@ -169,7 +169,7 @@ class test_Tank(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = Tank()
             m4.NLL = []
-        self.assertIn("Incorrect type 'list' provided to 'NLL'. Should be '('Length', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'NLL'. Can be any one from '('Length', 'int', 'float', 'tuple')'",
                       str(exp))                   
 
     @pytest.mark.negative
@@ -177,7 +177,7 @@ class test_Tank(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = Tank()
             m4.HLL = []
-        self.assertIn("Incorrect type 'list' provided to 'HLL'. Should be '('Length', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'HLL'. Can be any one from '('Length', 'int', 'float', 'tuple')'",
                       str(exp))                   
 
     @pytest.mark.negative
@@ -185,7 +185,7 @@ class test_Tank(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = Tank()
             m4.HHLL = []
-        self.assertIn("Incorrect type 'list' provided to 'HHLL'. Should be '('Length', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'HHLL'. Can be any one from '('Length', 'int', 'float', 'tuple')'",
                       str(exp))   
 
     @pytest.mark.negative
@@ -193,7 +193,7 @@ class test_Tank(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = Tank()
             m4.operating_temperature = []
-        self.assertIn("Incorrect type 'list' provided to 'operating_temperature'. Should be '('Temperature', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'operating_temperature'. Can be any one from '('Temperature', 'int', 'float', 'tuple')'",
                       str(exp))  
 
     @pytest.mark.negative
@@ -201,7 +201,7 @@ class test_Tank(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = Tank()
             m4.operating_pressure = []
-        self.assertIn("Incorrect type 'list' provided to 'operating_pressure'. Should be '('Pressure', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'operating_pressure'. Can be any one from '('Pressure', 'int', 'float', 'tuple')'",
                       str(exp))                                                                      
 
     @pytest.mark.negative
@@ -213,7 +213,7 @@ class test_Tank(unittest.TestCase):
             
         with pytest.raises(Exception) as exp:
             cv.connect_stream([inlet_stream], 'in', stream_governed=True)
-        self.assertIn("Incorrect type \'list\' provided to \'stream_object\'. Should be \'('MaterialStream', 'EnergyStream')\'",
+        self.assertIn("Incorrect type \'list\' provided to \'stream_object\'. Can be any one from \'('MaterialStream', 'EnergyStream')\'",
                       str(exp)) 
         
         with pytest.raises(Exception) as exp:
@@ -250,7 +250,7 @@ class test_Tank(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = Tank()
             m4.get_inventory([])
-        self.assertIn("Incorrect type 'list' provided to 'type'. Should be 'str",
+        self.assertIn("Incorrect type 'list' provided to 'type'. Should be \'str\'",
                       str(exp))   
     @pytest.mark.negative
     @pytest.mark.get_inventory
@@ -258,7 +258,7 @@ class test_Tank(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = Tank()
             m4.get_inventory('list')
-        self.assertIn("Incorrect value \'list\' provided to \'type\'. Should be among \'[\'volume\', \'mass\']\'.",
+        self.assertIn("Incorrect value \'list\' provided to \'type\'. Can be any one from \'[\'volume\', \'mass\']\'.",
                       str(exp))
     
     @pytest.mark.mapping
