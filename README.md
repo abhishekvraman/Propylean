@@ -57,6 +57,8 @@ https://github.com/abhishekvraman/Propylean/wiki/Getting-started-with-Propylean
 * instruments
     1. ControlValve
     2. FlowMeter
+    3. PressureGuage
+    4. TemparatureGuage
 * streams
     1. MaterialStream
     2. EnergyStream
