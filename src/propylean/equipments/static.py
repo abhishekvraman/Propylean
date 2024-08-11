@@ -5,6 +5,7 @@ from propylean import properties as prop
 from math import pi
 import pandas as pd
 from propylean.validators import _Validators
+from propylean.constants import Constants
 
 class PipeSegment(_EquipmentOneInletOutlet):
     items = []
@@ -410,7 +411,7 @@ class PipeSegment(_EquipmentOneInletOutlet):
         self = self._get_equipment_object(self)
         elevation_old_unit = self.elevation.unit
         self.elevation.unit = "m"
-        hydro_drop = prop.Pressure(self.elevation.value * density.value * 9.8)
+        hydro_drop = prop.Pressure(self.elevation.value * density.value * Constants.g)
         hydro_drop.unit = self.inlet_pressure.unit
         self.elevation.unit = elevation_old_unit
         return hydro_drop
@@ -420,7 +421,6 @@ class PipeSegment(_EquipmentOneInletOutlet):
         self = self._get_equipment_object(self)
         from fluids.friction import friction_factor
         from fluids.core import Reynolds, K_from_f, dP_from_K
-        from propylean.constants import Constants
 
         V=(vol_flowrate.value)/(pi* ID.value**2)/4
         Re = Reynolds(V=V,
