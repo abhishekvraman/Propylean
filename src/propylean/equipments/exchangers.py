@@ -1,5 +1,6 @@
 from propylean.equipments.generic_equipment_classes import _Exchangers
 from propylean import streams
+from propylean.series import Series
 from propylean import properties as prop
 from propylean.validators import _Validators
 
@@ -70,7 +71,7 @@ class AirCooler(_Exchangers):
         return self.fan_power
     @energy_in.setter
     def energy_in(self, value):
-        _Validators.validate_arg_prop_value_type("energy_in", value, (prop.Power, int, float, tuple))
+        _Validators.validate_arg_prop_value_type("energy_in", value, (prop.Power, int, float, tuple, Series))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
         if unit is None:
@@ -160,7 +161,7 @@ class ElectricHeater(_Exchangers):
         return self._power
     @power.setter
     def power(self, value):
-        _Validators.validate_arg_prop_value_type("energy_in", value, (prop.Power, int, float, tuple))
+        _Validators.validate_arg_prop_value_type("energy_in", value, (prop.Power, int, float, tuple, Series))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
         if unit is None:
@@ -173,7 +174,7 @@ class ElectricHeater(_Exchangers):
         return self.power
     @energy_in.setter
     def energy_in(self, value):
-        _Validators.validate_arg_prop_value_type("energy_in", value, (prop.Power, int, float, tuple))
+        _Validators.validate_arg_prop_value_type("energy_in", value, (prop.Power, int, float, tuple, Series))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
         if unit is None:

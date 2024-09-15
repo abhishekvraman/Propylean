@@ -62,7 +62,7 @@ class test_PressureGuage(unittest.TestCase):
     #     with pytest.raises(Exception) as exp:
     #         m4 = PressureGuage()
     #         m4.design_pressure = []
-    #     self.assertIn("Incorrect type 'list' provided to 'design_pressure'. Can be any one from '('Pressure', 'int', 'float', 'tuple')'",
+    #     self.assertIn("Incorrect type 'list' provided to 'design_pressure'. Can be any one from '('Pressure', 'int', 'float', 'tuple', 'Series')'",
     #                   str(exp)) 
 
 

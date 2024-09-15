@@ -5,7 +5,7 @@ from propylean.properties import _Property
 
 class Series():
     def __init__(self, data, prop, unit=None, index=None, is_spark=False,
-                 dtype=None, name=None, copy=False, fastpath=False) -> None:
+                 dtype=None, name=None, copy=False) -> None:
         """
         DESCRIPTION:
                 Class which wraps Pandas and PySpark Series.
@@ -48,11 +48,7 @@ class Series():
                     Required: No
                     Type: Array type
                     Description: Refer Pandas.series or pyspark.series documention
-                fastpath:
-                    Required: No
-                    Type: Array type
-                    Description: Refer Pandas.series or pyspark.series documention
-                
+
             RETURN VALUE:
                 Type: Series
                 Description: 
@@ -71,17 +67,19 @@ class Series():
         self._prop = None
         self._unit = None
         self.prop = prop
+        self._is_spark = is_spark
         self.unit = unit if unit is not None else prop().unit
-        if type(data) == PdSeries:
+        if isinstance(data, PdSeries):
             self.instance = data
-        elif type(data) == SpkSeries:
+        elif isinstance(data, SpkSeries):
             self.instance = data
+            self._is_spark = True
         elif is_spark:
             self.instance = SpkSeries(data=data,index=index,dtype=dtype,
-                                      copy=copy,fastpath=fastpath)
+                                      name=name, copy=copy)
         else:
             self.instance = PdSeries(data=data,index=index,dtype=dtype,
-                                      copy=copy,fastpath=fastpath)
+                                      name=name, copy=copy)
     
     @property
     def prop(self):
@@ -100,3 +98,30 @@ class Series():
 
     def __repr__(self) -> str:
         return "Property: {}\nunit: {}\n".format(self._prop.__name__, self._unit) + str(self.instance)
+    
+    def __getattr__(self, name):
+        return self.instance.__getattribute__(name)
+    
+    def __add__(self, other):
+        if self.unit != other.unit:
+            raise Exception("Series unit of measurment do not match.")
+        return type(self)(data=self.instance.add(other.instance), prop=self.prop,
+                          unit=self.unit, index=self.instance.index, 
+                          is_spark=self._is_spark, dtype=self.instance.dtype, 
+                          name=self.instance.name, copy=self.instance.copy)
+    
+    def __sub__(self, other):
+        if self.unit != other.unit:
+            raise Exception("Series unit of measurment do not match.")
+        return type(self)(data=self.instance.sub(other.instance), prop=self.prop,
+                          unit=self.unit, index=self.instance.index, 
+                          is_spark=self._is_spark, dtype=self.instance.dtype, 
+                          name=self.instance.name, copy=self.instance.copy)
+
+    def __truediv__(self, other):
+        if self.unit != other.unit:
+            raise Exception("Series unit of measurment do not match.")
+        return type(self)(data=self.instance.truediv(other.instance), prop=self.prop,
+                          unit=self.unit, index=self.instance.index, 
+                          is_spark=self._is_spark, dtype=self.instance.dtype, 
+                          name=self.instance.name, copy=self.instance.copy)

@@ -2,6 +2,7 @@ from propylean.equipments.abstract_equipment_classes import _EquipmentOneInletOu
 import propylean.properties as prop
 from propylean.constants import Constants
 from propylean.settings import Settings
+from propylean.series import Series
 from pandas import DataFrame
 from propylean.validators import _Validators
 from math import pi, sqrt, acos
@@ -98,7 +99,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
                              self.pressure_drop.unit)
     @differential_pressure.setter
     def differential_pressure(self, value):
-        _Validators.validate_arg_prop_value_type("differential_pressure", value, (prop.Pressure, int, float, tuple))
+        _Validators.validate_arg_prop_value_type("differential_pressure", value, (prop.Pressure, int, float, tuple, Series))
         _Validators.validate_non_negative_value("differential_pressure", value)
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Pressure)
@@ -128,7 +129,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         return self._efficiency
     @efficiency.setter
     def efficiency(self, value):
-        _Validators.validate_arg_prop_value_type("efficiency", value, (int, float, prop.Efficiency))
+        _Validators.validate_arg_prop_value_type("efficiency", value, (int, float, prop.Efficiency, Series))
         value, _ = self._tuple_property_value_unit_returner(value, prop.Efficiency)
         self = self._get_equipment_object(self)
         if value <= 0:
@@ -146,7 +147,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         return self._power
     @power.setter
     def power(self, value):
-        _Validators.validate_arg_prop_value_type("power", value, (prop.Power, int, float, tuple))
+        _Validators.validate_arg_prop_value_type("power", value, (prop.Power, int, float, tuple, Series))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
         if unit is None:
@@ -771,7 +772,7 @@ class _Vessels(_EquipmentOneInletOutlet):
         return self._pressure_drop
     @pressure_drop.setter
     def pressure_drop(self, value):
-        _Validators.validate_arg_prop_value_type("pressure_drop", value, (prop.Pressure, int, float, tuple))
+        _Validators.validate_arg_prop_value_type("pressure_drop", value, (prop.Pressure, int, float, tuple, Series))
         if ((self._inlet_energy_stream_index is not None or
              self._outlet_energy_stream_index is not None) and 
              self.main_fluid == "liquid"):
@@ -789,7 +790,7 @@ class _Vessels(_EquipmentOneInletOutlet):
         return self.inlet_pressure
     @operating_pressure.setter
     def operating_pressure(self, value):
-        _Validators.validate_arg_prop_value_type("operating_pressure", value, (prop.Pressure, int, float, tuple))
+        _Validators.validate_arg_prop_value_type("operating_pressure", value, (prop.Pressure, int, float, tuple, Series))
         self.inlet_pressure = value
         if self.blanketing is not None:
             self.blanketing.inlet_pressure = value
@@ -799,7 +800,7 @@ class _Vessels(_EquipmentOneInletOutlet):
         return self.inlet_temperature
     @operating_temperature.setter
     def operating_temperature(self, value):
-        _Validators.validate_arg_prop_value_type("operating_temperature", value, (prop.Temperature, int, float, tuple))
+        _Validators.validate_arg_prop_value_type("operating_temperature", value, (prop.Temperature, int, float, tuple, Series))
         self.inlet_temperature = value
         if self.blanketing is not None:
             self.blanketing.inlet_temperature = value

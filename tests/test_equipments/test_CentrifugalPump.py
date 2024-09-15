@@ -353,7 +353,7 @@ class test_CentrifugalPump(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = CentrifugalPump()
             m4.inlet_pressure = []
-        self.assertIn("Incorrect type 'list' provided to 'inlet_pressure'. Can be any one from '('Pressure', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'inlet_pressure'. Can be any one from '('Pressure', 'int', 'float', 'tuple', 'Series')'",
                       str(exp))
 
     @pytest.mark.negative
@@ -361,7 +361,7 @@ class test_CentrifugalPump(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = CentrifugalPump()
             m4.outlet_pressure = []
-        self.assertIn("Incorrect type 'list' provided to 'outlet_pressure'. Can be any one from '('Pressure', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'outlet_pressure'. Can be any one from '('Pressure', 'int', 'float', 'tuple', 'Series')'",
                       str(exp)) 
 
     @pytest.mark.negative
@@ -369,7 +369,7 @@ class test_CentrifugalPump(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = CentrifugalPump()
             m4.pressure_drop = []
-        self.assertIn("Incorrect type 'list' provided to 'pressure_drop'. Can be any one from '('Pressure', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'pressure_drop'. Can be any one from '('Pressure', 'int', 'float', 'tuple', 'Series')'",
                       str(exp))                                    
 
     @pytest.mark.negative
@@ -377,7 +377,7 @@ class test_CentrifugalPump(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = CentrifugalPump()
             m4.design_pressure = []
-        self.assertIn("Incorrect type 'list' provided to 'design_pressure'. Can be any one from '('Pressure', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'design_pressure'. Can be any one from '('Pressure', 'int', 'float', 'tuple', 'Series')'",
                       str(exp)) 
 
     @pytest.mark.negative
@@ -385,7 +385,7 @@ class test_CentrifugalPump(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = CentrifugalPump()
             m4.inlet_temperature = []
-        self.assertIn("Incorrect type 'list' provided to 'inlet_temperature'. Can be any one from '('Temperature', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'inlet_temperature'. Can be any one from '('Temperature', 'int', 'float', 'tuple', 'Series')'",
                       str(exp))
 
     @pytest.mark.negative
@@ -393,7 +393,7 @@ class test_CentrifugalPump(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = CentrifugalPump()
             m4.outlet_temperature = []
-        self.assertIn("Incorrect type 'list' provided to 'outlet_temperature'. Can be any one from '('Temperature', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'outlet_temperature'. Can be any one from '('Temperature', 'int', 'float', 'tuple', 'Series')'",
                       str(exp)) 
 
     @pytest.mark.negative
@@ -401,7 +401,7 @@ class test_CentrifugalPump(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = CentrifugalPump()
             m4.temperature_decrease = []
-        self.assertIn("Incorrect type 'list' provided to 'temperature_decrease'. Can be any one from '('Temperature', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'temperature_decrease'. Can be any one from '('Temperature', 'int', 'float', 'tuple', 'Series')'",
                       str(exp)) 
 
     @pytest.mark.negative
@@ -409,7 +409,7 @@ class test_CentrifugalPump(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = CentrifugalPump()
             m4.temperature_increase = []
-        self.assertIn("Incorrect type 'list' provided to 'temperature_increase'. Can be any one from '('Temperature', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'temperature_increase'. Can be any one from '('Temperature', 'int', 'float', 'tuple', 'Series')'",
                       str(exp))                                                      
 
     @pytest.mark.negative
@@ -417,7 +417,7 @@ class test_CentrifugalPump(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = CentrifugalPump()
             m4.design_temperature = []
-        self.assertIn("Incorrect type 'list' provided to 'design_temperature'. Can be any one from '('Temperature', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'design_temperature'. Can be any one from '('Temperature', 'int', 'float', 'tuple', 'Series')'",
                       str(exp)) 
 
     @pytest.mark.negative
@@ -425,7 +425,7 @@ class test_CentrifugalPump(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = CentrifugalPump()
             m4.inlet_mass_flowrate = []
-        self.assertIn("Incorrect type 'list' provided to 'inlet_mass_flowrate'. Can be any one from '('MassFlowRate', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'inlet_mass_flowrate'. Can be any one from '('MassFlowRate', 'int', 'float', 'tuple', 'Series')'",
                       str(exp))                   
 
     @pytest.mark.negative
@@ -433,7 +433,7 @@ class test_CentrifugalPump(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = CentrifugalPump()
             m4.outlet_mass_flowrate = []
-        self.assertIn("Incorrect type 'list' provided to 'outlet_mass_flowrate'. Can be any one from '('MassFlowRate', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'outlet_mass_flowrate'. Can be any one from '('MassFlowRate', 'int', 'float', 'tuple', 'Series')'",
                       str(exp))
 
     @pytest.mark.negative
@@ -441,7 +441,7 @@ class test_CentrifugalPump(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = CentrifugalPump()
             m4.energy_in = []
-        self.assertIn("Incorrect type 'list' provided to 'energy_in'. Can be any one from '('Power', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'energy_in'. Can be any one from '('Power', 'int', 'float', 'tuple', 'Series')'",
                       str(exp))      
 
     @pytest.mark.negative
@@ -449,7 +449,7 @@ class test_CentrifugalPump(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = CentrifugalPump()
             m4.energy_out = []
-        self.assertIn("Incorrect type 'list' provided to 'energy_out'. Can be any one from '('Power', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'energy_out'. Can be any one from '('Power', 'int', 'float', 'tuple', 'Series')'",
                       str(exp))
 
     @pytest.mark.negative
