@@ -104,9 +104,8 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Pressure)
         if unit is None:
-            unit = self.pressure_drop.unit         
-        self.pressure_drop = prop.Pressure(-1 * value,
-                                           unit)   
+            unit = self.pressure_drop.unit
+        self.pressure_drop = prop.Pressure(-1 * value, unit) if not isinstance(value, Series) else value
         self._update_equipment_object(self)   
     
     @property
@@ -132,7 +131,9 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         _Validators.validate_arg_prop_value_type("efficiency", value, (int, float, prop.Efficiency, Series))
         value, _ = self._tuple_property_value_unit_returner(value, prop.Efficiency)
         self = self._get_equipment_object(self)
-        if value <= 0:
+        if isinstance(value, Series):
+            self._efficiency = value
+        elif value <= 0:
             raise Exception("Provide a positive value for efficiency.")
         elif value <= 1:
             self._efficiency = prop.Efficiency(value)
@@ -152,7 +153,7 @@ class _PressureChangers(_EquipmentOneInletOutlet):
         value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
         if unit is None:
             unit = self._power.unit         
-        self._power = prop.Power(value, unit)
+        self._power = prop.Power(value, unit) if not isinstance(value, Series) else value
         self._update_equipment_object(self)  
 
 # Defining generic class for Compressors and Expanders.
@@ -250,10 +251,12 @@ class _GasPressureChangers(_PressureChangers):
             return self.adiabatic_efficiency
     @efficiency.setter
     def efficiency(self, value):
-        _Validators.validate_arg_prop_value_type("efficiency", value, (int, float, prop.Efficiency))
+        _Validators.validate_arg_prop_value_type("efficiency", value, (int, float, prop.Efficiency, Series))
         value, _ = self._tuple_property_value_unit_returner(value, prop.Efficiency)
         self = self._get_equipment_object(self)
-        if value < 0:
+        if isinstance(value, Series):
+            value = value
+        elif value < 0:
             raise Exception("Provide a positive value for efficiency.")
         elif value <= 1:
             value = value
@@ -781,7 +784,7 @@ class _Vessels(_EquipmentOneInletOutlet):
         value, unit = self._tuple_property_value_unit_returner(value, prop.Pressure)
         if unit is None:
             unit = self._pressure_drop.unit
-        self._pressure_drop = prop.Pressure(value, unit)
+        self._pressure_drop = prop.Pressure(value, unit) if not isinstance(value, Series) else value
         self._outlet_pressure =  self._inlet_pressure - self._pressure_drop
         self._update_equipment_object(self)
                
@@ -833,12 +836,12 @@ class _Vessels(_EquipmentOneInletOutlet):
         return self._liquid_level
     @liquid_level.setter
     def liquid_level(self, value):
-        _Validators.validate_arg_prop_value_type("liquid_level", value, (prop.Length, int, float, tuple))
+        _Validators.validate_arg_prop_value_type("liquid_level", value, (prop.Length, int, float, tuple, Series))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Length)
         if unit is None:
             unit = self._liquid_level.unit
-        self._liquid_level = prop.Length(value, unit)
+        self._liquid_level = prop.Length(value, unit) if not isinstance(value, Series) else value
         self._update_equipment_object(self)
 
     def get_inventory(self, type="volume"):
@@ -1059,7 +1062,9 @@ class _Exchangers(_EquipmentOneInletOutlet):
         _Validators.validate_arg_prop_value_type("efficiency", value, (int, float, prop.Efficiency))
         value, _ = self._tuple_property_value_unit_returner(value, prop.Efficiency)
         self = self._get_equipment_object(self)
-        if value < 0:
+        if isinstance(value, Series):
+            value = value
+        elif value < 0:
             raise Exception("Provide a positive value for efficiency.")
         elif value <= 1:
             self._efficiency = prop.Efficiency(value)

@@ -103,25 +103,36 @@ class Series():
         return self.instance.__getattribute__(name)
     
     def __add__(self, other):
-        if self.unit != other.unit:
-            raise Exception("Series unit of measurment do not match.")
-        return type(self)(data=self.instance.add(other.instance), prop=self.prop,
-                          unit=self.unit, index=self.instance.index, 
-                          is_spark=self._is_spark, dtype=self.instance.dtype, 
-                          name=self.instance.name, copy=self.instance.copy)
-    
+        self._arithmetic_operation(other, "+")        
+            
     def __sub__(self, other):
-        if self.unit != other.unit:
-            raise Exception("Series unit of measurment do not match.")
-        return type(self)(data=self.instance.sub(other.instance), prop=self.prop,
-                          unit=self.unit, index=self.instance.index, 
-                          is_spark=self._is_spark, dtype=self.instance.dtype, 
-                          name=self.instance.name, copy=self.instance.copy)
+        self._arithmetic_operation(other, "-")
 
     def __truediv__(self, other):
+        self._arithmetic_operation(other, "/")
+
+    def _arithmetic_operation(self, other, arithmetic_operater):
+        if not isinstance(other, self._prop):
+            raise Exception("Physical property of both operands must be same. You provided {} {} {}".format(self._prop, arithmetic_operater, other.prop))
         if self.unit != other.unit:
-            raise Exception("Series unit of measurment do not match.")
-        return type(self)(data=self.instance.truediv(other.instance), prop=self.prop,
-                          unit=self.unit, index=self.instance.index, 
-                          is_spark=self._is_spark, dtype=self.instance.dtype, 
-                          name=self.instance.name, copy=self.instance.copy)
+            raise Exception("Operand unit of measurment do not match.")
+        
+        if isinstance(other, Series):
+            if arithmetic_operater == "+":
+                data = self.instance.add(other.instance)
+            elif arithmetic_operater == "-":
+                data = self.instance.sub(other.instance)
+            elif arithmetic_operater == "/":
+                data = self.instance.truediv(other.instance)
+        else:
+            if arithmetic_operater == "+":     
+                data = self.instance + other.value
+            elif arithmetic_operater == "-":
+                data = self.instance - other.value
+            elif arithmetic_operater == "/":
+                data = self.instance / other.value
+
+        return type(self)(data=data, prop=self.prop,
+                        unit=self.unit, index=self.instance.index, 
+                        is_spark=self._is_spark, dtype=self.instance.dtype, 
+                        name=self.instance.name, copy=self.instance.copy)

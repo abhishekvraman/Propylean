@@ -383,7 +383,7 @@ class test_TurboExpander(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = TurboExpander()
             m4.design_pressure = []
-        self.assertIn("Incorrect type 'list' provided to 'design_pressure'. Can be any one from '('Pressure', 'int', 'float', 'tuple', 'Series')'",
+        self.assertIn("Incorrect type 'list' provided to 'design_pressure'. Can be any one from '('Pressure', 'int', 'float', 'tuple')'",
                       str(exp)) 
 
     @pytest.mark.negative

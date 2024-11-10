@@ -115,7 +115,7 @@ class _EquipmentOneInletOutlet(object):
         value, unit = self._tuple_property_value_unit_returner(value, Pressure)
         if unit is None:
             unit = self._inlet_pressure.unit
-        self._inlet_pressure = Pressure(value, unit)
+        self._inlet_pressure = Pressure(value, unit) if not isinstance(value, Series) else value
         self._outlet_pressure = self._inlet_pressure - self.pressure_drop
         self._update_equipment_object(self)
     
@@ -130,7 +130,7 @@ class _EquipmentOneInletOutlet(object):
         value, unit = self._tuple_property_value_unit_returner(value, Pressure)
         if unit is None:
             unit = self._outlet_pressure.unit
-        self._outlet_pressure = Pressure(value, unit)
+        self._outlet_pressure = Pressure(value, unit) if not isinstance(value, Series) else value
         self._inlet_pressure = self._outlet_pressure + self.pressure_drop
         self._update_equipment_object(self)
     
@@ -145,7 +145,7 @@ class _EquipmentOneInletOutlet(object):
         value, unit = self._tuple_property_value_unit_returner(value, Pressure)
         if unit is None:
             unit = self._pressure_drop.unit
-        self._pressure_drop = Pressure(value, unit)
+        self._pressure_drop = Pressure(value, unit) if not isinstance(value, Series) else value
         self._outlet_pressure =  self._inlet_pressure - self._pressure_drop
         self._update_equipment_object(self)
     
@@ -155,7 +155,7 @@ class _EquipmentOneInletOutlet(object):
         return self._design_pressure
     @design_pressure.setter
     def design_pressure(self, value):
-        _Validators.validate_arg_prop_value_type("design_pressure", value, (Pressure, int, float, tuple, Series))
+        _Validators.validate_arg_prop_value_type("design_pressure", value, (Pressure, int, float, tuple))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, Pressure)
         if unit is None:
@@ -174,7 +174,7 @@ class _EquipmentOneInletOutlet(object):
         value, unit = self._tuple_property_value_unit_returner(value, Temperature)
         if unit is None:
             unit = self._inlet_temperature.unit
-        self._inlet_temperature = Temperature(value, unit)
+        self._inlet_temperature = Temperature(value, unit) if not isinstance(value, Series) else value
         self._outlet_temperature = self._inlet_temperature + self.temperature_increase
         self._update_equipment_object(self)
 
@@ -189,7 +189,7 @@ class _EquipmentOneInletOutlet(object):
         value, unit = self._tuple_property_value_unit_returner(value, Temperature)
         if unit is None:
             unit = self._outlet_temperature.unit
-        self._outlet_temperature = Temperature(value, unit)
+        self._outlet_temperature = Temperature(value, unit) if not isinstance(value, Series) else value
         self._inlet_temperature = self._outlet_temperature - self.temperature_increase
         self._update_equipment_object(self)
 
@@ -204,7 +204,7 @@ class _EquipmentOneInletOutlet(object):
         value, unit = self._tuple_property_value_unit_returner(value, Temperature)
         if unit is None:
             unit = self._temperature_increase.unit
-        self._temperature_increase = Temperature(value, unit)
+        self._temperature_increase = Temperature(value, unit) if not isinstance(value, Series) else value
         self._outlet_temperature =  self._inlet_temperature + self._temperature_increase
         self._update_equipment_object(self)
     @property
@@ -221,6 +221,8 @@ class _EquipmentOneInletOutlet(object):
             value = Temperature(-1 * value[0], value[1])
         elif isinstance(value, (int, float)):
             value = Temperature(-1 * value, self._temperature_increase.unit)
+        elif isinstance(value, Series):
+            value = value.multiply(-1)
         self.temperature_increase = value
     
     @property
@@ -963,6 +965,8 @@ class _EquipmentOneInletOutlet(object):
             return value[0], value[1]
         elif isinstance(value, property_type):
             return value.value, value.unit
+        elif isinstance(value, Series):
+            return value, value.unit
         elif any([isinstance(value, float), isinstance(value, int)]):
             return value, None
 
