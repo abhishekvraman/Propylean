@@ -2,6 +2,7 @@ from pandas import Series as PdSeries
 from pyspark.pandas import Series as SpkSeries
 from propylean.validators import _Validators
 from propylean.properties import _Property
+from tabulate import tabulate
 
 class Series():
     def __init__(self, data, prop, unit=None, index=None, is_spark=False,
@@ -97,7 +98,14 @@ class Series():
         self._unit = value
 
     def __repr__(self) -> str:
-        return "Property: {}\nunit: {}\n".format(self._prop.__name__, self._unit) + str(self.instance)
+        values_to_tabulate = []
+        for val in self.instance.head().array.tolist():
+            values_to_tabulate.append([val])
+        if len(self.instance.array.tolist()) > 5:
+            values_to_tabulate.append([":"])
+            values_to_tabulate.append([":"])
+            
+        return "Property: {}\nunit: {}\n".format(self._prop.__name__, self._unit) + tabulate(values_to_tabulate)
     
     def __getattr__(self, name):
         return self.instance.__getattribute__(name)
@@ -112,9 +120,11 @@ class Series():
         self._arithmetic_operation(other, "/")
 
     def _arithmetic_operation(self, other, arithmetic_operater):
-        if not isinstance(other, self._prop):
-            raise Exception("Physical property of both operands must be same. You provided {} {} {}".format(self._prop, arithmetic_operater, other.prop))
-        if self.unit != other.unit:
+        if isinstance(other, Series) and not isinstance(other._prop, self._prop):
+            raise Exception("Physical property of both Series operands must be same. You provided {} {} {}".format(self._prop, arithmetic_operater, other.prop))
+        if isinstance(other, _Property) and self.unit != other.unit:
+            other.unit = self.unit                    
+        elif self.unit != other.unit:
             raise Exception("Operand unit of measurment do not match.")
         
         if isinstance(other, Series):
