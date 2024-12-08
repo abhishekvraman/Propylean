@@ -43,6 +43,7 @@ jobs:
         python -m pip install pyarrow
         python -m pip install build
         python -m pip install pyspark
+        python -m pip install tabulate
         python -m pip uninstall -y numpy
         python -m pip install numpy==1.26.4
     - name: Install Propylean
