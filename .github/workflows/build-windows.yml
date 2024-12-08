@@ -45,6 +45,7 @@ jobs:
         python -m pip install tabulate
         python -m pip uninstall -y numpy
         python -m pip install numpy==1.26.4
+        python -m pip install pyarrow
     - name: Install Propylean
       run: |
         git clone https://github.com/abhishekvraman/Propylean.git
