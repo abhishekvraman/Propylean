@@ -71,15 +71,15 @@ class Series():
         self._is_spark = is_spark
         self.unit = unit if unit is not None else prop().unit
         if isinstance(data, PdSeries):
-            self.instance = data
+            self._instance = data
         elif isinstance(data, SpkSeries):
-            self.instance = data
+            self._instance = data
             self._is_spark = True
         elif is_spark:
-            self.instance = SpkSeries(data=data,index=index,dtype=dtype,
+            self._instance = SpkSeries(data=data,index=index,dtype=dtype,
                                       name=name, copy=copy)
         else:
-            self.instance = PdSeries(data=data,index=index,dtype=dtype,
+            self._instance = PdSeries(data=data,index=index,dtype=dtype,
                                       name=name, copy=copy)
     
     @property
@@ -99,28 +99,28 @@ class Series():
 
     def __repr__(self) -> str:
         values_to_tabulate = []
-        for val in self.instance.head().array.tolist():
+        for val in self._instance.head().to_numpy().tolist():
             values_to_tabulate.append([val])
-        if len(self.instance.array.tolist()) > 5:
+        if len(self._instance.to_numpy().tolist()) > 5:
             values_to_tabulate.append([":"])
             values_to_tabulate.append([":"])
             
         return "Property: {}\nunit: {}\n".format(self._prop.__name__, self._unit) + tabulate(values_to_tabulate)
     
     def __getattr__(self, name):
-        return self.instance.__getattribute__(name)
+        return self._instance.__getattribute__(name)
     
     def __add__(self, other):
-        self._arithmetic_operation(other, "+")        
+        return self._arithmetic_operation(other, "+")        
             
     def __sub__(self, other):
-        self._arithmetic_operation(other, "-")
+        return self._arithmetic_operation(other, "-")
 
     def __truediv__(self, other):
-        self._arithmetic_operation(other, "/")
+        return self._arithmetic_operation(other, "/")
 
     def _arithmetic_operation(self, other, arithmetic_operater):
-        if isinstance(other, Series) and not isinstance(other._prop, self._prop):
+        if isinstance(other, Series) and other._prop != self._prop:
             raise Exception("Physical property of both Series operands must be same. You provided {} {} {}".format(self._prop, arithmetic_operater, other.prop))
         if isinstance(other, _Property) and self.unit != other.unit:
             other.unit = self.unit                    
@@ -129,20 +129,20 @@ class Series():
         
         if isinstance(other, Series):
             if arithmetic_operater == "+":
-                data = self.instance.add(other.instance)
+                data = self._instance.add(other._instance)
             elif arithmetic_operater == "-":
-                data = self.instance.sub(other.instance)
+                data = self._instance.sub(other._instance)
             elif arithmetic_operater == "/":
-                data = self.instance.truediv(other.instance)
+                data = self._instance.truediv(other._instance)
         else:
             if arithmetic_operater == "+":     
-                data = self.instance + other.value
+                data = self._instance + other.value
             elif arithmetic_operater == "-":
-                data = self.instance - other.value
+                data = self._instance - other.value
             elif arithmetic_operater == "/":
-                data = self.instance / other.value
+                data = self._instance / other.value
 
         return type(self)(data=data, prop=self.prop,
-                        unit=self.unit, index=self.instance.index, 
-                        is_spark=self._is_spark, dtype=self.instance.dtype, 
-                        name=self.instance.name, copy=self.instance.copy)
+                        unit=self.unit, index=self._instance.index, 
+                        is_spark=self._is_spark, dtype=self._instance.dtype, 
+                        name=self._instance.name, copy=self._instance.copy)

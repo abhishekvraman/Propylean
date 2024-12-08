@@ -13,11 +13,12 @@ a = spkSeries(r,copy=False)
 pps = pplSeries(a,prop=Length)
 
 print("++++++++++++++")
-# print(pps)
+print(pps)
 # print("describe: ", pps.describe())
 print("____________")
-pps2=pps
-print(a + 2)
+pps2=pplSeries(a,prop=Length)
+# print(pps)
+print(pps2 + pps)
 print("____________")
 
 print("++++++++++++")
@@ -32,8 +33,7 @@ print("++++++++++++++")
 # print("describe: ", pps.describe())
 print("____________")
 pps2=pps
-print(df["time(s)"] + 2)
-print("____________")
+print(pps+pps2)
 print("++++++++++++")
 
 
