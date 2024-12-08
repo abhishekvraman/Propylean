@@ -1,6 +1,8 @@
 from propylean.equipments.generic_equipment_classes import _PressureChangers, _GasPressureChangers
 from propylean import streams
 import propylean.properties as prop
+from propylean.constants import Constants
+from propylean.series import Series
 
 from math import pow
 from propylean.validators import _Validators
@@ -118,7 +120,7 @@ class CentrifugalPump(_PressureChangers):
         density.unit = "kg/m^3"
         old_p_unit = self.inlet_pressure.unit
         self.inlet_pressure.unit = 'Pa'
-        value = self.inlet_pressure.value/(9.8 * density.value)
+        value = self.inlet_pressure.value/(Constants.g * density.value)
         self.inlet_pressure.unit = old_p_unit
         return prop.Length(value, "m")
 
@@ -133,7 +135,7 @@ class CentrifugalPump(_PressureChangers):
         density.unit = "kg/m^3"
         dp = self.differential_pressure
         dp.unit = "Pa"
-        value = dp.value / (9.8 * density.value)
+        value = dp.value / (Constants.g * density.value)
         return prop.Length(value, "m")
     @property
     def hydraulic_power(self):
@@ -164,7 +166,7 @@ class CentrifugalPump(_PressureChangers):
     @energy_in.setter
     def energy_in(self, value):
         # This is needed for property matching with the stream.
-        _Validators.validate_arg_prop_value_type("energy_in", value, (prop.Power, int, float, tuple))
+        _Validators.validate_arg_prop_value_type("energy_in", value, (prop.Power, int, float, tuple, Series))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
         if unit is None:
@@ -287,7 +289,7 @@ class PositiveDisplacementPump(_PressureChangers):
         old_acc_head_unit = self.accel_head.unit
         self.inlet_pressure.unit = self.accel_head = 'Pa'
         
-        value = (self.inlet_pressure.value - self.accel_head.value)/(9.8 * density.value)
+        value = (self.inlet_pressure.value - self.accel_head.value)/(Constants.g * density.value)
         self.inlet_pressure.unit = old_p_unit
         self.accel_head.unit = old_acc_head_unit
         return prop.Length(value, "m")
@@ -316,7 +318,7 @@ class PositiveDisplacementPump(_PressureChangers):
         density.unit = "kg/m^3"
         dp = self.differential_pressure
         dp.unit = "Pa"
-        value = dp.value / (9.8 * density.value)
+        value = dp.value / (Constants.g * density.value)
         return prop.Length(value, "m")
     
     @property
@@ -326,7 +328,7 @@ class PositiveDisplacementPump(_PressureChangers):
         density.unit = "kg/m^3"
         SG = density.value/1000
         k = 1
-        head_loss = L.value * V.value * self.speed * SG / (k * 9.8) 
+        head_loss = L.value * V.value * self.speed * SG / (k * Constants.g)
         return prop.Length(head_loss, 'm')
     
     @property
@@ -348,7 +350,7 @@ class PositiveDisplacementPump(_PressureChangers):
         return self.power
     @energy_in.setter
     def energy_in(self, value):
-        _Validators.validate_arg_prop_value_type("energy_in", value, (prop.Power, int, float, tuple))
+        _Validators.validate_arg_prop_value_type("energy_in", value, (prop.Power, int, float, tuple, Series))
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
         if unit is None:
@@ -472,7 +474,7 @@ class CentrifugalCompressor(_GasPressureChangers):
     @energy_in.setter
     def energy_in(self, value):
         # This is needed for property matching with the stream.
-        _Validators.validate_arg_prop_value_type("energy_in", value, (prop.Power, int, float, tuple))
+        _Validators.validate_arg_prop_value_type("energy_in", value, (prop.Power, int, float, tuple, Series))
         _Validators.validate_non_negative_value("energy_in", value)
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
@@ -544,7 +546,7 @@ class TurboExpander(_GasPressureChangers):
     @energy_out.setter
     def energy_out(self, value):
         # This is needed for property matching with the stream.
-        _Validators.validate_arg_prop_value_type("energy_out", value, (prop.Power, int, float, tuple))
+        _Validators.validate_arg_prop_value_type("energy_out", value, (prop.Power, int, float, tuple, Series))
         _Validators.validate_non_negative_value("energy_out", value)
         self = self._get_equipment_object(self)
         value, unit = self._tuple_property_value_unit_returner(value, prop.Power)

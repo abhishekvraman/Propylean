@@ -1,7 +1,8 @@
-import propylean.properties as prop
+from propylean.properties import Power, Pressure, Temperature, MassFlowRate
 from propylean import streams
 from propylean.validators import _Validators
-import warnings
+from propylean.series import Series
+from warnings import warn
 
 global _material_stream_equipment_map
 _material_stream_equipment_map = dict()
@@ -49,22 +50,22 @@ class _EquipmentOneInletOutlet(object):
         self.tag = inputs.pop('tag', self._create_equipment_tag())
 
         #Flow properties
-        self._inlet_mass_flowrate = prop.MassFlowRate() 
-        self._outlet_mass_flowrate = prop.MassFlowRate()
-        self._inventory_change_rate = prop.MassFlowRate()
-        self.design_flowrate = prop.MassFlowRate()
+        self._inlet_mass_flowrate = MassFlowRate() 
+        self._outlet_mass_flowrate = MassFlowRate()
+        self._inventory_change_rate = MassFlowRate()
+        self.design_flowrate = MassFlowRate()
 
         #Pressure properties
-        self._pressure_drop = prop.Pressure(0)
-        self._inlet_pressure = prop.Pressure()
-        self._outlet_pressure = prop.Pressure()
-        self._design_pressure = prop.Pressure()
+        self._pressure_drop = Pressure(0)
+        self._inlet_pressure = Pressure()
+        self._outlet_pressure = Pressure()
+        self._design_pressure = Pressure()
         
         #Temperature properties
-        self._temperature_increase = prop.Temperature(0, 'K')
-        self._inlet_temperature = prop.Temperature()
-        self._outlet_temperature = prop.Temperature()
-        self._design_temperature = prop.Temperature()
+        self._temperature_increase = Temperature(0, 'K')
+        self._inlet_temperature = Temperature()
+        self._outlet_temperature = Temperature()
+        self._design_temperature = Temperature()
 
         #Inlet and outlet material and energy streams
         self._inlet_material_stream_tag = None
@@ -77,8 +78,8 @@ class _EquipmentOneInletOutlet(object):
         self._outlet_energy_stream_index = None
         
         #Energy properties
-        self._energy_in = prop.Power()
-        self._energy_out = prop.Power()
+        self._energy_in = Power()
+        self._energy_out = Power()
 
         #Other Porperties
         self.main_fluid = "liquid" if "main_fluid" not in inputs else inputs["main_fluid"]
@@ -109,12 +110,12 @@ class _EquipmentOneInletOutlet(object):
         return self._inlet_pressure
     @inlet_pressure.setter
     def inlet_pressure(self, value):
-        _Validators.validate_arg_prop_value_type("inlet_pressure", value, (prop.Pressure, int, float, tuple))
+        _Validators.validate_arg_prop_value_type("inlet_pressure", value, (Pressure, int, float, tuple, Series))
         self = self._get_equipment_object(self)
-        value, unit = self._tuple_property_value_unit_returner(value, prop.Pressure)
+        value, unit = self._tuple_property_value_unit_returner(value, Pressure)
         if unit is None:
             unit = self._inlet_pressure.unit
-        self._inlet_pressure = prop.Pressure(value, unit)
+        self._inlet_pressure = Pressure(value, unit) if not isinstance(value, Series) else value
         self._outlet_pressure = self._inlet_pressure - self.pressure_drop
         self._update_equipment_object(self)
     
@@ -124,12 +125,12 @@ class _EquipmentOneInletOutlet(object):
         return self._outlet_pressure
     @outlet_pressure.setter
     def outlet_pressure(self, value):
-        _Validators.validate_arg_prop_value_type("outlet_pressure", value, (prop.Pressure, int, float, tuple))
+        _Validators.validate_arg_prop_value_type("outlet_pressure", value, (Pressure, int, float, tuple, Series))
         self = self._get_equipment_object(self)
-        value, unit = self._tuple_property_value_unit_returner(value, prop.Pressure)
+        value, unit = self._tuple_property_value_unit_returner(value, Pressure)
         if unit is None:
             unit = self._outlet_pressure.unit
-        self._outlet_pressure = prop.Pressure(value, unit)
+        self._outlet_pressure = Pressure(value, unit) if not isinstance(value, Series) else value
         self._inlet_pressure = self._outlet_pressure + self.pressure_drop
         self._update_equipment_object(self)
     
@@ -139,12 +140,12 @@ class _EquipmentOneInletOutlet(object):
         return self._pressure_drop
     @pressure_drop.setter
     def pressure_drop(self, value):
-        _Validators.validate_arg_prop_value_type("pressure_drop", value, (prop.Pressure, int, float, tuple))
+        _Validators.validate_arg_prop_value_type("pressure_drop", value, (Pressure, int, float, tuple, Series))
         self = self._get_equipment_object(self)
-        value, unit = self._tuple_property_value_unit_returner(value, prop.Pressure)
+        value, unit = self._tuple_property_value_unit_returner(value, Pressure)
         if unit is None:
             unit = self._pressure_drop.unit
-        self._pressure_drop = prop.Pressure(value, unit)
+        self._pressure_drop = Pressure(value, unit) if not isinstance(value, Series) else value
         self._outlet_pressure =  self._inlet_pressure - self._pressure_drop
         self._update_equipment_object(self)
     
@@ -154,12 +155,12 @@ class _EquipmentOneInletOutlet(object):
         return self._design_pressure
     @design_pressure.setter
     def design_pressure(self, value):
-        _Validators.validate_arg_prop_value_type("design_pressure", value, (prop.Pressure, int, float, tuple))
+        _Validators.validate_arg_prop_value_type("design_pressure", value, (Pressure, int, float, tuple))
         self = self._get_equipment_object(self)
-        value, unit = self._tuple_property_value_unit_returner(value, prop.Pressure)
+        value, unit = self._tuple_property_value_unit_returner(value, Pressure)
         if unit is None:
             unit = self._design_pressure.unit
-        self._design_pressure = prop.Pressure(value, unit)
+        self._design_pressure = Pressure(value, unit)
         self._update_equipment_object(self)
 
     @property
@@ -168,12 +169,12 @@ class _EquipmentOneInletOutlet(object):
         return self._inlet_temperature
     @inlet_temperature.setter
     def inlet_temperature(self, value):
-        _Validators.validate_arg_prop_value_type("inlet_temperature", value, (prop.Temperature, int, float, tuple))
+        _Validators.validate_arg_prop_value_type("inlet_temperature", value, (Temperature, int, float, tuple, Series))
         self = self._get_equipment_object(self)
-        value, unit = self._tuple_property_value_unit_returner(value, prop.Temperature)
+        value, unit = self._tuple_property_value_unit_returner(value, Temperature)
         if unit is None:
             unit = self._inlet_temperature.unit
-        self._inlet_temperature = prop.Temperature(value, unit)
+        self._inlet_temperature = Temperature(value, unit) if not isinstance(value, Series) else value
         self._outlet_temperature = self._inlet_temperature + self.temperature_increase
         self._update_equipment_object(self)
 
@@ -183,12 +184,12 @@ class _EquipmentOneInletOutlet(object):
         return self._outlet_temperature
     @outlet_temperature.setter
     def outlet_temperature(self,value):
-        _Validators.validate_arg_prop_value_type("outlet_temperature", value, (prop.Temperature, int, float, tuple))
+        _Validators.validate_arg_prop_value_type("outlet_temperature", value, (Temperature, int, float, tuple, Series))
         self = self._get_equipment_object(self)
-        value, unit = self._tuple_property_value_unit_returner(value, prop.Temperature)
+        value, unit = self._tuple_property_value_unit_returner(value, Temperature)
         if unit is None:
             unit = self._outlet_temperature.unit
-        self._outlet_temperature = prop.Temperature(value, unit)
+        self._outlet_temperature = Temperature(value, unit) if not isinstance(value, Series) else value
         self._inlet_temperature = self._outlet_temperature - self.temperature_increase
         self._update_equipment_object(self)
 
@@ -198,28 +199,30 @@ class _EquipmentOneInletOutlet(object):
         return self._temperature_increase
     @temperature_increase.setter
     def temperature_increase(self, value):
-        _Validators.validate_arg_prop_value_type("temperature_increase", value, (prop.Temperature, int, float, tuple))
+        _Validators.validate_arg_prop_value_type("temperature_increase", value, (Temperature, int, float, tuple, Series))
         self = self._get_equipment_object(self)
-        value, unit = self._tuple_property_value_unit_returner(value, prop.Temperature)
+        value, unit = self._tuple_property_value_unit_returner(value, Temperature)
         if unit is None:
             unit = self._temperature_increase.unit
-        self._temperature_increase = prop.Temperature(value, unit)
+        self._temperature_increase = Temperature(value, unit) if not isinstance(value, Series) else value
         self._outlet_temperature =  self._inlet_temperature + self._temperature_increase
         self._update_equipment_object(self)
     @property
     def temperature_decrease(self):
         self = self._get_equipment_object(self)
         decrease = -1 * self._temperature_increase.value
-        return prop.Temperature(decrease, self._temperature_increase.unit)
+        return Temperature(decrease, self._temperature_increase.unit)
     @temperature_decrease.setter
     def temperature_decrease(self, value):
-        _Validators.validate_arg_prop_value_type("temperature_decrease", value, (prop.Temperature, int, float, tuple))
-        if isinstance(value, prop.Temperature):
-            value = prop.Temperature(-1 * value.value, value.unit)
+        _Validators.validate_arg_prop_value_type("temperature_decrease", value, (Temperature, int, float, tuple, Series))
+        if isinstance(value, Temperature):
+            value = Temperature(-1 * value.value, value.unit)
         elif isinstance(value, tuple):
-            value = prop.Temperature(-1 * value[0], value[1])
+            value = Temperature(-1 * value[0], value[1])
         elif isinstance(value, (int, float)):
-            value = prop.Temperature(-1 * value, self._temperature_increase.unit)
+            value = Temperature(-1 * value, self._temperature_increase.unit)
+        elif isinstance(value, Series):
+            value = value.multiply(-1)
         self.temperature_increase = value
     
     @property
@@ -228,12 +231,12 @@ class _EquipmentOneInletOutlet(object):
         return self._design_pressure
     @design_temperature.setter
     def design_temperature(self, value):
-        _Validators.validate_arg_prop_value_type("design_temperature", value, (prop.Temperature, int, float, tuple))
+        _Validators.validate_arg_prop_value_type("design_temperature", value, (Temperature, int, float, tuple, Series))
         self = self._get_equipment_object(self)
-        value, unit = self._tuple_property_value_unit_returner(value, prop.Temperature)
+        value, unit = self._tuple_property_value_unit_returner(value, Temperature)
         if unit is None:
             unit = self._design_temperature.unit
-        self._design_temperature = prop.Temperature(value, unit)
+        self._design_temperature = Temperature(value, unit)
         self._update_equipment_object(self)
 
     @property
@@ -242,12 +245,12 @@ class _EquipmentOneInletOutlet(object):
         return self._inlet_mass_flowrate
     @inlet_mass_flowrate.setter
     def inlet_mass_flowrate(self, value):
-        _Validators.validate_arg_prop_value_type("inlet_mass_flowrate", value, (prop.MassFlowRate, int, float, tuple))
+        _Validators.validate_arg_prop_value_type("inlet_mass_flowrate", value, (MassFlowRate, int, float, tuple, Series))
         self = self._get_equipment_object(self)
-        value, unit = self._tuple_property_value_unit_returner(value, prop.MassFlowRate)
+        value, unit = self._tuple_property_value_unit_returner(value, MassFlowRate)
         if unit is None:
             unit = self._inlet_mass_flowrate.unit
-        self._inlet_mass_flowrate = prop.MassFlowRate(value, unit)
+        self._inlet_mass_flowrate = MassFlowRate(value, unit)
         self._outlet_mass_flowrate = self._inlet_mass_flowrate + self.inventory_change_rate
         self._update_equipment_object(self)
     
@@ -257,12 +260,12 @@ class _EquipmentOneInletOutlet(object):
         return self._outlet_mass_flowrate
     @outlet_mass_flowrate.setter
     def outlet_mass_flowrate(self, value):
-        _Validators.validate_arg_prop_value_type("outlet_mass_flowrate", value, (prop.MassFlowRate, int, float, tuple))
+        _Validators.validate_arg_prop_value_type("outlet_mass_flowrate", value, (MassFlowRate, int, float, tuple, Series))
         self = self._get_equipment_object(self)
-        value, unit = self._tuple_property_value_unit_returner(value, prop.MassFlowRate)
+        value, unit = self._tuple_property_value_unit_returner(value, MassFlowRate)
         if unit is None:
             unit = self._outlet_mass_flowrate.unit
-        self._outlet_mass_flowrate = prop.MassFlowRate(value, unit)
+        self._outlet_mass_flowrate = MassFlowRate(value, unit)
         self._inlet_mass_flowrate = self._outlet_mass_flowrate - self.inventory_change_rate
         self._update_equipment_object(self)
     
@@ -272,9 +275,9 @@ class _EquipmentOneInletOutlet(object):
         return self._inventory_change_rate
     @inventory_change_rate.setter
     def inventory_change_rate(self, value):
-        _Validators.validate_arg_prop_value_type("inventory_change_rate", value, (int, float, prop.MassFlowRate))
+        _Validators.validate_arg_prop_value_type("inventory_change_rate", value, (int, float, MassFlowRate, Series))
         self = self._get_equipment_object(self)
-        value, unit = self._tuple_property_value_unit_returner(value, prop.MassFlowRate)
+        value, unit = self._tuple_property_value_unit_returner(value, MassFlowRate)
         if unit is None:
             unit = self.inventory_change_rate.unit
         self._update_equipment_object(self)
@@ -285,12 +288,12 @@ class _EquipmentOneInletOutlet(object):
         return self._energy_in
     @energy_in.setter
     def energy_in(self, value):
-        _Validators.validate_arg_prop_value_type("energy_in", value, (prop.Power, int, float, tuple))
+        _Validators.validate_arg_prop_value_type("energy_in", value, (Power, int, float, tuple, Series))
         self = self._get_equipment_object(self)
-        value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
+        value, unit = self._tuple_property_value_unit_returner(value, Power)
         if unit is None:
             unit = self.energy_in.unit
-        self._energy_in = prop.Power(value, unit)
+        self._energy_in = Power(value, unit)
         self._update_equipment_object(self)
     @energy_in.deleter
     def energy_in(self):
@@ -304,12 +307,12 @@ class _EquipmentOneInletOutlet(object):
         return self._energy_out
     @energy_out.setter
     def energy_out(self, value):
-        _Validators.validate_arg_prop_value_type("energy_out", value, (prop.Power, int, float, tuple))
+        _Validators.validate_arg_prop_value_type("energy_out", value, (Power, int, float, tuple, Series))
         self = self._get_equipment_object(self)
-        value, unit = self._tuple_property_value_unit_returner(value, prop.Power)
+        value, unit = self._tuple_property_value_unit_returner(value, Power)
         if unit is None:
             unit = self.energy_out.unit
-        self._energy_in = prop.Power(value, unit)
+        self._energy_in = Power(value, unit)
         self._update_equipment_object(self)
     @energy_out.deleter
     def energy_out(self):
@@ -593,31 +596,31 @@ class _EquipmentOneInletOutlet(object):
 
         # Validate if connection is there.
         if stream_type is None and direction is None:
-            warnings.warn("Already there is no connection.")
+            warn("Already there is no connection.")
             return
 
         if stream_type.lower() in ['material', 'mass', 'm']:
             if direction.lower() in ['in', 'inlet']:
                 if (self._inlet_material_stream_tag is None or 
                    self._inlet_material_stream_index is None):
-                   warnings.warn("Material Inlet already has no connection.")
+                   warn("Material Inlet already has no connection.")
                    return 
             else:
                 if (self._outlet_material_stream_tag is None or 
                    self._outlet_material_stream_index is None):
-                   warnings.warn("Material Outlet already has no connection.")
+                   warn("Material Outlet already has no connection.")
                    return 
                   
         else:
             if direction.lower() in ['in', 'inlet']:
                 if (self._inlet_energy_stream_tag is None or 
                    self._inlet_energy_stream_index is None):
-                   warnings.warn("Energy Inlet already has no connection.")
+                   warn("Energy Inlet already has no connection.")
                    return 
             else:
                 if (self._outlet_energy_stream_tag is None or 
                    self._outlet_energy_stream_index is None):
-                   warnings.warn("Energy Outlet already has no connection.")
+                   warn("Energy Outlet already has no connection.")
                    return       
 
         self._is_disconnection = True
@@ -700,7 +703,7 @@ class _EquipmentOneInletOutlet(object):
                 and old_equipment_type is not None):
                 old_equipment_obj = old_equipment_type.list_objects()[old_equipment_index]
                 old_equipment_obj.disconnect_stream(stream_type=stream_type, direction='in' if is_inlet else 'out')
-                warnings.warn("Equipment type " + str(old_equipment_type) +
+                warn("Equipment type " + str(old_equipment_type) +
                               " with tag " + old_equipment_obj.tag + 
                               " was disconnected from stream type " + str(stream_type) +
                               " with tag " + str(self.get_stream_tag(stream_type,
@@ -962,6 +965,8 @@ class _EquipmentOneInletOutlet(object):
             return value[0], value[1]
         elif isinstance(value, property_type):
             return value.value, value.unit
+        elif isinstance(value, Series):
+            return value, value.unit
         elif any([isinstance(value, float), isinstance(value, int)]):
             return value, None
 
