@@ -62,7 +62,7 @@ class test_TemperatureGuage(unittest.TestCase):
     #     with pytest.raises(Exception) as exp:
     #         m4 = TemperatureGuage()
     #         m4.design_temperature = []
-    #     self.assertIn("Incorrect type 'list' provided to 'design_temperature'. Can be any one from '('Temperature', 'int', 'float', 'tuple')'",
+    #     self.assertIn("Incorrect type 'list' provided to 'design_temperature'. Can be any one from '('Temperature', 'int', 'float', 'tuple', 'Series')'",
     #                   str(exp)) 
 
 

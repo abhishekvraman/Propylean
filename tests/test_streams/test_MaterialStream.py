@@ -183,12 +183,12 @@ class test_MaterialStream(unittest.TestCase):
             m4 = MaterialStream(pressure=[10],
                                 temperature=300,
                                 mass_flowrate=prop.MassFlowRate(1000, "kg/h"))
-        self.assertIn("Incorrect type 'list' provided to 'pressure'. Can be any one from '('Pressure', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'pressure'. Can be any one from '('Pressure', 'int', 'float', 'tuple', 'Series')'",
                       str(exp))
         with pytest.raises(Exception) as exp:
             m4 = MaterialStream()
             m4.pressure = []
-        self.assertIn("Incorrect type 'list' provided to 'pressure'. Can be any one from '('Pressure', 'int', 'float', 'tuple')'", str(exp))
+        self.assertIn("Incorrect type 'list' provided to 'pressure'. Can be any one from '('Pressure', 'int', 'float', 'tuple', 'Series')'", str(exp))
 
     @pytest.mark.negative
     def test_MaterialStream_temperature_incorrect_type_to_value(self):
@@ -196,12 +196,12 @@ class test_MaterialStream(unittest.TestCase):
             m4 = MaterialStream(pressure=10,
                                 temperature=[300],
                                 mass_flowrate=prop.MassFlowRate(1000, "kg/h"))
-        self.assertIn("Incorrect type 'list' provided to 'temperature'. Can be any one from '('Temperature', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'temperature'. Can be any one from '('Temperature', 'int', 'float', 'tuple', 'Series')'",
                       str(exp))
         with pytest.raises(Exception) as exp:
             m4 = MaterialStream()
             m4.temperature = []
-        self.assertIn("Incorrect type 'list' provided to 'temperature'. Can be any one from '('Temperature', 'int', 'float', 'tuple')'", str(exp))
+        self.assertIn("Incorrect type 'list' provided to 'temperature'. Can be any one from '('Temperature', 'int', 'float', 'tuple', 'Series')'", str(exp))
 
     @pytest.mark.negative
     def test_MaterialStream_mass_flowrate_incorrect_type_to_value(self):
@@ -209,19 +209,19 @@ class test_MaterialStream(unittest.TestCase):
             m4 = MaterialStream(pressure=10,
                                 temperature=300,
                                 mass_flowrate=[])
-        self.assertIn("Incorrect type 'list' provided to 'mass_flowrate'. Can be any one from '('MassFlowRate', 'int', 'float', 'tuple')'",
+        self.assertIn("Incorrect type 'list' provided to 'mass_flowrate'. Can be any one from '('MassFlowRate', 'int', 'float', 'tuple', 'Series')'",
                       str(exp))
         with pytest.raises(Exception) as exp:
             m4 = MaterialStream()
             m4.mass_flowrate = []
-        self.assertIn("Incorrect type 'list' provided to 'mass_flowrate'. Can be any one from '('MassFlowRate', 'int', 'float', 'tuple')'", str(exp))
+        self.assertIn("Incorrect type 'list' provided to 'mass_flowrate'. Can be any one from '('MassFlowRate', 'int', 'float', 'tuple', 'Series')'", str(exp))
 
     @pytest.mark.negative
     def test_MaterialStream_molecular_weigth_incorrect_type_to_value(self):
         with pytest.raises(Exception) as exp:
             m4 = MaterialStream()
             m4.molecular_weight = []
-        self.assertIn("Incorrect type 'list' provided to 'molecular_weight'. Can be any one from '('MolecularWeigth', 'int', 'float', 'tuple')'", str(exp))
+        self.assertIn("Incorrect type 'list' provided to 'molecular_weight'. Can be any one from '('MolecularWeigth', 'int', 'float', 'tuple', 'Series')'", str(exp))
 
     @pytest.mark.negative
     def test_MaterialStream_components_incorrect_type_to_value(self):
@@ -235,56 +235,56 @@ class test_MaterialStream(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = MaterialStream()
             m4.density = []
-        self.assertIn("Incorrect type 'list' provided to 'density'. Can be any one from '('Density', 'int', 'float', 'tuple')'", str(exp))
+        self.assertIn("Incorrect type 'list' provided to 'density'. Can be any one from '('Density', 'int', 'float', 'tuple', 'Series')'", str(exp))
 
     @pytest.mark.negative
     def test_MaterialStream_desnity_l_incorrect_type_to_value(self):
         with pytest.raises(Exception) as exp:
             m4 = MaterialStream()
             m4.density_l = []
-        self.assertIn("Incorrect type 'list' provided to 'density_l'. Can be any one from '('Density', 'int', 'float', 'tuple')'", str(exp))
+        self.assertIn("Incorrect type 'list' provided to 'density_l'. Can be any one from '('Density', 'int', 'float', 'tuple', 'Series')'", str(exp))
 
     @pytest.mark.negative
     def test_MaterialStream_desnity_g_incorrect_type_to_value(self):
         with pytest.raises(Exception) as exp:
             m4 = MaterialStream()
             m4.density_g = []
-        self.assertIn("Incorrect type 'list' provided to 'density_g'. Can be any one from '('Density', 'int', 'float', 'tuple')'", str(exp))
+        self.assertIn("Incorrect type 'list' provided to 'density_g'. Can be any one from '('Density', 'int', 'float', 'tuple', 'Series')'", str(exp))
 
     @pytest.mark.negative
     def test_MaterialStream_desnity_s_incorrect_type_to_value(self):
         with pytest.raises(Exception) as exp:
             m4 = MaterialStream()
             m4.density_s = []
-        self.assertIn("Incorrect type 'list' provided to 'density_s'. Can be any one from '('Density', 'int', 'float', 'tuple')'", str(exp))
+        self.assertIn("Incorrect type 'list' provided to 'density_s'. Can be any one from '('Density', 'int', 'float', 'tuple', 'Series')'", str(exp))
 
     @pytest.mark.negative
     def test_MaterialStream_d_viscosity_incorrect_type_to_value(self):
         with pytest.raises(Exception) as exp:
             m4 = MaterialStream()
             m4.d_viscosity = []
-        self.assertIn("Incorrect type 'list' provided to 'd_viscosity'. Can be any one from '('DViscosity', 'int', 'float', 'tuple')'", str(exp))
+        self.assertIn("Incorrect type 'list' provided to 'd_viscosity'. Can be any one from '('DViscosity', 'int', 'float', 'tuple', 'Series')'", str(exp))
 
     @pytest.mark.negative
     def test_MaterialStream_d_viscosity_l_incorrect_type_to_value(self):
         with pytest.raises(Exception) as exp:
             m4 = MaterialStream()
             m4.d_viscosity_l = []
-        self.assertIn("Incorrect type 'list' provided to 'd_viscosity_l'. Can be any one from '('DViscosity', 'int', 'float', 'tuple')'", str(exp))
+        self.assertIn("Incorrect type 'list' provided to 'd_viscosity_l'. Can be any one from '('DViscosity', 'int', 'float', 'tuple', 'Series')'", str(exp))
 
     @pytest.mark.negative
     def test_MaterialStream_d_viscosity_g_incorrect_type_to_value(self):
         with pytest.raises(Exception) as exp:
             m4 = MaterialStream()
             m4.d_viscosity_g = []
-        self.assertIn("Incorrect type 'list' provided to 'd_viscosity_g'. Can be any one from '('DViscosity', 'int', 'float', 'tuple')'", str(exp))
+        self.assertIn("Incorrect type 'list' provided to 'd_viscosity_g'. Can be any one from '('DViscosity', 'int', 'float', 'tuple', 'Series')'", str(exp))
 
     @pytest.mark.negative
     def test_MaterialStream_isentropic_exponent_incorrect_type_to_value(self):
         with pytest.raises(Exception) as exp:
             m4 = MaterialStream()
             m4.isentropic_exponent = []
-        self.assertIn("Incorrect type 'list' provided to 'isentropic_exponent'. Can be any one from '('Dimensionless', 'int', 'float')'", str(exp))
+        self.assertIn("Incorrect type 'list' provided to 'isentropic_exponent'. Can be any one from '('Dimensionless', 'int', 'float', 'Series')'", str(exp))
     
     @pytest.mark.negative
     def test_MaterialStream_phase_incorrect_type_to_value(self):
@@ -298,35 +298,35 @@ class test_MaterialStream(unittest.TestCase):
         with pytest.raises(Exception) as exp:
             m4 = MaterialStream()
             m4.Z = []
-        self.assertIn("Incorrect type 'list' provided to 'Z'. Can be any one from '('Dimensionless', 'int', 'float')'", str(exp))
+        self.assertIn("Incorrect type 'list' provided to 'Z'. Can be any one from '('Dimensionless', 'int', 'float', 'Series')'", str(exp))
     
     @pytest.mark.negative
     def test_MaterialStream_Z_g_incorrect_type_to_value(self):
         with pytest.raises(Exception) as exp:
             m4 = MaterialStream()
             m4.Z_g = []
-        self.assertIn("Incorrect type 'list' provided to 'Z_g'. Can be any one from '('Dimensionless', 'int', 'float')'", str(exp))
+        self.assertIn("Incorrect type 'list' provided to 'Z_g'. Can be any one from '('Dimensionless', 'int', 'float', 'Series')'", str(exp))
     
     @pytest.mark.negative
     def test_MaterialStream_Z_l_incorrect_type_to_value(self):
         with pytest.raises(Exception) as exp:
             m4 = MaterialStream()
             m4.Z_l = []
-        self.assertIn("Incorrect type 'list' provided to 'Z_l'. Can be any one from '('Dimensionless', 'int', 'float')'", str(exp))
+        self.assertIn("Incorrect type 'list' provided to 'Z_l'. Can be any one from '('Dimensionless', 'int', 'float', 'Series')'", str(exp))
     
     @pytest.mark.negative
     def test_MaterialStream_Pc_incorrect_type_to_value(self):
         with pytest.raises(Exception) as exp:
             m4 = MaterialStream()
             m4.Pc = []
-        self.assertIn("Incorrect type 'list' provided to 'Pc'. Can be any one from '('Pressure', 'int', 'float', 'tuple')'", str(exp))
+        self.assertIn("Incorrect type 'list' provided to 'Pc'. Can be any one from '('Pressure', 'int', 'float', 'tuple', 'Series')'", str(exp))
 
     @pytest.mark.negative
     def test_MaterialStream_Psat_incorrect_type_to_value(self):
         with pytest.raises(Exception) as exp:
             m4 = MaterialStream()
             m4.Psat = []
-        self.assertIn("Incorrect type 'list' provided to 'Psat'. Can be any one from '('Pressure', 'int', 'float', 'tuple')'", str(exp))
+        self.assertIn("Incorrect type 'list' provided to 'Psat'. Can be any one from '('Pressure', 'int', 'float', 'tuple', 'Series')'", str(exp))
 
     @pytest.mark.delete 
     def test_MaterialStream_stream_equipment_delete_without_connection(self):

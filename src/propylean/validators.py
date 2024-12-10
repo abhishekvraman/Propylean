@@ -184,3 +184,28 @@ class _Validators(object):
 
         if not issubclass(child_class, parent_class):
             raise Exception(f"Invalid type provided for '{arg_prop_name}'. Should be a class of type {class_type}.")
+        
+    @classmethod
+    def validate_property_unit(self, prop, unit):
+        """
+        DESCRIPTION:
+            Function to validate values passed by user is a child class
+            of parent class.
+        PARAMETERS:
+            prop:
+                Required: Yes
+                Type: propylean.property
+                Acceptable values: All properties that can be measured.
+                Default value: NA
+                Description: Property class whose unit is to be validated.
+            unit:
+                Required: Yes
+                Type: string  
+                Description: Unit chosen by the user.
+        """
+        temp = prop()
+        try:
+            temp.unit = unit
+        except Exception as e:
+            raise Exception(str(e))
+    

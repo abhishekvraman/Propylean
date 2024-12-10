@@ -1,3 +1,5 @@
 thermo
 fluids
 pandas
+pyspark
+tabulate
